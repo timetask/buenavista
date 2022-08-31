@@ -1,18 +1,5 @@
-defmodule Buenavista do
+defmodule BuenaVista do
   @moduledoc """
-  Documentation for `Buenavista`.
+  Documentation for `BuenaVista`.
   """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Buenavista.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
 end
