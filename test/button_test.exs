@@ -14,7 +14,7 @@ defmodule Buenavista.ButtonTest do
         |> rendered_to_string()
         |> Floki.parse_fragment()
 
-      assert Floki.attribute(element, "class") == ["button md ctrl filled thin"]
+      assert Floki.attribute(element, "class") == ["button button-md button-ctrl button-filled button-border-thin"]
       assert Floki.attribute(element, "type") == ["button"]
       assert Floki.text(element) =~ "Press Me"
     end

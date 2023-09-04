@@ -29,7 +29,7 @@ defmodule Mix.Tasks.Buenavista.Utils do
   def uses_hydrator?(:foundation), do: false
   def uses_hydrator?(_style), do: true
 
-  def parent_nomenclator(:buenavista, _style), do: nil
+  def parent_nomenclator(:buenavista, _style), do: BuenaVista.Nomenclator.Default
   def parent_nomenclator(_app_name, :tailwind_inline), do: BuenaVista.Nomenclator.TailwindInline
   def parent_nomenclator(_app_name, :tailwind_classes), do: BuenaVista.Nomenclator.TailwindClasses
   def parent_nomenclator(_app_name, :bootstrap), do: BuenaVista.Nomenclator.Bootstrap
@@ -37,7 +37,7 @@ defmodule Mix.Tasks.Buenavista.Utils do
   def parent_nomenclator(_app_name, :foundation), do: BuenaVista.Nomenclator.Foundation
   def parent_nomenclator(_app_name, :rest), do: BuenaVista.Nomenclator.Default
 
-  def parent_hydrator(:buenavista, _style), do: nil
+  def parent_hydrator(:buenavista, _style), do: BuenaVista.Hydrator.Empty
   def parent_hydrator(_app_name, :tailwind_classes), do: BuenaVista.Hydrator.TailwindClasses
   def parent_hydrator(_app_name, :vanilla), do: BuenaVista.Hydrator.TailwindClasses
 

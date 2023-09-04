@@ -1,33 +1,43 @@
 defmodule BuenaVista.Nomenclator do
-  @callback __class_name(atom(), atom(), atom()) :: String.t() | nil
-  @optional_callbacks __class_name: 3
+  @callback class_name(atom(), atom(), atom()) :: String.t() | nil
+  @optional_callbacks class_name: 3
 
   defmacro __using__(_opts) do
     quote do
       @behaviour BuenaVista.Nomenclator
 
-      def class_name(component, :classes, :base_class) do
-        classname = __MODULE__.__class_name(component, :classes, :base_class)
+      def get_class_name(component, variant, option) do
+        try do
+          if component == :label and variant == :state do
+            __MODULE__.class_name(component, variant, option)
+          end
 
-        if classname == :not_implemented,
-          do: Atom.to_string(component) |> String.replace("_", "-"),
-          else: classname
+          __MODULE__.class_name(component, variant, option)
+        rescue
+          _e in [UndefinedFunctionError, FunctionClauseError] ->
+            variables = __MODULE__.__info__(:attributes)
+
+            if parent = Keyword.get(variables, :parent) do
+              parent.get_class_name(component, variant, option)
+            else
+              default_class_name(component, variant, option)
+            end
+        end
       end
 
-      def class_name(component, :classes, class_key) do
-        classname = __MODULE__.__class_name(component, :classes, class_key)
-
-        if classname == :not_implemented,
-          do: Atom.to_string(class_key) |> String.replace("_class", "") |> String.replace("_", "-"),
-          else: classname
+      defp default_class_name(component, :classes, :base_class) do
+        component |> Atom.to_string() |> String.replace("_", "-")
       end
 
-      def class_name(component, variant, option) do
-        classname = __MODULE__.__class_name(component, variant, option)
+      defp default_class_name(_component, :classes, class_key) do
+        class_key |> Atom.to_string() |> String.replace("_class", "") |> String.replace("_", "-")
+      end
 
-        if classname == :not_implemented,
-          do: option |> Atom.to_string() |> String.replace("_", "-"),
-          else: classname
+      defp default_class_name(component, _variant, option) do
+        component = component |> Atom.to_string() |> String.replace("_", "-")
+        option = option |> Atom.to_string() |> String.replace("_", "-")
+
+        "#{component}-#{option}"
       end
     end
   end

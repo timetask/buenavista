@@ -38,14 +38,14 @@ defmodule BuenaVista.InputTest do
       assigns = %{field: build_field()}
 
       {:ok, [element]} =
-        ~H[<.label field={@field} text="Name" />]
+        ~H[<.label field={@field} label="Name" />]
         |> rendered_to_string()
         |> Floki.parse_fragment()
 
       assert Floki.text(element) =~ "Name"
     end
 
-    for {state, class} <- [success: "success", danger: "danger"] do
+    for {state, class} <- [success: "label-success", danger: "label-danger"] do
       test "attribute state set to #{state} adds class #{class}" do
         assigns = %{field: build_field(), state: unquote(state)}
 
@@ -64,10 +64,9 @@ defmodule BuenaVista.InputTest do
     test "Can assign a state class via module config" do
       defmodule NewNomenclator do
         use BuenaVista.Nomenclator
+        @parent BuenaVista.Nomenclator.Default
 
-        defp class_name(:label, :state, :danger), do: "peligro!"
-
-        defp class_name(_, _, _), do: :not_implemented
+        def class_name(:label, :state, :danger), do: "peligro!"
       end
 
       assigns = %{field: build_field(), state: :danger, nomenclator: NewNomenclator}
@@ -82,12 +81,11 @@ defmodule BuenaVista.InputTest do
     end
 
     test "Can assign a base_class via module config" do
-      defmodule NewNomenclator do
-        use BuenaVista.Nomenclator2
+      defmodule NewNomenclator2 do
+        use BuenaVista.Nomenclator
+        @parent BuenaVista.Nomenclator.Default
 
-        defp class_name(:label, :classes, :base_class), do: "form-label"
-
-        defp class_name(_, _, _), do: :not_implemented
+        def class_name(:label, :classes, :base_class), do: "form-label"
       end
 
       assigns = %{field: build_field(), state: :danger, nomenclator: NewNomenclator2}
@@ -98,7 +96,9 @@ defmodule BuenaVista.InputTest do
         |> Floki.parse_fragment()
 
       [class] = Floki.attribute(element, "class")
-      assert class == "form-label danger"
+      assert class == "form-label label-danger"
     end
+
+    # TODO: pass keyword to config nomenclature
   end
 end

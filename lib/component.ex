@@ -60,7 +60,7 @@ defmodule BuenaVista.Component do
         for %Variant{} = variant <- variant_defs do
           options =
             for option <- variant.options do
-              class_name = nomenclator.class_name(component_name, variant.name, option)
+              class_name = nomenclator.get_class_name(component_name, variant.name, option)
               {option, class_name}
             end
 
@@ -73,7 +73,7 @@ defmodule BuenaVista.Component do
 
       classes =
         for class_key <- [:base_class | classes] do
-          class_name = nomenclator.class_name(component_name, :classes, class_key)
+          class_name = nomenclator.get_class_name(component_name, :classes, class_key)
           {class_key, class_name}
         end
 
@@ -142,7 +142,8 @@ defmodule BuenaVista.Component do
           for %Variant{} = variant <- component.variants do
             selected_option = Map.get(assigns, variant.name)
 
-            if not is_nil(selected_option) and selected_option not in Keyword.keys(variant.options) do
+            if not is_nil(selected_option) and
+                 selected_option not in Keyword.keys(variant.options) do
               raise "Invalid BuenaVista component variant selected option:\n" <>
                       "\t\t> Module: #{inspect(__MODULE__)}\n" <>
                       "\t\t> Component: #{component.name}\n" <>
@@ -159,10 +160,10 @@ defmodule BuenaVista.Component do
                 Keyword.get(variant.options, selected_option)
 
               {nomenclator, nil} ->
-                nomenclator.class_name(component.name, variant.name, variant.default)
+                nomenclator.get_class_name(component.name, variant.name, variant.default)
 
               {nomenclator, selected_option} ->
-                nomenclator.class_name(component.name, variant.name, selected_option)
+                nomenclator.get_class_name(component.name, variant.name, selected_option)
             end
           end
 
@@ -175,7 +176,7 @@ defmodule BuenaVista.Component do
             class_name =
               if is_nil(nomenclator),
                 do: class_name,
-                else: nomenclator.class_name(component.name, :classes, class_key)
+                else: nomenclator.get_class_name(component.name, :classes, class_key)
 
             assign_new(assigns, class_key, fn -> class_name end)
         end
