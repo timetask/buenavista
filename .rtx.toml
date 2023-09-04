@@ -1,0 +1,6 @@
+[env]
+NODE_ENV = 'development'
+
+[tools]
+erlang = '26.0.2'
+elixir = '1.15.4-otp-26'
