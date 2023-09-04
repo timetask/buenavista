@@ -29,18 +29,16 @@ defmodule BuenaVista.MixProject do
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
       extra_applications: [:logger]
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:phoenix_live_view, "~> 0.17.11"},
-      {:timex, "~> 3.0"}
+      {:phoenix_live_view, "~> 0.18"},
+      {:floki, ">= 0.30.0", only: :test}
     ]
   end
 end
