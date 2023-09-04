@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Buenavista.Utils do
+defmodule Buenavista.Generator.Utils do
   import Macro, only: [camelize: 1]
 
   @doc """
@@ -44,37 +44,49 @@ defmodule Mix.Tasks.Buenavista.Utils do
   @doc """
   Generates module names for nomenclators and hydrators
 
-  iex> module_name(:my_app_web, :nomenclator, :tailwind_inline)
+  iex> module_name(:my_app_web, :nomenclator, :tailwind_inline, nil)
   MyAppWeb.Components.Config.TailwindInlineNomenclator
 
-  iex> module_name(:my_app, :hydrator, :vanilla)
+  iex> module_name(:my_app, :hydrator, :vanilla, nil)
   MyApp.Components.Config.VanillaHydrator
 
-  iex> module_name(:buenavista, :nomenclator, :vanilla)
+  iex> module_name(:buenavista, :nomenclator, :vanilla, nil)
   BuenaVista.Nomenclator.Vanilla
 
-  iex> module_name(:buenavista, :hydrator, :tailwind_classes)
+  iex> module_name(:buenavista, :hydrator, :tailwind_classes, nil)
   BuenaVista.Hydrator.TailwindClasses
+
+  iex> module_name(:my_app_web, :hydrator, :tailwind_classes, "dark_mode")
+  MyAppWeb.Components.Config.DarkModeHydrator
+
+  iex> module_name(:my_app_web, :nomenclator, :bulma, "light_mode")
+  MyAppWeb.Components.Config.LightModeNomenclator
   """
-  def module_name(app_name, :nomenclator, style) when is_atom(app_name) and is_atom(style) do
-    style = Atom.to_string(style)
+  def module_name(app_name, :nomenclator, style, name) when is_atom(app_name) and is_atom(style) do
+    name =
+      if is_nil(name),
+        do: name,
+        else: Atom.to_string(style)
 
     if app_name == :buenavista do
-      Module.concat([BuenaVista, Nomenclator, camelize(style)])
+      Module.concat([BuenaVista, Nomenclator, camelize(name)])
     else
       base_module = app_name |> Atom.to_string() |> camelize()
-      Module.concat([base_module, Components, Config, camelize(style <> "_nomenclator")])
+      Module.concat([base_module, Components, Config, camelize(name <> "_nomenclator")])
     end
   end
 
-  def module_name(app_name, :hydrator, style) when is_atom(app_name) and is_atom(style) do
-    style = Atom.to_string(style)
+  def module_name(app_name, :hydrator, style, name) when is_atom(app_name) and is_atom(style) do
+    name =
+      if is_nil(name),
+        do: name,
+        else: Atom.to_string(style)
 
     if app_name == :buenavista do
-      Module.concat([BuenaVista, Hydrator, camelize(style)])
+      Module.concat([BuenaVista, Hydrator, camelize(name)])
     else
       base_module = app_name |> Atom.to_string() |> camelize()
-      Module.concat([base_module, Components, Config, camelize(style <> "_hydrator")])
+      Module.concat([base_module, Components, Config, camelize(name <> "_hydrator")])
     end
   end
 

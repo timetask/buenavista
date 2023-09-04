@@ -1,11 +1,4 @@
 defmodule Mix.Tasks.Buenavista.Init do
-  use Mix.Task
-  require Logger
-
-  import Mix.Generator
-
-  alias Mix.Tasks.Buenavista.Utils
-
   @moduledoc """
   Generates both Nomenclator and Hydrator modules to be used to configure
   both BuenaVista and your own components. 
@@ -21,6 +14,8 @@ defmodule Mix.Tasks.Buenavista.Init do
 
   Options:
 
+  -n, --name                 Used to create Nomenclature and Hydrator module and
+                             file name. By default the name is derived from style.
   -s, --style                Framework & style to be used.
                              Options:
                              - tailwind_inline
@@ -34,6 +29,9 @@ defmodule Mix.Tasks.Buenavista.Init do
                              Default lib/<your_app>_web/components/config
   -h, --help                 Show this help
   """
+  use Mix.Task
+
+  alias BuenaVista.Generator
 
   @shortdoc "Generates an initial Nomenclator and Hydrator modules"
   def run(opts) do
@@ -45,6 +43,7 @@ defmodule Mix.Tasks.Buenavista.Init do
         strict: [name: :string, style: :string, out: :string, help: :boolean]
       )
 
+    name = Keyword.get(parsed, :name)
     style = Keyword.get(parsed, :style, "vanilla") |> String.to_existing_atom()
     out_dir = Keyword.get(parsed, :out)
     help = Keyword.get(parsed, :help)
@@ -53,116 +52,8 @@ defmodule Mix.Tasks.Buenavista.Init do
       IO.puts(@moduledoc)
     else
       {:ok, app_name} = :application.get_application(__MODULE__)
-      app_name = Utils.sanitize_app_name(app_name)
-      modules = BuenaVista.ComponentFinder.find_component_modules()
 
-      generate_nomenclator(modules, app_name, out_dir, style)
-
-      if Utils.uses_hydrator?(style) do
-        generate_hydrator(modules, app_name, out_dir, style)
-      end
+      Generator.init(app_name, out_dir, style, name)
     end
   end
-
-  defp generate_nomenclator(modules, app_name, out_dir, style) do
-    module_name = Utils.module_name(app_name, :nomenclator, style)
-    parent = Utils.parent_nomenclator(app_name, style)
-    nomenclator_file = Utils.file_path(app_name, :nomenclator, style, out_dir)
-
-    assigns = [
-      module_name: module_name,
-      parent: parent,
-      modules: modules
-    ]
-
-    create_file(nomenclator_file, nomenclator_template(assigns))
-    System.cmd("mix", ["format", nomenclator_file])
-  end
-
-  defp generate_hydrator(modules, app_name, out_dir, style) do
-    module_name = Utils.module_name(app_name, :hydrator, style)
-    parent = Utils.parent_hydrator(app_name, style)
-    hydrator_file = Utils.file_path(app_name, :hydrator, style, out_dir)
-
-    assigns = [
-      module_name: module_name,
-      parent: parent,
-      modules: modules
-    ]
-
-    create_file(hydrator_file, hydrator_template(assigns))
-    System.cmd("mix", ["format", hydrator_file])
-  end
-
-  embed_template(:nomenclator, ~S/
-  defmodule <%= inspect @module_name %> do
-    use BuenaVista.Nomenclator
-
-    <%= unless is_nil(@parent) do %>@parent <%= @parent %><% end %>
-
-    <%= for {module, components} <- @modules do %>
-      <%= module_title_template(module: module) %>
-
-      <%= for {_, component} <- components do %>
-      <%= component_title_template(component: component) %>
-
-        <%= for {class_key, _} <- component.classes do %>
-          # defp class_name(:<%= component.name %>, :classes, :<%= class_key %>), do: "<%= unless is_nil(@parent) do %><%= @parent.get_class_name(:"#{component.name}", :classes, :"#{class_key}") %>"<% end %><% end %>
-        <%= for variant <- component.variants do %>
-          <%= for {option, _} <- variant.options do %>
-            # defp class_name(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: "<%= unless is_nil(@parent) do %><%= @parent.get_class_name(:"#{component.name}", :"#{variant.name}", :"#{option}") %>"<% end %><% end %>
-        <% end %>
-      <% end %>
-  <% end %>
-  end
-  /)
-
-  embed_template(:hydrator, ~S/
-  defmodule <%= inspect @module_name %> do
-    use BuenaVista.Hydrator
-
-    <%= unless is_nil(@parent) do %>@parent <%= @parent %><% end %>
-    
-    # defp variables(), do: [] 
-
-    <%= for {module, components} <- @modules do %>
-      <%= module_title_template(module: module) %>
-
-      <%= for {_, component} <- components do %>
-      <%= component_title_template(component: component) %>
-
-        <%= for {class_key, _} <- component.classes do %>
-          """ 
-          defp css(:<%= component.name %>, :classes, :<%= class_key %>), do: ~S|
-            <%= unless is_nil(@parent) do %>
-              <%= @parent.css(:"#{component.name}", :classes, :"#{class_key}") %>
-            <%end %>
-          | 
-          """<% end %> 
-        <%= for variant <- component.variants do %>
-          <%= for {option, _} <- variant.options do %>
-            """ 
-            defp css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S|
-              <%= unless is_nil(@parent) do %>
-                <%= @parent.get_css(:"#{component.name}", :"#{variant.name}", :"#{option}") %>
-              <%end %>
-            | 
-            """<% end %>
-        <% end %>
-      <% end %>
-    <% end %>
-  end
-  /)
-
-  embed_template(:module_title, ~S/
-    # ----------------------------------------
-    # <%= @module |> Atom.to_string() |> String.replace("Elixir.", "") %>
-    # ----------------------------------------
-  /)
-
-  embed_template(:component_title, ~S/
-    # - - - - - - - - - - - - - - - - - - - - 
-    # <%= @component.name %>
-    # - - - - - - - - - - - - - - - - - - - - 
-  /)
 end
