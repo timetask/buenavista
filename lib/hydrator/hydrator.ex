@@ -2,18 +2,28 @@ defmodule BuenaVista.Hydrator do
   @callback variables() :: list()
   @callback css(atom(), atom(), atom()) :: String.t()
 
+  @optional_callbacks css: 3
+
   defmacro __using__(_opts) do
     quote do
       @behaviour BuenaVista.Hydrator
 
       def variables(), do: []
 
-      def css(component_name, variant, option)
-          when is_atom(component_name) and is_atom(variant) and is_atom(option) do
-        ""
-      end
+      def hydrate_css(component, variant, option) do
+        try do
+          __MODULE__.css(component, variant, option)
+        rescue
+          _e in [UndefinedFunctionError, FunctionClauseError] ->
+            variables = __MODULE__.__info__(:attributes)
 
-      defoverridable variables: 0, css: 3
+            if parent = Keyword.get(variables, :parent) do
+              parent.hydrate_css(component, variant, option)
+            else
+              ""
+            end
+        end
+      end
     end
   end
 end

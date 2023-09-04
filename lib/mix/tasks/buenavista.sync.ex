@@ -39,7 +39,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Nomenclator do
     if help do
       IO.puts(@moduledoc)
     else
-    {:ok, app_name} = :application.get_application(__MODULE__)
+      {:ok, app_name} = :application.get_application(__MODULE__)
       Generator.sync(app_name, out_dir, style, name)
     end
   end

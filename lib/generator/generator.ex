@@ -7,7 +7,7 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   # Public API
   # ----------------------------------------
-  def init(app_name, out_dir, style_name) do
+  def init(app_name, out_dir, style, name) do
     app_name = Utils.sanitize_app_name(app_name)
     modules = BuenaVista.ComponentFinder.find_component_modules()
 
@@ -42,7 +42,7 @@ defmodule BuenaVista.Generator do
   defp generate_hydrator(modules, app_name, out_dir, style, name) do
     module_name = Utils.module_name(app_name, :hydrator, style, name)
     parent = Utils.parent_hydrator(app_name, style)
-    hydrator_file = Utils.file_path(app_name, :hydrator, style, out_dir)
+    hydrator_file = Utils.file_path(app_name, :hydrator, style, name, out_dir)
 
     assigns = [
       module_name: module_name,
@@ -61,7 +61,7 @@ defmodule BuenaVista.Generator do
   defmodule <%= inspect @module_name %> do
     use BuenaVista.Nomenclator
 
-    <%= unless is_nil(@parent) do %>@parent <%= @parent %><% end %>
+    <%= unless is_nil(@parent) do %>@parent <%= pretty_module(@parent) %><% end %>
 
     <%= for {module, components} <- @modules do %>
       <%= module_title_template(module: module) %>
@@ -84,7 +84,7 @@ defmodule BuenaVista.Generator do
   defmodule <%= inspect @module_name %> do
     use BuenaVista.Hydrator
 
-    <%= unless is_nil(@parent) do %>@parent <%= @parent %><% end %>
+    <%= unless is_nil(@parent) do %>@parent <%= pretty_module(@parent) %><% end %>
     
     # defp variables(), do: [] 
 
@@ -96,18 +96,18 @@ defmodule BuenaVista.Generator do
 
         <%= for {class_key, _} <- component.classes do %>
           """ 
-          defp css(:<%= component.name %>, :classes, :<%= class_key %>), do: ~S|
+          def css(:<%= component.name %>, :classes, :<%= class_key %>), do: ~S|
             <%= unless is_nil(@parent) do %>
-              <%= @parent.css(:"#{component.name}", :classes, :"#{class_key}") %>
+              <%= @parent.hydrate_css(:"#{component.name}", :classes, :"#{class_key}") %>
             <%end %>
           | 
           """<% end %> 
         <%= for variant <- component.variants do %>
           <%= for {option, _} <- variant.options do %>
             """ 
-            defp css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S|
+            def css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S|
               <%= unless is_nil(@parent) do %>
-                <%= @parent.get_css(:"#{component.name}", :"#{variant.name}", :"#{option}") %>
+                <%= @parent.hydrate_css(:"#{component.name}", :"#{variant.name}", :"#{option}") %>
               <%end %>
             | 
             """<% end %>
@@ -119,7 +119,7 @@ defmodule BuenaVista.Generator do
 
   embed_template(:module_title, ~S/
     # ----------------------------------------
-    # <%= @module |> Atom.to_string() |> String.replace("Elixir.", "") %>
+    # <%= pretty_module(@module) %>
     # ----------------------------------------
   /)
 
@@ -128,4 +128,8 @@ defmodule BuenaVista.Generator do
     # <%= @component.name %>
     # - - - - - - - - - - - - - - - - - - - - 
   /)
+
+  defp pretty_module(module) do
+    module |> Atom.to_string() |> String.replace("Elixir.", "")
+  end
 end

@@ -1,5 +1,5 @@
-defmodule Buenavista.Generator.Utils do
-  import Macro, only: [camelize: 1]
+defmodule BuenaVista.Generator.Utils do
+  import Macro, only: [camelize: 1, underscore: 1]
 
   @doc """
   Returns *_web base module name for your project.
@@ -65,8 +65,8 @@ defmodule Buenavista.Generator.Utils do
   def module_name(app_name, :nomenclator, style, name) when is_atom(app_name) and is_atom(style) do
     name =
       if is_nil(name),
-        do: name,
-        else: Atom.to_string(style)
+        do: Atom.to_string(style),
+        else: name
 
     if app_name == :buenavista do
       Module.concat([BuenaVista, Nomenclator, camelize(name)])
@@ -79,8 +79,8 @@ defmodule Buenavista.Generator.Utils do
   def module_name(app_name, :hydrator, style, name) when is_atom(app_name) and is_atom(style) do
     name =
       if is_nil(name),
-        do: name,
-        else: Atom.to_string(style)
+        do: Atom.to_string(style),
+        else: name
 
     if app_name == :buenavista do
       Module.concat([BuenaVista, Hydrator, camelize(name)])
@@ -106,14 +106,19 @@ defmodule Buenavista.Generator.Utils do
   iex> path =~ "lib/my_app_web/components/config/bootstrap_nomenclator.ex"
   true
   """
-  def file_path(app_name, module_type, style, out_dir)
+  def file_path(app_name, module_type, style, name, out_dir)
       when is_atom(app_name) and is_atom(module_type) and is_atom(style) do
+    name =
+      if is_nil(name),
+        do: Atom.to_string(style),
+        else: name
+
     directory = final_out_dir(app_name, module_type, out_dir)
 
     filename =
       if app_name == :buenavista,
-        do: "#{style}.ex",
-        else: "#{style}_#{module_type}.ex"
+        do: "#{underscore(name)}.ex",
+        else: "#{underscore(name)}_#{module_type}.ex"
 
     Path.join(directory, filename)
   end
