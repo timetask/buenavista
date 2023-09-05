@@ -8,26 +8,38 @@ defmodule BuenaVista.Generator do
   # Public API
   # ----------------------------------------
   def init(app_name, out_dir, style, name) do
-    app_name = Utils.sanitize_app_name(app_name)
-    modules = BuenaVista.ComponentFinder.find_component_modules()
+    # style = Keyword.get(bundle, :style)
+    # component_apps = Keyword.get(bundle, :component_apps)
 
-    generate_nomenclator(modules, app_name, out_dir, style, name)
+    # modules = BuenaVista.ComponentFinder.find_component_modules()
 
-    if Utils.uses_hydrator?(style) do
-      generate_hydrator(modules, app_name, out_dir, style, name)
-    end
+    # generate_nomenclator(modules, app_name, out_dir, style, name)
+
+    # if Utils.uses_hydrator?(style) do
+    #   generate_hydrator(modules, app_name, out_dir, style, name)
+    # end
   end
 
-  def sync(_app_name, _out_dir, _style, _name) do
+  def sync(bundle) do
+    style = Keyword.get(bundle, :style)
+    component_apps = Keyword.get(bundle, :component_apps)
+
+    modules = BuenaVista.ComponentFinder.find_component_modules(component_apps)
+
+    sync_nomenclator(bundle, modules)
+
+    if Utils.uses_hydrator?(style) do
+      sync_hydrator(bundle, modules)
+    end
   end
 
   # ----------------------------------------
   # Core Functions
   # ----------------------------------------
-  def generate_nomenclator(modules, app_name, out_dir, style, name) do
-    module_name = Utils.module_name(app_name, :nomenclator, style, name)
-    parent = Utils.parent_nomenclator(app_name, style)
-    nomenclator_file = Utils.file_path(app_name, :nomenclator, style, name, out_dir)
+  def sync_nomenclator(bundle, modules) do
+    module_name = Utils.module_name(bundle, :nomenclator)
+    parent = Utils.parent_nomenclator(bundle)
+    nomenclator_file = Utils.config_file_path(bundle, :nomenclator)
 
     assigns = [
       module_name: module_name,
@@ -39,10 +51,10 @@ defmodule BuenaVista.Generator do
     System.cmd("mix", ["format", nomenclator_file])
   end
 
-  defp generate_hydrator(modules, app_name, out_dir, style, name) do
-    module_name = Utils.module_name(app_name, :hydrator, style, name)
-    parent = Utils.parent_hydrator(app_name, style)
-    hydrator_file = Utils.file_path(app_name, :hydrator, style, name, out_dir)
+  defp sync_hydrator(bundle, modules) do
+    module_name = Utils.module_name(bundle, :hydrator)
+    parent = Utils.parent_hydrator(bundle)
+    hydrator_file = Utils.config_file_path(bundle, :hydrator)
 
     assigns = [
       module_name: module_name,
