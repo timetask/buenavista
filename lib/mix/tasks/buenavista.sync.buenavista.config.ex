@@ -14,45 +14,51 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
     bundles = [
       [
         name: :css,
-        template: :internal_hydrator,
         component_apps: [:buenavista],
+        parent_hydrator: BuenaVista.Template.EmptyHydrator,
         config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Templates
+        config_base_module: BuenaVista.Template,
+        produce_css: false
       ],
       [
         name: :tailwind,
-        template: :internal_hydrator,
+        parent_hydrator: BuenaVista.Template.EmptyHydrator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Templates
+        config_base_module: BuenaVista.Template,
+        produce_css: false
       ],
       [
         name: :tailwind_inline,
-        template: :external_hydrator,
+        parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Templates
+        config_base_module: BuenaVista.Template,
+        produce_css: false
       ],
       [
         name: :bootstrap,
-        template: :external_hydrator,
+        parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Templates
+        config_base_module: BuenaVista.Template,
+        produce_css: false
       ],
       [
         name: :bulma,
-        template: :external_hydrator,
+        parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Templates
+        config_base_module: BuenaVista.Template,
+        produce_css: false
       ],
       [
         name: :foundation,
-        template: :external_hydrator,
+        parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Templates
+        config_base_module: BuenaVista.Template,
+        produce_css: false
       ]
     ]
 

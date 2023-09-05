@@ -1,5 +1,6 @@
-defmodule BuenaVista.Templates.CssHydrator do
+defmodule BuenaVista.Template.CssHydrator do
   @behaviour BuenaVista.Hydrator
+  @delegate BuenaVista.Template.EmptyHydrator
 
   # defp variables(), do: [] 
 
@@ -149,4 +150,6 @@ defmodule BuenaVista.Templates.CssHydrator do
   # def css(:button, :border, :none), do: ~S||
   # def css(:button, :border, :thin), do: ~S||
   # def css(:button, :border, :thick), do: ~S||
+
+  defdelegate css(component, variant, option), to: @delegate
 end

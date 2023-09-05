@@ -30,39 +30,6 @@ defmodule BuenaVista.Generator.Utils do
     Module.concat([base_module, camelize(name <> "_#{module_type}")])
   end
 
-  def uses_hydrator?(:internal_hydrator), do: true
-  def uses_hydrator?(:css), do: true
-  def uses_hydrator?(:tailwind), do: true
-
-  def uses_hydrator?(:external_hydrator), do: false
-  def uses_hydrator?(:tailwind_inline), do: false
-  def uses_hydrator?(:bootstrap), do: false
-  def uses_hydrator?(:bulma), do: false
-  def uses_hydrator?(:foundation), do: false
-
-  def delegate_nomenclator(bundle) do
-    case Keyword.get(bundle, :template) do
-      :internal_hydrator -> BuenaVista.Template.DefaultNomenclator
-      :external_hydrator -> nil
-      :css -> BuenaVista.Template.DefaultNomenclator
-      :tailwind -> BuenaVista.Template.DefaultNomenclator
-      :tailwind_indline -> BuenaVista.Template.TailwinInlineNomenclator
-      :bootstrap -> BuenaVista.Template.BootstrapNomenclator
-      :bulma -> BuenaVista.Template.BulmaNomenclator
-      :foundation -> BuenaVista.Template.FoundationNomenclator
-    end
-  end
-
-  def parent_nomenclator(_rest), do: BuenaVista.Nomenclator.Default
-
-  def delegate_hydrator(bundle) do
-    case Keyword.get(bundle, :template) do
-      :internal_hydrator -> nil
-      :css -> BuenaVista.Template.CssHydrator
-      :tailwind -> BuenaVista.Template.TailwindHydrator
-    end
-  end
-
   @doc """
   Generates the path where to write the specified module.
 

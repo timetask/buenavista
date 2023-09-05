@@ -1,4 +1,4 @@
-defmodule BuenaVista.Templates.TailwindNomenclator do
+defmodule BuenaVista.Template.TailwindNomenclator do
   @behaviour BuenaVista.Nomenclator
   @delegate BuenaVista.Template.DefaultNomenclator
 

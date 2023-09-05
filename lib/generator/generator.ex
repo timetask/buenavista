@@ -21,14 +21,13 @@ defmodule BuenaVista.Generator do
   end
 
   def sync(bundle) do
-    template = Keyword.get(bundle, :template)
     component_apps = Keyword.get(bundle, :component_apps)
 
     modules = BuenaVista.ComponentFinder.find_component_modules(component_apps)
 
     sync_nomenclator(bundle, modules)
 
-    if Utils.uses_hydrator?(template) do
+    if Keyword.get(bundle, :parent_hydrator) do
       sync_hydrator(bundle, modules)
     end
   end
@@ -38,7 +37,7 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   def sync_nomenclator(bundle, modules) do
     module_name = Utils.module_name(bundle, :nomenclator)
-    delegate = Utils.delegate_nomenclator(bundle)
+    delegate = Keyword.get(bundle, :parent_nomenclator)
     nomenclator_file = Utils.config_file_path(bundle, :nomenclator)
 
     assigns = [
@@ -53,7 +52,7 @@ defmodule BuenaVista.Generator do
 
   defp sync_hydrator(bundle, modules) do
     module_name = Utils.module_name(bundle, :hydrator)
-    delegate = Utils.delegate_hydrator(bundle)
+    delegate = Keyword.get(bundle, :parent_hydrator)
     hydrator_file = Utils.config_file_path(bundle, :hydrator)
 
     assigns = [
