@@ -1,10 +1,10 @@
 defmodule BuenaVista.ComponentFinder do
-  def find_component_modules() do
+  def find_component_modules(apps) do
     modules =
-      for {app, _desc, _version} <- :application.loaded_applications(),
-          {:ok, modules} = :application.get_key(app, :modules),
-          module <- modules,
-          Code.ensure_loaded(module),
+      for app <- apps,
+          spec = Application.spec(app),
+          module <- Keyword.get(spec, :modules),
+          {:module, module} = Code.ensure_loaded(module),
           reduce: [] do
         acc ->
           if function_exported?(module, :__are_you_buenavista?, 0),
