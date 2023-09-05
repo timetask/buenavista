@@ -25,7 +25,7 @@ defmodule BuenaVista.Gallery do
     end
   end
 
-  def templates do
+  def html do
     quote do
       use Phoenix.Component
 
