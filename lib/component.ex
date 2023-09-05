@@ -48,7 +48,7 @@ defmodule BuenaVista.Component do
 
   def __on_definition__(env, _kind, component_name, args, _guards, _body) do
     if __is_component?(component_name, args) do
-      nomenclator = Application.get_env(:buenavista, :nomenclator, BuenaVista.Nomenclator.Default)
+      nomenclator = BuenaVista.get_current_nomenclator()
 
       variant_defs = Module.delete_attribute(env.module, :__variant_defs__) || []
       variant_defs = Enum.reverse(variant_defs)
@@ -60,7 +60,7 @@ defmodule BuenaVista.Component do
         for %Variant{} = variant <- variant_defs do
           options =
             for option <- variant.options do
-              class_name = nomenclator.get_class_name(component_name, variant.name, option)
+              class_name = nomenclator.class_name(component_name, variant.name, option)
               {option, class_name}
             end
 
@@ -73,7 +73,7 @@ defmodule BuenaVista.Component do
 
       classes =
         for class_key <- [:base_class | classes] do
-          class_name = nomenclator.get_class_name(component_name, :classes, class_key)
+          class_name = nomenclator.class_name(component_name, :classes, class_key)
           {class_key, class_name}
         end
 
@@ -160,10 +160,10 @@ defmodule BuenaVista.Component do
                 Keyword.get(variant.options, selected_option)
 
               {nomenclator, nil} ->
-                nomenclator.get_class_name(component.name, variant.name, variant.default)
+                nomenclator.class_name(component.name, variant.name, variant.default)
 
               {nomenclator, selected_option} ->
-                nomenclator.get_class_name(component.name, variant.name, selected_option)
+                nomenclator.class_name(component.name, variant.name, selected_option)
             end
           end
 
@@ -176,7 +176,7 @@ defmodule BuenaVista.Component do
             class_name =
               if is_nil(nomenclator),
                 do: class_name,
-                else: nomenclator.get_class_name(component.name, :classes, class_key)
+                else: nomenclator.class_name(component.name, :classes, class_key)
 
             assign_new(assigns, class_key, fn -> class_name end)
         end

@@ -27,28 +27,30 @@ defmodule BuenaVista.Generator.Utils do
     name = Keyword.get(bundle, :name)
     name = if is_atom(name), do: Atom.to_string(name), else: name
 
-    if base_module == BuenaVista do
-      [first | rest] = Atom.to_string(module_type)
-
-      Module.concat([BuenaVista, :"#{String.upcase(first) <> rest}", camelize(name)])
-    else
-      Module.concat([base_module, camelize(name <> "_#{module_type}")])
-    end
+    Module.concat([base_module, camelize(name <> "_#{module_type}")])
   end
+
+  def uses_hydrator?(:external_hydrator), do: false
+  def uses_hydrator?(:internal_hydrator), do: true
+
+  def uses_hydrator?(:css), do: true
+  def uses_hydrator?(:css_dark), do: true
+  def uses_hydrator?(:css_light), do: true
+  def uses_hydrator?(:tailwind), do: true
+  def uses_hydrator?(:tailwind_dark), do: true
+  def uses_hydrator?(:tailwind_light), do: true
 
   def uses_hydrator?(:tailwind_inline), do: false
   def uses_hydrator?(:bootstrap), do: false
   def uses_hydrator?(:bulma), do: false
   def uses_hydrator?(:foundation), do: false
 
-  def uses_hydrator?(:vanilla_dark), do: true
-  def uses_hydrator?(:vanilla_light), do: true
-  def uses_hydrator?(_style), do: true
-
-  def parent_nomenclator(bundle) do
+  def delegate_nomenclator(bundle) do
     case Keyword.get(bundle, :style) do
-      :tailwind_inline -> BuenaVista.Nomenclator.TailwindInline
-      :tailwind_classes -> BuenaVista.Nomenclator.TailwindClasses
+      :internal_hydrator -> BuenaVista.Template.DefaultNomenclator
+      :external_hydrator -> nil
+      :css -> BuenaVista.Templates.CssNomenclator
+      :css_list -> BuenaVista.Templates.CssNomenclator
       :bootstrap -> BuenaVista.Nomenclator.Bootstrap
       :bulma -> BuenaVista.Nomenclator.Bulma
       :foundation -> BuenaVista.Nomenclator.Foundation
@@ -59,7 +61,7 @@ defmodule BuenaVista.Generator.Utils do
 
   def parent_nomenclator(_rest), do: BuenaVista.Nomenclator.Default
 
-  def parent_hydrator(bundle) do
+  def delegate_hydrator(bundle) do
     case Keyword.get(bundle, :style) do
       :tailwind_classes -> BuenaVista.Hydrator.TailwindClasses
       :vanilla_dark -> BuenaVista.Hydrator.VanillaDark
@@ -86,9 +88,9 @@ defmodule BuenaVista.Generator.Utils do
   def config_file_path(bundle, module_type) do
     name = Keyword.get(bundle, :name)
     name = if is_atom(name), do: Atom.to_string(name), else: name
-    config_dir = Keyword.get(bundle, :config_dir)
+    config_out_dir = Keyword.get(bundle, :config_out_dir)
     filename = "#{underscore(name)}_#{module_type}.ex"
 
-    Path.join(config_dir, filename)
+    Path.join(config_out_dir, filename)
   end
 end

@@ -7,7 +7,7 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   # Public API
   # ----------------------------------------
-  def init(app_name, out_dir, style, name) do
+  def init(_app_name, _out_dir, _style, _name) do
     # style = Keyword.get(bundle, :style)
     # component_apps = Keyword.get(bundle, :component_apps)
 
@@ -38,31 +38,31 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   def sync_nomenclator(bundle, modules) do
     module_name = Utils.module_name(bundle, :nomenclator)
-    parent = Utils.parent_nomenclator(bundle)
+    delegate = Utils.delegate_nomenclator(bundle)
     nomenclator_file = Utils.config_file_path(bundle, :nomenclator)
 
     assigns = [
       module_name: module_name,
-      parent: parent,
+      delegate: delegate,
       modules: modules
     ]
 
-    create_file(nomenclator_file, nomenclator_template(assigns))
+    create_file(nomenclator_file, nomenclator_template(assigns), force: true)
     System.cmd("mix", ["format", nomenclator_file])
   end
 
   defp sync_hydrator(bundle, modules) do
     module_name = Utils.module_name(bundle, :hydrator)
-    parent = Utils.parent_hydrator(bundle)
+    delegate = Utils.delegate_hydrator(bundle)
     hydrator_file = Utils.config_file_path(bundle, :hydrator)
 
     assigns = [
       module_name: module_name,
-      parent: parent,
+      delegate: delegate,
       modules: modules
     ]
 
-    create_file(hydrator_file, hydrator_template(assigns))
+    create_file(hydrator_file, hydrator_template(assigns), force: true)
     System.cmd("mix", ["format", hydrator_file])
   end
 
@@ -71,32 +71,31 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   embed_template(:nomenclator, ~S/
   defmodule <%= inspect @module_name %> do
-    use BuenaVista.Nomenclator
-
-    <%= unless is_nil(@parent) do %>@parent <%= pretty_module(@parent) %><% end %>
+    @behaviour BuenaVista.Nomenclator
+    <%= unless is_nil(@delegate) do %>@delegate <%= pretty_module(@delegate) %><% end %>
 
     <%= for {module, components} <- @modules do %>
       <%= module_title_template(module: module) %>
 
       <%= for {_, component} <- components do %>
-      <%= component_title_template(component: component) %>
+        <%= component_title_template(component: component) %>
 
         <%= for {class_key, _} <- component.classes do %>
-          # defp class_name(:<%= component.name %>, :classes, :<%= class_key %>), do: "<%= unless is_nil(@parent) do %><%= @parent.get_class_name(:"#{component.name}", :classes, :"#{class_key}") %>"<% end %><% end %>
+          # def class_name(:<%= component.name %>, :classes, :<%= class_key %>), do: "<%= unless is_nil(@delegate) do %><%= @delegate.class_name(:"#{component.name}", :classes, :"#{class_key}") %>"<% end %><% end %>
         <%= for variant <- component.variants do %>
           <%= for {option, _} <- variant.options do %>
-            # defp class_name(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: "<%= unless is_nil(@parent) do %><%= @parent.get_class_name(:"#{component.name}", :"#{variant.name}", :"#{option}") %>"<% end %><% end %>
-        <% end %>
+            # def class_name(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: "<%= unless is_nil(@delegate) do %><%= @delegate.class_name(:"#{component.name}", :"#{variant.name}", :"#{option}") %>"<% end %><% end %>
       <% end %>
+    <% end %>
   <% end %>
+  <%= unless is_nil(@delegate) do %>defdelegate class_name(component, variant, option), to: @delegate<% end %>
   end
   /)
 
   embed_template(:hydrator, ~S/
   defmodule <%= inspect @module_name %> do
     use BuenaVista.Hydrator
-
-    <%= unless is_nil(@parent) do %>@parent <%= pretty_module(@parent) %><% end %>
+    <%= unless is_nil(@delegate) do %>@delegate <%= pretty_module(@delegate) %><% end %>
     
     # defp variables(), do: [] 
 
@@ -107,25 +106,15 @@ defmodule BuenaVista.Generator do
       <%= component_title_template(component: component) %>
 
         <%= for {class_key, _} <- component.classes do %>
-          """ 
-          def css(:<%= component.name %>, :classes, :<%= class_key %>), do: ~S|
-            <%= unless is_nil(@parent) do %>
-              <%= @parent.hydrate_css(:"#{component.name}", :classes, :"#{class_key}") %>
-            <%end %>
-          | 
-          """<% end %> 
+          # def css(:<%= component.name %>, :classes, :<%= class_key %>), do: ~S||<% end %> 
         <%= for variant <- component.variants do %>
           <%= for {option, _} <- variant.options do %>
-            """ 
-            def css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S|
-              <%= unless is_nil(@parent) do %>
-                <%= @parent.hydrate_css(:"#{component.name}", :"#{variant.name}", :"#{option}") %>
-              <%end %>
-            | 
-            """<% end %>
+            # def css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S||<% end %>
         <% end %>
       <% end %>
     <% end %>
+
+    <%= unless is_nil(@delegate) do %>defdelegate css(component, variant, option), to: @delegate<% end %>
   end
   /)
 
