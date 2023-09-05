@@ -30,16 +30,11 @@ defmodule BuenaVista.Generator.Utils do
     Module.concat([base_module, camelize(name <> "_#{module_type}")])
   end
 
-  def uses_hydrator?(:external_hydrator), do: false
   def uses_hydrator?(:internal_hydrator), do: true
-
   def uses_hydrator?(:css), do: true
-  def uses_hydrator?(:css_dark), do: true
-  def uses_hydrator?(:css_light), do: true
   def uses_hydrator?(:tailwind), do: true
-  def uses_hydrator?(:tailwind_dark), do: true
-  def uses_hydrator?(:tailwind_light), do: true
 
+  def uses_hydrator?(:external_hydrator), do: false
   def uses_hydrator?(:tailwind_inline), do: false
   def uses_hydrator?(:bootstrap), do: false
   def uses_hydrator?(:bulma), do: false
@@ -49,13 +44,12 @@ defmodule BuenaVista.Generator.Utils do
     case Keyword.get(bundle, :style) do
       :internal_hydrator -> BuenaVista.Template.DefaultNomenclator
       :external_hydrator -> nil
-      :css -> BuenaVista.Templates.CssNomenclator
-      :css_list -> BuenaVista.Templates.CssNomenclator
-      :bootstrap -> BuenaVista.Nomenclator.Bootstrap
-      :bulma -> BuenaVista.Nomenclator.Bulma
-      :foundation -> BuenaVista.Nomenclator.Foundation
-      :vanilla_dark -> BuenaVista.Nomenclator.Default
-      :vanilla_light -> BuenaVista.Nomenclator.Default
+      :css -> BuenaVista.Template.DefaultNomenclator
+      :tailwind-> BuenaVista.Template.DefaultNomenclator
+      :tailwind_indline-> BuenaVista.Template.TailwinInlineNomenclator
+      :bootstrap -> BuenaVista.Template.BootstrapNomenclator
+      :bulma -> BuenaVista.Template.BulmaNomenclator
+      :foundation -> BuenaVista.Template.FoundationNomenclator
     end
   end
 
@@ -63,9 +57,9 @@ defmodule BuenaVista.Generator.Utils do
 
   def delegate_hydrator(bundle) do
     case Keyword.get(bundle, :style) do
-      :tailwind_classes -> BuenaVista.Hydrator.TailwindClasses
-      :vanilla_dark -> BuenaVista.Hydrator.VanillaDark
-      :vanilla_light -> BuenaVista.Hydrator.VanillaLight
+      :internal_hydrator -> nil
+      :css -> BuenaVista.Template.CssHydrator
+      :tailwind -> BuenaVista.Template.TailwindHydrator
     end
   end
 

@@ -94,7 +94,7 @@ defmodule BuenaVista.Generator do
 
   embed_template(:hydrator, ~S/
   defmodule <%= inspect @module_name %> do
-    use BuenaVista.Hydrator
+    @behaviour BuenaVista.Hydrator
     <%= unless is_nil(@delegate) do %>@delegate <%= pretty_module(@delegate) %><% end %>
     
     # defp variables(), do: [] 
