@@ -21,14 +21,14 @@ defmodule BuenaVista.Generator do
   end
 
   def sync(bundle) do
-    style = Keyword.get(bundle, :style)
+    template = Keyword.get(bundle, :template)
     component_apps = Keyword.get(bundle, :component_apps)
 
     modules = BuenaVista.ComponentFinder.find_component_modules(component_apps)
 
     sync_nomenclator(bundle, modules)
 
-    if Utils.uses_hydrator?(style) do
+    if Utils.uses_hydrator?(template) do
       sync_hydrator(bundle, modules)
     end
   end

@@ -14,42 +14,42 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
     bundles = [
       [
         name: :css,
-        style: :internal_hydrator,
+        template: :internal_hydrator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Templates
       ],
       [
         name: :tailwind,
-        style: :internal_hydrator,
+        template: :internal_hydrator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Templates
       ],
       [
         name: :tailwind_inline,
-        style: :external_hydrator,
+        template: :external_hydrator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Templates
       ],
       [
         name: :bootstrap,
-        style: :external_hydrator,
+        template: :external_hydrator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Templates
       ],
       [
         name: :bulma,
-        style: :external_hydrator,
+        template: :external_hydrator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Templates
       ],
       [
         name: :foundation,
-        style: :external_hydrator,
+        template: :external_hydrator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Templates

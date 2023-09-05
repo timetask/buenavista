@@ -7,18 +7,8 @@ defmodule Mix.Tasks.Buenavista.Sync.Config do
 
   alias BuenaVista.Generator
 
-  @allowed_styles [
-    :internal_hydrator,
-    :external_hydrator,
-    :css,
-    :tailwind,
-    :tailwind_inline,
-    :bootstrap,
-    :bulma,
-    :foundation
-  ]
-
   @requirements ["app.config"]
+
   @shortdoc "Generates an initial Nomenclator and Hydrator modules"
   def run(_opts) do
     bundles = Application.get_env(:buenavista, :bundles)
@@ -34,10 +24,10 @@ defmodule Mix.Tasks.Buenavista.Sync.Config do
             Keyword.get(bundle, :name) ||
               raise "Bundle #{inspect(bundle)} is missing :name."
 
-          style = Keyword.get(bundle, :style)
+          template = Keyword.get(bundle, :template)
 
-          unless style in @allowed_styles do
-            raise "Bundle #{inspect(bundle)} is missing a valid :style."
+          unless template in BuenaVista.Config.supported_templates() do
+            raise "Bundle #{inspect(bundle)} is missing a valid :template."
           end
 
           component_apps =
@@ -58,7 +48,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Config do
 
           [
             name: name,
-            style: style,
+            template: template,
             component_apps: component_apps,
             config_out_dir: config_out_dir,
             config_base_module: config_base_module

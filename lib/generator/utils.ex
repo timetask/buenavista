@@ -41,12 +41,12 @@ defmodule BuenaVista.Generator.Utils do
   def uses_hydrator?(:foundation), do: false
 
   def delegate_nomenclator(bundle) do
-    case Keyword.get(bundle, :style) do
+    case Keyword.get(bundle, :template) do
       :internal_hydrator -> BuenaVista.Template.DefaultNomenclator
       :external_hydrator -> nil
       :css -> BuenaVista.Template.DefaultNomenclator
-      :tailwind-> BuenaVista.Template.DefaultNomenclator
-      :tailwind_indline-> BuenaVista.Template.TailwinInlineNomenclator
+      :tailwind -> BuenaVista.Template.DefaultNomenclator
+      :tailwind_indline -> BuenaVista.Template.TailwinInlineNomenclator
       :bootstrap -> BuenaVista.Template.BootstrapNomenclator
       :bulma -> BuenaVista.Template.BulmaNomenclator
       :foundation -> BuenaVista.Template.FoundationNomenclator
@@ -56,7 +56,7 @@ defmodule BuenaVista.Generator.Utils do
   def parent_nomenclator(_rest), do: BuenaVista.Nomenclator.Default
 
   def delegate_hydrator(bundle) do
-    case Keyword.get(bundle, :style) do
+    case Keyword.get(bundle, :template) do
       :internal_hydrator -> nil
       :css -> BuenaVista.Template.CssHydrator
       :tailwind -> BuenaVista.Template.TailwindHydrator

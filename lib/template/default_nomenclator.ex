@@ -6,7 +6,6 @@ defmodule BuenaVista.Template.DefaultNomenclator do
 
   def class_name(:label, :state, :default), do: nil
 
-
   def class_name(component, :classes, :base_class) do
     component |> Atom.to_string() |> String.replace("_", "-")
   end
