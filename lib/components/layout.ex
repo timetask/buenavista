@@ -18,10 +18,10 @@ defmodule BuenaVista.Components.Layout do
     ~H"""
     <div class={[@base_class, @variant_classes]}>
       <sidebar class={@sidebar_class}>
-        <%= render_slot(@sidebar) %>  
+        <%= render_slot(@sidebar) %>
       </sidebar>
       <main class={@main_class}>
-        <%= render_slot(@main)%>
+        <%= render_slot(@main) %>
       </main>
     </div>
     """
@@ -31,8 +31,5 @@ defmodule BuenaVista.Components.Layout do
     ~H"""
 
     """
-  end
-
-  def im_not_a_component(hello, yeas) do
   end
 end

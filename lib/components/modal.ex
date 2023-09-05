@@ -14,8 +14,8 @@ defmodule BuenaVista.Components.Modal do
       <div class={@content_class}>
         <a href="#" class={@close_class} />
         <%= render_slot(@inner_block) %>
-        </div>
       </div>
+    </div>
     """
   end
 

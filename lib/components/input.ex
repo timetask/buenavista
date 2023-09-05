@@ -42,8 +42,8 @@ defmodule BuenaVista.Components.Input do
   component input_group(assigns) do
     ~H"""
     <div id={@id} class={[@base_class, @variant_classes]} phx-feedback-for={@field.name}>
-       <span class="input-group-label">
-        <.label field={@field} label={@label} state={@state}/>
+      <span class="input-group-label">
+        <.label field={@field} label={@label} state={@state} />
         <i :if={@state == :success} class="bx bx-check" />
         <p :if={@state == :error}>
           <span :for={error <- @field.errors} class="input-error phx-no-feedback:hidden">
