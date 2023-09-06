@@ -1,5 +1,9 @@
 defmodule BuenaVista.Gallery.GalleryController do
-  use BuenaVista.Gallery, :controller
+  use Phoenix.Controller,
+    formats: [:html],
+    layouts: [html: {BuenaVista.Gallery.LayoutsTemplates, :base}]
+
+  import Plug.Conn
 
   plug :put_layout, html: {BuenaVista.Gallery.LayoutsTemplates, :base}
   plug :put_view, html: BuenaVista.Gallery.GalleryTemplates
