@@ -48,7 +48,7 @@ defmodule BuenaVista.Component do
 
   def __on_definition__(env, _kind, component_name, args, _guards, _body) do
     if __is_component?(component_name, args) do
-      nomenclator = BuenaVista.get_current_nomenclator()
+      nomenclator = BuenaVista.current_nomenclator()
 
       variant_defs = Module.delete_attribute(env.module, :__variant_defs__) || []
       variant_defs = Enum.reverse(variant_defs)

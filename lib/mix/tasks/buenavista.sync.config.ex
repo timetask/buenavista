@@ -5,6 +5,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Config do
   use Mix.Task
   require Logger
 
+  alias BuenaVista.Bundle
   alias BuenaVista.Generator
 
   @requirements ["app.config"]
@@ -58,7 +59,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Config do
         raise "Bundle config error: missing key :produce_css. Provided bundle: #{inspect(bundle)}"
       end
 
-      [
+      %Bundle{
         name: name,
         parent_hydrator: parent_hydrator,
         parent_nomenclator: parent_nomenclator,
@@ -66,7 +67,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Config do
         config_out_dir: config_out_dir,
         config_base_module: config_base_module,
         produce_css: produce_css
-      ]
+      }
     end
   end
 

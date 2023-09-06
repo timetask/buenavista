@@ -1,5 +1,5 @@
 defmodule BuenaVista.Template.DefaultNomenclator do
-  @behaviour BuenaVista.Nomenclator
+  use BuenaVista.Nomenclator
 
   def class_name(:button, :border, :none), do: nil
   def class_name(:button, :border, option), do: "button-border-#{option}"

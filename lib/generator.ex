@@ -27,7 +27,7 @@ defmodule BuenaVista.Generator do
 
     sync_nomenclator(bundle, modules)
 
-    if Keyword.get(bundle, :parent_hydrator) do
+    if bundle.parent_hydrator do
       sync_hydrator(bundle, modules)
     end
   end
@@ -37,15 +37,12 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   def sync_nomenclator(%Bundle{} = bundle, modules) do
     module_name = Utils.module_name(bundle, :nomenclator)
-    delegate = Keyword.get(bundle, :parent_nomenclator)
     nomenclator_file = Utils.config_file_path(bundle, :nomenclator)
-
-    existing_implementations = Finder.find_nomenclator_defs(module_name)
 
     assigns = [
       module_name: module_name,
-      existing_implementations: existing_implementations,
-      delegate: delegate,
+      existing_defs: module_name.get_class_name_defs(),
+      delegate: bundle.parent_nomenclator,
       modules: modules
     ]
 
@@ -55,15 +52,14 @@ defmodule BuenaVista.Generator do
 
   defp sync_hydrator(%Bundle{} = bundle, modules) do
     module_name = Utils.module_name(bundle, :hydrator)
-    delegate = Keyword.get(bundle, :parent_hydrator)
     hydrator_file = Utils.config_file_path(bundle, :hydrator)
 
-    existing_implementations = Finder.find_hydrator_defs(module_name)
+    existing_defs = Finder.find_hydrator_defs(module_name)
 
     assigns = [
       module_name: module_name,
-      existing_implementations: existing_implementations,
-      delegate: delegate,
+      existing_defs: existing_defs,
+      delegate: bundle.parent_hydrator,
       modules: modules
     ]
 
@@ -86,16 +82,24 @@ defmodule BuenaVista.Generator do
         <%= component_title_template(component: component) %>
 
         <%= for {class_key, _} <- component.classes do %>
-          # def class_name(:<%= component.name %>, :classes, :<%= class_key %>), do: "<%= unless is_nil(@delegate) do %><%= @delegate.class_name(:"#{component.name}", :classes, :"#{class_key}") %>"<% end %><% end %>
+          <%= class_name_def(component.name, :classes, class_key, @existing_defs, @delegate) %><% end %>
         <%= for variant <- component.variants do %>
           <%= for {option, _} <- variant.options do %>
-            # def class_name(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: "<%= unless is_nil(@delegate) do %><%= @delegate.class_name(:"#{component.name}", :"#{variant.name}", :"#{option}") %>"<% end %><% end %>
+            <%= class_name_def(component.name, variant.name, option, @existing_defs, @delegate) %><% end %>
       <% end %>
     <% end %>
   <% end %>
   <%= unless is_nil(@delegate) do %>defdelegate class_name(component, variant, option), to: @delegate<% end %>
   end
   /)
+
+  defp class_name_def(component, variant, option, existing_defs, delegate) do
+    if class_name = Map.get(existing_defs, {component, variant, option}) do
+      ~s|def class_name(:#{component}, :#{variant}, :#{option}), do: "#{class_name}"|
+    else
+      ~s|# def class_name(:#{component}, :#{variant}, :#{option}), do: "#{delegate && delegate.class_name(component, variant, option)}"|
+    end
+  end
 
   embed_template(:hydrator, ~S/
   defmodule <%= inspect @module_name %> do
@@ -114,7 +118,7 @@ defmodule BuenaVista.Generator do
           # def css(:<%= component.name %>, :classes, :<%= class_key %>), do: ~S||<% end %> 
         <%= for variant <- component.variants do %>
           <%= for {option, _} <- variant.options do %>
-            <%= if hydrated_css = Map.get(@existing_implementations, {component.name, variant.name, option}) do %>
+            <%= if hydrated_css = Map.get(@existing_defs, {component.name, variant.name, option}) do %>
               def css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S|
                 <%= hydrated_css %>
               |

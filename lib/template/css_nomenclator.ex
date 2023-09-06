@@ -1,5 +1,5 @@
 defmodule BuenaVista.Template.CssNomenclator do
-  @behaviour BuenaVista.Nomenclator
+  use BuenaVista.Nomenclator
   @delegate BuenaVista.Template.DefaultNomenclator
 
   # ----------------------------------------

@@ -1,7 +1,9 @@
-defmodule BuenaVista.ComponentFinder do
-  def find_component_modules(apps) do
+defmodule BuenaVista.Finder do
+  alias BuenaVista.Bundle
+
+  def find_component_modules(%Bundle{} = bundle) do
     modules =
-      for app <- apps,
+      for app <- bundle.component_apps,
           spec = Application.spec(app),
           module <- Keyword.get(spec, :modules),
           {:module, module} = Code.ensure_loaded(module),
