@@ -25,6 +25,7 @@ defmodule BuenaVista.Nomenclator do
     quote do
       @behaviour BuenaVista.Nomenclator
       @before_compile BuenaVista.Nomenclator
+
       Module.register_attribute(__MODULE__, :__defs_class_name__, persist: true)
 
       def get_class_name_defs() do

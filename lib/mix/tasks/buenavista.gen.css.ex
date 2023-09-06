@@ -4,6 +4,7 @@ defmodule Mix.Tasks.Buenavista.Gen.Css do
 
   import Mix.Generator
 
+  alias BuenaVista.Finder
   import Macro, only: [underscore: 1]
 
   @shortdoc "Generates CSS files (use `--help` for options)"
@@ -84,7 +85,7 @@ defmodule Mix.Tasks.Buenavista.Gen.Css do
     unless File.dir?(modules_base_dir), do: create_directory(modules_base_dir)
 
     module_paths =
-      for {module, components} <- BuenaVista.ComponentFinder.find_component_modules() do
+      for {module, components} <- Finder.find_component_modules(modules_base_dir) do
         module_name =
           module.__info__(:module)
           |> Atom.to_string()

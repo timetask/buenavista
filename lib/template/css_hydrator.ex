@@ -1,5 +1,5 @@
 defmodule BuenaVista.Template.CssHydrator do
-  @behaviour BuenaVista.Hydrator
+  use BuenaVista.Hydrator
   @delegate BuenaVista.Template.EmptyHydrator
 
   # defp variables(), do: [] 
@@ -14,7 +14,7 @@ defmodule BuenaVista.Template.CssHydrator do
 
   # def css(:drawer, :classes, :base_class), do: ~S||
   # def css(:drawer, :classes, :modal_content_class), do: ~S||
-  # def css(:drawer, :classes, :close_btn_class), do: ~S|| 
+  # def css(:drawer, :classes, :close_btn_class), do: ~S||
 
   # def css(:drawer, :position, :top), do: ~S||
   # def css(:drawer, :position, :right), do: ~S||
@@ -32,7 +32,7 @@ defmodule BuenaVista.Template.CssHydrator do
 
   # def css(:modal, :classes, :base_class), do: ~S||
   # def css(:modal, :classes, :content_class), do: ~S||
-  # def css(:modal, :classes, :close_class), do: ~S|| 
+  # def css(:modal, :classes, :close_class), do: ~S||
 
   # def css(:modal, :position, :centered), do: ~S||
   # def css(:modal, :position, :top), do: ~S||
@@ -50,7 +50,7 @@ defmodule BuenaVista.Template.CssHydrator do
   # multi_column_layout
   # - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:multi_column_layout, :classes, :base_class), do: ~S|| 
+  # def css(:multi_column_layout, :classes, :base_class), do: ~S||
 
   # - - - - - - - - - - - - - - - - - - - - 
   # sidebar_layout
@@ -58,7 +58,7 @@ defmodule BuenaVista.Template.CssHydrator do
 
   # def css(:sidebar_layout, :classes, :base_class), do: ~S||
   # def css(:sidebar_layout, :classes, :sidebar_class), do: ~S||
-  # def css(:sidebar_layout, :classes, :main_class), do: ~S|| 
+  # def css(:sidebar_layout, :classes, :main_class), do: ~S||
 
   # def css(:sidebar_layout, :position, :left), do: ~S||
   # def css(:sidebar_layout, :position, :right), do: ~S||
@@ -71,7 +71,7 @@ defmodule BuenaVista.Template.CssHydrator do
   # input
   # - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:input, :classes, :base_class), do: ~S|| 
+  # def css(:input, :classes, :base_class), do: ~S||
 
   # def css(:input, :type, :text), do: ~S||
   # def css(:input, :type, :number), do: ~S||
@@ -85,7 +85,7 @@ defmodule BuenaVista.Template.CssHydrator do
   # input_group
   # - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:input_group, :classes, :base_class), do: ~S|| 
+  # def css(:input_group, :classes, :base_class), do: ~S||
 
   # def css(:input_group, :layout, :vertical), do: ~S||
   # def css(:input_group, :layout, :table), do: ~S||
@@ -99,7 +99,7 @@ defmodule BuenaVista.Template.CssHydrator do
   # label
   # - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:label, :classes, :base_class), do: ~S|| 
+  # def css(:label, :classes, :base_class), do: ~S||
 
   # def css(:label, :state, :default), do: ~S||
   # def css(:label, :state, :success), do: ~S||
@@ -113,7 +113,7 @@ defmodule BuenaVista.Template.CssHydrator do
   # form
   # - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:form, :classes, :base_class), do: ~S|| 
+  # def css(:form, :classes, :base_class), do: ~S||
 
   # def css(:form, :display, :block), do: ~S||
   # def css(:form, :display, :inline), do: ~S||
@@ -126,7 +126,7 @@ defmodule BuenaVista.Template.CssHydrator do
   # button
   # - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:button, :classes, :base_class), do: ~S|| 
+  # def css(:button, :classes, :base_class), do: ~S||
 
   # def css(:button, :size, :xs), do: ~S||
   # def css(:button, :size, :sm), do: ~S||

@@ -54,11 +54,9 @@ defmodule BuenaVista.Generator do
     module_name = Utils.module_name(bundle, :hydrator)
     hydrator_file = Utils.config_file_path(bundle, :hydrator)
 
-    existing_defs = Finder.find_hydrator_defs(module_name)
-
     assigns = [
       module_name: module_name,
-      existing_defs: existing_defs,
+      existing_defs: module_name.get_css_defs(),
       delegate: bundle.parent_hydrator,
       modules: modules
     ]
@@ -112,19 +110,13 @@ defmodule BuenaVista.Generator do
       <%= module_title_template(module: module) %>
 
       <%= for {_, component} <- components do %>
-      <%= component_title_template(component: component) %>
+        <%= component_title_template(component: component) %>
 
         <%= for {class_key, _} <- component.classes do %>
-          # def css(:<%= component.name %>, :classes, :<%= class_key %>), do: ~S||<% end %> 
+          <%= css_def(component.name, :classes, class_key, @existing_defs, @delegate) %><% end %>
         <%= for variant <- component.variants do %>
           <%= for {option, _} <- variant.options do %>
-            <%= if hydrated_css = Map.get(@existing_defs, {component.name, variant.name, option}) do %>
-              def css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S|
-                <%= hydrated_css %>
-              |
-            <% else %>
-              # def css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S||<% end %>
-            <% end %>
+            <%= css_def(component.name, variant.name, option, @existing_defs, @delegate) %><% end %>
         <% end %>
       <% end %>
     <% end %>
@@ -132,6 +124,14 @@ defmodule BuenaVista.Generator do
     <%= unless is_nil(@delegate) do %>defdelegate css(component, variant, option), to: @delegate<% end %>
   end
   /)
+
+  defp css_def(component, variant, option, existing_defs, delegate) do
+    if css = Map.get(existing_defs, {component, variant, option}) do
+      ~s/def css(:#{component}, :#{variant}, :#{option}), do: ~S|#{css}|/
+    else
+      ~s/# def css(:#{component}, :#{variant}, :#{option}), do: ~S||/
+    end
+  end
 
   embed_template(:module_title, ~S/
     # ----------------------------------------

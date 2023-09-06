@@ -1,5 +1,5 @@
 defmodule BuenaVista.Template.EmptyHydrator do
-  @behaviour BuenaVista.Hydrator
+  use BuenaVista.Hydrator
 
   def variables(), do: []
 
