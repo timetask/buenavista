@@ -19,7 +19,7 @@ defmodule Buenavista.ButtonTest do
       assert Floki.text(element) =~ "Press Me"
     end
 
-    for {size, class} <- [xs: "xs", sm: "sm", md: "md", lg: "lg"] do
+    for {size, class} <- [xs: "button-xs", sm: "button-sm", md: "button-md", lg: "button-lg"] do
       test ~s|attribute size set to :#{size} adds class "#{class}"| do
         assigns = %{size: unquote(size)}
 
@@ -34,13 +34,13 @@ defmodule Buenavista.ButtonTest do
     end
 
     for {color, class} <- [
-          nav: "nav",
-          ctrl: "ctrl",
-          primary: "primary",
-          success: "success",
-          warning: "warning",
-          info: "info",
-          danger: "danger"
+          nav: "button-nav",
+          ctrl: "button-ctrl",
+          primary: "button-primary",
+          success: "button-success",
+          warning: "button-warning",
+          info: "button-info",
+          danger: "button-danger"
         ] do
       test ~s|attribute color set to :#{color} adds class "#{class}"| do
         assigns = %{color: unquote(color)}
@@ -55,7 +55,12 @@ defmodule Buenavista.ButtonTest do
       end
     end
 
-    for {style, class} <- [outline: "outline", transparent: "transparent", filled: "filled", link: "link"] do
+    for {style, class} <- [
+          outline: "button-outline",
+          transparent: "button-transparent",
+          filled: "button-filled",
+          link: "button-link"
+        ] do
       test ~s|attribute style set to :#{style} adds class "#{class}"| do
         assigns = %{style: unquote(style)}
 
@@ -69,7 +74,7 @@ defmodule Buenavista.ButtonTest do
       end
     end
 
-    for {border, class} <- [none: nil, thin: "thin", thick: "thick"] do
+    for {border, class} <- [none: nil, thin: "button-border-thin", thick: "button-border-thick"] do
       test ~s|attribute border set to :#{border} adds class "#{class}"| do
         assigns = %{border: unquote(border)}
 
