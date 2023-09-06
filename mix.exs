@@ -16,7 +16,7 @@ defmodule BuenaVista.MixProject do
 
   defp description do
     """
-    Phoenix Components
+    Phoenix Component Library. 
     """
   end
 
@@ -38,7 +38,8 @@ defmodule BuenaVista.MixProject do
   defp deps do
     [
       {:phoenix_live_view, "~> 0.18"},
-      {:floki, ">= 0.30.0", only: :test}
+      {:floki, ">= 0.30.0", only: :test},
+      {:gettext, "~> 0.20"}
     ]
   end
 end
