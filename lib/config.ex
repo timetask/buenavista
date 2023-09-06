@@ -1,9 +1,13 @@
 defmodule BuenaVista.Config do
-  def get_current_nomenclator() do
+  def current_nomenclator() do
     BuenaVista.Template.DefaultNomenclator
   end
 
-  def get_available_bundles() do
+  def available_bundles() do
     Application.get_env(:buenavista, :bundles)
+  end
+
+  def gettext() do
+    Application.get_env(:buenvista, :gettext)
   end
 end
