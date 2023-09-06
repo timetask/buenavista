@@ -2,7 +2,9 @@ defmodule BuenaVista.Generator do
   require Logger
   import Mix.Generator
 
-  alias BuenaVista.Generator.Utils
+  alias BuenaVista.Bundle
+  alias BuenaVista.Finder
+  alias BuenaVista.Utils
 
   # ----------------------------------------
   # Public API
@@ -20,10 +22,8 @@ defmodule BuenaVista.Generator do
     # end
   end
 
-  def sync(bundle) do
-    component_apps = Keyword.get(bundle, :component_apps)
-
-    modules = BuenaVista.ComponentFinder.find_component_modules(component_apps)
+  def sync(%Bundle{} = bundle) do
+    modules = Finder.find_component_modules(bundle)
 
     sync_nomenclator(bundle, modules)
 
@@ -35,13 +35,16 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   # Core Functions
   # ----------------------------------------
-  def sync_nomenclator(bundle, modules) do
+  def sync_nomenclator(%Bundle{} = bundle, modules) do
     module_name = Utils.module_name(bundle, :nomenclator)
     delegate = Keyword.get(bundle, :parent_nomenclator)
     nomenclator_file = Utils.config_file_path(bundle, :nomenclator)
 
+    existing_implementations = Finder.find_nomenclator_defs(module_name)
+
     assigns = [
       module_name: module_name,
+      existing_implementations: existing_implementations,
       delegate: delegate,
       modules: modules
     ]
@@ -50,13 +53,16 @@ defmodule BuenaVista.Generator do
     System.cmd("mix", ["format", nomenclator_file])
   end
 
-  defp sync_hydrator(bundle, modules) do
+  defp sync_hydrator(%Bundle{} = bundle, modules) do
     module_name = Utils.module_name(bundle, :hydrator)
     delegate = Keyword.get(bundle, :parent_hydrator)
     hydrator_file = Utils.config_file_path(bundle, :hydrator)
 
+    existing_implementations = Finder.find_hydrator_defs(module_name)
+
     assigns = [
       module_name: module_name,
+      existing_implementations: existing_implementations,
       delegate: delegate,
       modules: modules
     ]
@@ -70,7 +76,7 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   embed_template(:nomenclator, ~S/
   defmodule <%= inspect @module_name %> do
-    @behaviour BuenaVista.Nomenclator
+    use BuenaVista.Nomenclator
     <%= unless is_nil(@delegate) do %>@delegate <%= pretty_module(@delegate) %><% end %>
 
     <%= for {module, components} <- @modules do %>
@@ -93,7 +99,7 @@ defmodule BuenaVista.Generator do
 
   embed_template(:hydrator, ~S/
   defmodule <%= inspect @module_name %> do
-    @behaviour BuenaVista.Hydrator
+    use BuenaVista.Hydrator
     <%= unless is_nil(@delegate) do %>@delegate <%= pretty_module(@delegate) %><% end %>
     
     # defp variables(), do: [] 
@@ -108,7 +114,13 @@ defmodule BuenaVista.Generator do
           # def css(:<%= component.name %>, :classes, :<%= class_key %>), do: ~S||<% end %> 
         <%= for variant <- component.variants do %>
           <%= for {option, _} <- variant.options do %>
-            # def css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S||<% end %>
+            <%= if hydrated_css = Map.get(@existing_implementations, {component.name, variant.name, option}) do %>
+              def css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S|
+                <%= hydrated_css %>
+              |
+            <% else %>
+              # def css(:<%= component.name %>, :<%= variant.name %>, :<%= option %>), do: ~S||<% end %>
+            <% end %>
         <% end %>
       <% end %>
     <% end %>
