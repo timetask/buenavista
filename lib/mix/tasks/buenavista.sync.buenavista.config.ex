@@ -13,7 +13,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
   def run(_opts) do
     bundles = [
       [
-        name: :css,
+        name: "css",
         component_apps: [:buenavista],
         parent_hydrator: BuenaVista.Template.EmptyHydrator,
         config_out_dir: "lib/template",
@@ -21,7 +21,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
         produce_css: false
       ],
       [
-        name: :tailwind,
+        name: "tailwind",
         parent_hydrator: BuenaVista.Template.EmptyHydrator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
@@ -29,7 +29,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
         produce_css: false
       ],
       [
-        name: :tailwind_inline,
+        name: "tailwind_inline",
         parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
@@ -37,7 +37,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
         produce_css: false
       ],
       [
-        name: :bootstrap,
+        name: "bootstrap",
         parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
@@ -45,7 +45,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
         produce_css: false
       ],
       [
-        name: :bulma,
+        name: "bulma",
         parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
@@ -53,7 +53,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
         produce_css: false
       ],
       [
-        name: :foundation,
+        name: "foundation",
         parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
