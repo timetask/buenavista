@@ -8,7 +8,7 @@ locals_without_parens = [
 
 [
   inputs: ["mix.exs", ".formatter.exs", "{lib,test}/**/*.{ex,exs}"],
-  plugins: [Phoenix.LiveView.HTMLFormatter],
+  plugins: [Phoenix.LiveView.HTMLFormatter, BuenaVista.CssFormatter],
   import_deps: [:phoenix],
   locals_without_parens: locals_without_parens,
   export: [locals_without_parens: locals_without_parens],
