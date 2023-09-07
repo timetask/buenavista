@@ -1,10 +1,9 @@
 defmodule BuenaVista.Generator do
   require Logger
   import Mix.Generator
+  import Macro, only: [camelize: 1, underscore: 1]
 
   alias BuenaVista.Bundle
-  alias BuenaVista.Finder
-  alias BuenaVista.Utils
 
   # ----------------------------------------
   # Public API
@@ -17,13 +16,13 @@ defmodule BuenaVista.Generator do
 
     # generate_nomenclator(modules, app_name, out_dir, style, name)
 
-    # if Utils.uses_hydrator?(style) do
+    # if uses_hydrator?(style) do
     #   generate_hydrator(modules, app_name, out_dir, style, name)
     # end
   end
 
   def sync(%Bundle{} = bundle) do
-    modules = Finder.find_component_modules(bundle)
+    modules = find_component_modules(bundle)
 
     sync_nomenclator(bundle, modules)
 
@@ -35,9 +34,9 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   # Core Functions
   # ----------------------------------------
-  def sync_nomenclator(%Bundle{} = bundle, modules) do
-    module_name = Utils.module_name(bundle, :nomenclator)
-    nomenclator_file = Utils.config_file_path(bundle, :nomenclator)
+  defp sync_nomenclator(%Bundle{} = bundle, modules) do
+    module_name = module_name(bundle, :nomenclator)
+    nomenclator_file = config_file_path(bundle, :nomenclator)
 
     assigns = [
       module_name: module_name,
@@ -51,8 +50,8 @@ defmodule BuenaVista.Generator do
   end
 
   defp sync_hydrator(%Bundle{} = bundle, modules) do
-    module_name = Utils.module_name(bundle, :hydrator)
-    hydrator_file = Utils.config_file_path(bundle, :hydrator)
+    module_name = module_name(bundle, :hydrator)
+    hydrator_file = config_file_path(bundle, :hydrator)
 
     assigns = [
       module_name: module_name,
@@ -91,13 +90,6 @@ defmodule BuenaVista.Generator do
   end
   /)
 
-  defp class_name_def(component, variant, option, existing_defs, delegate) do
-    if class_name = Map.get(existing_defs, {component, variant, option}) do
-      ~s|def class_name(:#{component}, :#{variant}, :#{option}), do: "#{class_name}"|
-    else
-      ~s|# def class_name(:#{component}, :#{variant}, :#{option}), do: "#{delegate && delegate.class_name(component, variant, option)}"|
-    end
-  end
 
   embed_template(:hydrator, ~S/
   defmodule <%= inspect @module_name %> do
@@ -133,6 +125,18 @@ defmodule BuenaVista.Generator do
     end
   end
 
+  defp class_name_def(component, variant, option, existing_defs, delegate) do
+    if class_name = Map.get(existing_defs, {component, variant, option}) do
+      ~s|def class_name(:#{component}, :#{variant}, :#{option}), do: "#{class_name}"|
+    else
+      ~s|# def class_name(:#{component}, :#{variant}, :#{option}), do: "#{delegate && delegate.class_name(component, variant, option)}"|
+    end
+  end
+
+  defp pretty_module(module) do
+    module |> Atom.to_string() |> String.replace("Elixir.", "")
+  end
+
   embed_template(:module_title, ~S/
     # ----------------------------------------
     # <%= pretty_module(@module) %>
@@ -145,7 +149,62 @@ defmodule BuenaVista.Generator do
     # - - - - - - - - - - - - - - - - - - - - 
   /)
 
-  defp pretty_module(module) do
-    module |> Atom.to_string() |> String.replace("Elixir.", "")
+  # ----------------------------------------
+  # Module Helpers 
+  # ----------------------------------------
+  @doc """
+  Returns all BuenaVista module and components.
+  """
+  def find_component_modules(%Bundle{} = bundle) do
+    modules =
+      for app <- bundle.component_apps,
+          spec = Application.spec(app),
+          module <- Keyword.get(spec, :modules),
+          {:module, module} = Code.ensure_loaded(module),
+          reduce: [] do
+        acc ->
+          if function_exported?(module, :__are_you_buenavista?, 0),
+            do: [module | acc],
+            else: acc
+      end
+
+    for module <- modules do
+      case module.__buenavista_components() do
+        [] -> nil
+        components -> {module, components}
+      end
+    end
+    |> Enum.reject(&is_nil/1)
+  end
+
+  @doc """
+  Generates module names for nomenclators and hydrators
+
+  iex> module_name(%Bundle{name: "admin", config_base_module: MyApp.Components.Config}, :nomenclator)
+  MyApp.Components.Config.AdminNomenclator
+
+  iex> module_name(%Bundle{name: "admin_light", config_base_module: MyApp.Components.Config}, :nomenclator)
+  MyApp.Components.Config.AdminLightNomenclator
+
+  iex> module_name(%Bundle{name: "admin_dark", config_base_module: MyApp.Components}, :hydrator)
+  MyApp.Components.AdminDarkHydrator
+  """
+  def module_name(%Bundle{} = bundle, module_type) when module_type in [:nomenclator, :hydrator] do
+    Module.concat([bundle.config_base_module, camelize("#{bundle.name}_#{module_type}")])
+  end
+
+  @doc """
+  Generates the path where to write the specified module.
+
+  iex> config_file_path(%Bundle{name: "admin", config_out_dir: "/tmp/config"}, :nomenclator)
+  "/tmp/config/admin_nomenclator.ex"
+
+  iex> config_file_path(%Bundle{name: "admin_dark", config_out_dir: "lib/components/config"}, :hydrator)
+  "lib/components/config/admin_dark_hydrator.ex"
+  """
+  def config_file_path(%Bundle{} = bundle, module_type) when module_type in [:nomenclator, :hydrator] do
+    filename = "#{underscore(bundle.name)}_#{module_type}.ex"
+
+    Path.join(bundle.config_out_dir, filename)
   end
 end
