@@ -2,7 +2,7 @@ defmodule BuenaVista.Hydrator do
   @callback variables() :: list()
   @callback css(atom(), atom(), atom()) :: String.t()
 
-  @optional_callbacks css: 3
+  @optional_callbacks variables: 0, css: 3
 
   def __before_compile__(env) do
     {_, :def, _, defs} = Module.get_definition(env.module, {:css, 3})
@@ -27,6 +27,8 @@ defmodule BuenaVista.Hydrator do
     quote do
       @behaviour BuenaVista.Hydrator
       @before_compile BuenaVista.Hydrator
+
+      import BuenaVista.CSS
 
       Module.register_attribute(__MODULE__, :__defs_css__, persist: true)
 

@@ -90,7 +90,6 @@ defmodule BuenaVista.Generator do
   end
   /)
 
-
   embed_template(:hydrator, ~S/
   defmodule <%= inspect @module_name %> do
     use BuenaVista.Hydrator
@@ -119,9 +118,9 @@ defmodule BuenaVista.Generator do
 
   defp css_def(component, variant, option, existing_defs, delegate) do
     if css = Map.get(existing_defs, {component, variant, option}) do
-      ~s/def css(:#{component}, :#{variant}, :#{option}), do: ~S|#{css}|/
+      ~s/def css(:#{component}, :#{variant}, :#{option}), do: ~CSS|#{css}|/
     else
-      ~s/# def css(:#{component}, :#{variant}, :#{option}), do: ~S||/
+      ~s/# def css(:#{component}, :#{variant}, :#{option}), do: ~CSS||/
     end
   end
 
