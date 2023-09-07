@@ -54,12 +54,25 @@ defmodule BuenaVista.CssFormatter do
     [%{scope | rules: rules} | rules_rest]
   end
 
-  defp sort_rules(contents) do
-    dbg(contents)
-    contents
+  defp sort_rules(rules) do
+    dbg(rules)
+    rules
   end
 
-  def write_rules(contents) do
-    contents
+  def write_rules(rules) do
+    rules
+    |> Enum.reduce([], &expand_rule/2)
+    |> Enum.reverse()
+    |> :erlang.iolist_to_binary()
+  end
+
+  defp expand_rule(%Scope{} = scope, acc) do
+    acc = ["#{scope.selector} {\n" | acc]
+    acc = Enum.reduce(scope.rules, acc, fn child_rules, child_acc -> expand_rule(child_rules, child_acc) end)
+    ["}\n" | acc]
+  end
+
+  defp expand_rule(%Property{} = prop, acc) do
+    ["#{prop.attr}: #{prop.value};\n" | acc]
   end
 end
