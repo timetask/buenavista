@@ -8,7 +8,7 @@ WHITESPACE  = [\s\t\n\r]
 Rules.
 
 {PROPERTY}    : {token, {property, TokenLine, extract_property(TokenChars)}}.
-{BEGIN_SCOPE} : {token, {start_scope, TokenLine, extract_begin_selectors(TokenChars)}}.
+{BEGIN_SCOPE} : {token, {start_scope, TokenLine, extract_begin_selector(TokenChars)}}.
 {END_SCOPE}   : {token, {end_scope, TokenLine}}.
 {WHITESPACE}  : skip_token.
 
@@ -21,8 +21,7 @@ extract_property(Chars) ->
   [Property, Value] = string:split(C3, ":"),
   {string:trim(Property, both), string:trim(Value, both)}.
 
-extract_begin_selectors(Chars) ->
+extract_begin_selector(Chars) ->
   C1 = list_to_binary(Chars),
   C2 = string:replace(C1, "{", ""),
-  Selectors = string:split(C2, ","),
-  lists:map(fun(X) -> string:trim(X) end, Selectors).
+  string:trim(C2).

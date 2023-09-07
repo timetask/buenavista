@@ -21,11 +21,10 @@ extract_property(Chars) ->
   [Property, Value] = string:split(C3, ":"),
   {string:trim(Property, both), string:trim(Value, both)}.
 
-extract_begin_selectors(Chars) ->
+extract_begin_selector(Chars) ->
   C1 = list_to_binary(Chars),
   C2 = string:replace(C1, "{", ""),
-  Selectors = string:split(C2, ","),
-  lists:map(fun(X) -> string:trim(X) end, Selectors).
+  string:trim(C2).
 
 -file("/Users/fceruti/.local/share/rtx/installs/erlang/26.0.2/lib/parsetools-2.5/include/leexinc.hrl", 14).
 
@@ -384,7 +383,7 @@ tab_size() -> 8.
 %% return signal either an unrecognised character or end of current
 %% input.
 
--file("src/css_lexer.erl", 352).
+-file("src/css_lexer.erl", 351).
 yystate() -> 7.
 
 yystate(10, Ics, Line, Col, Tlen, _, _) ->
@@ -520,7 +519,7 @@ yyaction_0(TokenChars, TokenLine) ->
 -compile({inline,yyaction_1/2}).
 -file("src/css_lexer.xrl", 9).
 yyaction_1(TokenChars, TokenLine) ->
-     { token, { start_scope, TokenLine, extract_begin_selectors (TokenChars) } } .
+     { token, { start_scope, TokenLine, extract_begin_selector (TokenChars) } } .
 
 -compile({inline,yyaction_2/1}).
 -file("src/css_lexer.xrl", 10).
