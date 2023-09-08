@@ -359,4 +359,91 @@ defmodule BuenaVista.CssProperties do
                    |> Map.new()
 
   def default_sorting(), do: @default_sorting
+  @pseudo_class_index [
+                        "active",
+                        "any-link",
+                        "autofill",
+                        "blank",
+                        "checked",
+                        "current",
+                        "default",
+                        "defined",
+                        "dir",
+                        "disabled",
+                        "empty",
+                        "enabled",
+                        "first",
+                        "first-child",
+                        "first-of-type",
+                        "fullscreen",
+                        "future",
+                        "focus",
+                        "focus-visible",
+                        "focus-within",
+                        "has",
+                        "host",
+                        "host",
+                        "hover",
+                        "host-context",
+                        "indeterminate",
+                        "in-range",
+                        "invalid",
+                        "is",
+                        "lang",
+                        "last-child",
+                        "last-of-type",
+                        "left",
+                        "link",
+                        "local-link",
+                        "modal",
+                        "not",
+                        "nth-child",
+                        "nth-col",
+                        "nth-last-child",
+                        "nth-last-col",
+                        "nth-last-of-type",
+                        "nth-of-type",
+                        "only-child",
+                        "only-of-type",
+                        "optional",
+                        "out-of-range",
+                        "past",
+                        "picture-in-picture",
+                        "placeholder-shown",
+                        "paused",
+                        "playing",
+                        "read-only",
+                        "read-write",
+                        "required",
+                        "right",
+                        "root",
+                        "scope",
+                        "state",
+                        "target",
+                        "target-within",
+                        "user-invalid",
+                        "valid",
+                        "visited",
+                        "where"
+                      ]
+                      |> Enum.with_index()
+                      |> Map.new()
+
+  def property_index(property), do: Map.get(@property_index, property)
+
+  def scope_index(selector) do
+    case selector do
+      "&:" <> rest ->
+        case Regex.run(~r/^[a-z-]+/, rest, capture: :first) |> dbg() do
+          [pseudo_class] -> Map.get(@pseudo_class_index, pseudo_class, 300)
+          _ -> 300
+        end
+
+      "[" <> rest ->
+        1_000 + :binary.first(rest)
+
+      "." <> rest ->
+        2_000 + :binary.first(rest)
+    end
+  end
 end
