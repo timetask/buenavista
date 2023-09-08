@@ -431,7 +431,7 @@ defmodule BuenaVista.CssProperties do
                       |> Enum.with_index()
                       |> Map.new()
 
-  def property_index(property), do: Map.get(@property_index, property) |> dbg()
+  def property_index(property), do: Map.get(@property_index, property)
 
   def scope_index(selector) do
     case selector do

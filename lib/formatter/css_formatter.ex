@@ -56,7 +56,16 @@ defmodule BuenaVista.CssFormatter do
   end
 
   defp sort_rules(rules) do
-    Enum.sort(rules, &compare/2)
+    rules
+    |> Enum.sort(&compare/2)
+    |> Enum.map(fn
+      %Scope{} = scope ->
+        rules = sort_rules(scope.rules)
+        %Scope{scope | rules: rules}
+
+      property ->
+        property
+    end)
   end
 
   defp compare(%Property{}, %Scope{}), do: true
@@ -73,12 +82,12 @@ defmodule BuenaVista.CssFormatter do
   end
 
   defp expand_rule(%Scope{} = scope, level, acc) do
-    acc = ["\n#{String.duplicate("  ", level)}#{scope.selector} {\n" | acc]
+    acc = ["\n#{String.duplicate("  ", level + 2)}#{scope.selector} {\n" | acc]
     acc = Enum.reduce(scope.rules, acc, fn child_rules, child_acc -> expand_rule(child_rules, level + 1, child_acc) end)
-    ["#{String.duplicate("  ", level)}}\n" | acc]
+    ["#{String.duplicate("  ", level + 2)}}\n" | acc]
   end
 
   defp expand_rule(%Property{} = prop, level, acc) do
-    ["#{String.duplicate("  ", level)}#{prop.attr}: #{prop.value};\n" | acc]
+    ["#{String.duplicate("  ", level + 2)}#{prop.attr}: #{prop.value};\n" | acc]
   end
 end
