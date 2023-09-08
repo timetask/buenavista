@@ -1,5 +1,6 @@
 defmodule BuenaVista.CssFormatter do
   @behaviour Mix.Tasks.Format
+  import BuenaVista.CssProperties, only: [property_index: 1, scope_index: 1]
 
   defmodule Property do
     defstruct [:attr, :value]
@@ -55,24 +56,29 @@ defmodule BuenaVista.CssFormatter do
   end
 
   defp sort_rules(rules) do
-    dbg(rules)
-    rules
+    Enum.sort(rules, &compare/2)
   end
+
+  defp compare(%Property{}, %Scope{}), do: true
+  defp compare(%Scope{}, %Property{}), do: false
+  defp compare(%Property{} = a, %Property{} = b), do: property_index(a.attr) >= property_index(b.attr)
+  defp compare(%Scope{} = a, %Scope{} = b), do: scope_index(a.selector) <= scope_index(b.selector)
 
   def write_rules(rules) do
     rules
-    |> Enum.reduce([], &expand_rule/2)
+    |> Enum.reduce([], fn rule, acc -> expand_rule(rule, 0, acc) end)
     |> Enum.reverse()
     |> :erlang.iolist_to_binary()
+    |> then(fn body -> "\n" <> body end)
   end
 
-  defp expand_rule(%Scope{} = scope, acc) do
-    acc = ["#{scope.selector} {\n" | acc]
-    acc = Enum.reduce(scope.rules, acc, fn child_rules, child_acc -> expand_rule(child_rules, child_acc) end)
-    ["}\n" | acc]
+  defp expand_rule(%Scope{} = scope, level, acc) do
+    acc = ["\n#{String.duplicate("  ", level)}#{scope.selector} {\n" | acc]
+    acc = Enum.reduce(scope.rules, acc, fn child_rules, child_acc -> expand_rule(child_rules, level + 1, child_acc) end)
+    ["#{String.duplicate("  ", level)}}\n" | acc]
   end
 
-  defp expand_rule(%Property{} = prop, acc) do
-    ["#{prop.attr}: #{prop.value};\n" | acc]
+  defp expand_rule(%Property{} = prop, level, acc) do
+    ["#{String.duplicate("  ", level)}#{prop.attr}: #{prop.value};\n" | acc]
   end
 end

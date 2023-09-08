@@ -359,49 +359,52 @@ defmodule BuenaVista.CssProperties do
                   |> Map.new()
 
   @pseudo_class_index [
-                        "active",
-                        "any-link",
-                        "autofill",
-                        "blank",
-                        "checked",
-                        "current",
-                        "default",
-                        "defined",
-                        "dir",
-                        "disabled",
-                        "empty",
-                        "enabled",
-                        "first",
-                        "first-child",
-                        "first-of-type",
-                        "fullscreen",
-                        "future",
+                        "is",
+                        "has",
+                        # State
+                        "hover",
                         "focus",
                         "focus-visible",
                         "focus-within",
-                        "has",
-                        "host",
-                        "host",
-                        "hover",
-                        "host-context",
-                        "indeterminate",
-                        "in-range",
-                        "invalid",
-                        "is",
-                        "lang",
+                        "active",
+                        "checked",
+                        "disabled",
+                        # Ordinal
+                        "first",
+                        "first-child",
                         "last-child",
-                        "last-of-type",
-                        "left",
-                        "link",
-                        "local-link",
-                        "modal",
-                        "not",
                         "nth-child",
                         "nth-col",
                         "nth-last-child",
                         "nth-last-col",
                         "nth-last-of-type",
                         "nth-of-type",
+                        # Rest
+                        "any-link",
+                        "autofill",
+                        "blank",
+                        "current",
+                        "default",
+                        "defined",
+                        "dir",
+                        "empty",
+                        "enabled",
+                        "first-of-type",
+                        "fullscreen",
+                        "future",
+                        "host",
+                        "host",
+                        "host-context",
+                        "indeterminate",
+                        "in-range",
+                        "invalid",
+                        "lang",
+                        "last-of-type",
+                        "left",
+                        "link",
+                        "local-link",
+                        "modal",
+                        "not",
                         "only-child",
                         "only-of-type",
                         "optional",
@@ -428,12 +431,12 @@ defmodule BuenaVista.CssProperties do
                       |> Enum.with_index()
                       |> Map.new()
 
-  def property_index(property), do: Map.get(@property_index, property)
+  def property_index(property), do: Map.get(@property_index, property) |> dbg()
 
   def scope_index(selector) do
     case selector do
       "&:" <> rest ->
-        case Regex.run(~r/^[a-z-]+/, rest, capture: :first) |> dbg() do
+        case Regex.run(~r/^[a-z-]+/, rest, capture: :first) do
           [pseudo_class] -> Map.get(@pseudo_class_index, pseudo_class, 300)
           _ -> 300
         end

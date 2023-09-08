@@ -1,7 +1,7 @@
 Definitions.
 
 PROPERTY    = [a-z-]+\s*:[a-z0-9\s"'(),#]+;
-BEGIN_SCOPE = [.&]+[a-z\s-,.:&]*{
+BEGIN_SCOPE = [.&]+[a-z\s,.:&-]*{
 END_SCOPE   = }
 WHITESPACE  = [\s\t\n\r]
 
