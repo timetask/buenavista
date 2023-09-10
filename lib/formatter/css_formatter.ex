@@ -78,16 +78,19 @@ defmodule BuenaVista.CssFormatter do
     |> Enum.reduce([], fn rule, acc -> expand_rule(rule, 0, acc) end)
     |> Enum.reverse()
     |> :erlang.iolist_to_binary()
-    |> then(fn body -> "\n" <> body end)
   end
 
   defp expand_rule(%Scope{} = scope, level, acc) do
-    acc = ["\n#{String.duplicate("  ", level + 2)}#{scope.selector} {\n" | acc]
+    acc = ["\n#{String.duplicate("  ", level)}#{scope.selector} {\n" | acc]
     acc = Enum.reduce(scope.rules, acc, fn child_rules, child_acc -> expand_rule(child_rules, level + 1, child_acc) end)
-    ["#{String.duplicate("  ", level + 2)}}\n" | acc]
+    ["#{String.duplicate("  ", level)}}\n" | acc]
   end
 
   defp expand_rule(%Property{} = prop, level, acc) do
-    ["#{String.duplicate("  ", level + 2)}#{prop.attr}: #{prop.value};\n" | acc]
+    ["#{String.duplicate("  ", level)}#{prop.attr}: #{prop.value};\n" | acc]
+  end
+
+  defp expand_rule(%Apply{} = apply, level, acc) do
+    ["#{String.duplicate("  ", level)}#{apply.value};\n" | acc]
   end
 end

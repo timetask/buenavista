@@ -118,9 +118,9 @@ defmodule BuenaVista.Generator do
 
   defp css_def(component, variant, option, existing_defs, delegate) do
     if css = Map.get(existing_defs, {component, variant, option}) do
-      ~s/def css(:#{component}, :#{variant}, :#{option}), do: ~CSS|#{css}|/
+      ~s/def css(:#{component}, :#{variant}, :#{option}), \ndo: ~CSS"""\n #{css} """/
     else
-      ~s/# def css(:#{component}, :#{variant}, :#{option}), do: ~CSS||/
+      ~s/# def css(:#{component}, :#{variant}, :#{option}), \n#   do: ~CSS""" \n# #{delegate && delegate.css(component, variant, option) |> comment_lines()}  """/
     end
   end
 
@@ -132,20 +132,24 @@ defmodule BuenaVista.Generator do
     end
   end
 
+  defp comment_lines(content) do
+    String.replace(content, "\n", "\n#")
+  end
+
   defp pretty_module(module) do
     module |> Atom.to_string() |> String.replace("Elixir.", "")
   end
 
   embed_template(:module_title, ~S/
-    # ----------------------------------------
+    # --------------------------------------------------------------------------------
     # <%= pretty_module(@module) %>
-    # ----------------------------------------
+    # --------------------------------------------------------------------------------
   /)
 
   embed_template(:component_title, ~S/
-    # - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
     # <%= @component.name %>
-    # - - - - - - - - - - - - - - - - - - - - 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   /)
 
   # ----------------------------------------

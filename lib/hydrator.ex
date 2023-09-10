@@ -28,7 +28,7 @@ defmodule BuenaVista.Hydrator do
       @behaviour BuenaVista.Hydrator
       @before_compile BuenaVista.Hydrator
 
-      import BuenaVista.CSS
+      import BuenaVista.CssSigil
 
       Module.register_attribute(__MODULE__, :__defs_css__, persist: true)
 
