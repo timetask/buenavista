@@ -6,6 +6,10 @@ defmodule BuenaVista.CssFormatter do
     defstruct [:attr, :value]
   end
 
+  defmodule Apply do
+    defstruct [:value]
+  end
+
   defmodule Scope do
     defstruct [:selector, :rules]
   end
@@ -32,6 +36,11 @@ defmodule BuenaVista.CssFormatter do
       {:property, _, {key, val}}, %{level: level, rules: rules} ->
         prop = %Property{attr: key, value: val}
         rules = insert_element(rules, prop, level)
+        %{level: level, rules: rules}
+
+      {:apply, _, value}, %{level: level, rules: rules} ->
+        apply = %Apply{value: value}
+        rules = insert_element(rules, apply, level)
         %{level: level, rules: rules}
 
       {:start_scope, _, selectors}, %{level: level, rules: rules} ->
@@ -68,6 +77,10 @@ defmodule BuenaVista.CssFormatter do
     end)
   end
 
+  defp compare(%Apply{} = a, %Apply{} = b), do: a <= b
+  defp compare(%Apply{}, _), do: true
+  defp compare(_, %Apply{}), do: false
+
   defp compare(%Property{}, %Scope{}), do: true
   defp compare(%Scope{}, %Property{}), do: false
   defp compare(%Property{} = a, %Property{} = b), do: property_index(a.attr) >= property_index(b.attr)
@@ -91,6 +104,6 @@ defmodule BuenaVista.CssFormatter do
   end
 
   defp expand_rule(%Apply{} = apply, level, acc) do
-    ["#{String.duplicate("  ", level)}#{apply.value};\n" | acc]
+    ["#{String.duplicate("  ", level)}@apply #{apply.value};\n" | acc]
   end
 end

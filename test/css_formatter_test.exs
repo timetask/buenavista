@@ -40,5 +40,25 @@ defmodule BuenaVista.CssFormatterTest do
                }
                """
     end
+
+    test "reading @apply" do
+      css = """
+                 @apply text-blue-400;
+           .nested {
+             @apply bg-green-100;
+             }
+      """
+
+      result = format(css, [])
+
+      assert result ==
+               """
+               @apply text-blue-400;
+
+               .nested {
+                 @apply bg-green-100;
+               }
+               """
+    end
   end
 end
