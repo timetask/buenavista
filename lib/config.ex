@@ -3,7 +3,7 @@ defmodule BuenaVista.Config do
 
   @default_bundle_name Application.compile_env(:buenavista, :default_bundle)
 
-  @bundles (for bundle <- Application.compile_env(:buenavista, :bundles) do
+  @bundles (for bundle <- Application.compile_env(:buenavista, :bundles) || [] do
               unless is_list(bundle) do
                 raise ":bundles config should a a list of keyword lists. Got: #{inspect(bundle)}."
               end
@@ -54,7 +54,7 @@ defmodule BuenaVista.Config do
 
   def get_bundles(), do: @bundles
 
-  def find_bundle(bundle_name) when is_atom(bundle_name) do
+  def find_bundle(bundle_name) when is_binary(bundle_name) do
     Enum.find(get_bundles(), fn bundle -> bundle.name == bundle_name end)
   end
 
