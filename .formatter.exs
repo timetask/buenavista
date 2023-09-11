@@ -1,4 +1,6 @@
 locals_without_parens = [
+  variable: 2,
+  style: 2,
   variant: 2,
   variant: 3,
   component: 1,

@@ -1,8 +1,6 @@
 defmodule BuenaVista.Bundle do
   defstruct [
     :name,
-    :parent_hydrator,
-    :parent_nomenclator,
     :nomenclator,
     :hydrator,
     :component_apps,
