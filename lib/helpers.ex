@@ -58,4 +58,8 @@ defmodule BuenaVista.Helpers do
 
     Path.join(bundle.config_out_dir, filename)
   end
+
+  def pretty_module(module) do
+    module |> Atom.to_string() |> String.replace("Elixir.", "")
+  end
 end

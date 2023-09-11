@@ -70,7 +70,7 @@ defmodule BuenaVista.Generator do
   embed_template(:nomenclator, ~S/
   defmodule <%= inspect @module_name %> do
     use BuenaVista.Nomenclator
-    <%= unless is_nil(@delegate) do %>@delegate <%= pretty_module(@delegate) %><% end %>
+    <%= unless is_nil(@delegate) do %>@delegate <%= Helpers.pretty_module(@delegate) %><% end %>
 
     <%= for {module, components} <- @modules do %>
       <%= module_title_template(module: module) %>
@@ -93,7 +93,7 @@ defmodule BuenaVista.Generator do
   embed_template(:hydrator, ~S/
   defmodule <%= inspect @module_name %> do
     use BuenaVista.Hydrator
-    <%= unless is_nil(@delegate) do %>@delegate <%= pretty_module(@delegate) %><% end %>
+    <%= unless is_nil(@delegate) do %>@delegate <%= Helpers.pretty_module(@delegate) %><% end %>
     
     # defp variables(), do: [] 
 
@@ -136,13 +136,9 @@ defmodule BuenaVista.Generator do
     String.replace(content, "\n", "\n#")
   end
 
-  defp pretty_module(module) do
-    module |> Atom.to_string() |> String.replace("Elixir.", "")
-  end
-
   embed_template(:module_title, ~S/
     # --------------------------------------------------------------------------------
-    # <%= pretty_module(@module) %>
+    # <%= Helpers.pretty_module(@module) %>
     # --------------------------------------------------------------------------------
   /)
 
