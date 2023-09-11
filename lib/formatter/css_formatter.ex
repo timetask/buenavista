@@ -94,16 +94,16 @@ defmodule BuenaVista.CssFormatter do
   end
 
   defp expand_rule(%Scope{} = scope, level, acc) do
-    acc = ["\n#{String.duplicate("  ", level)}#{scope.selector} {\n" | acc]
+    acc = ["\n#{String.duplicate("  ", level + 1)}#{scope.selector} {\n" | acc]
     acc = Enum.reduce(scope.rules, acc, fn child_rules, child_acc -> expand_rule(child_rules, level + 1, child_acc) end)
-    ["#{String.duplicate("  ", level)}}\n" | acc]
+    ["#{String.duplicate("  ", level + 1)}}\n" | acc]
   end
 
   defp expand_rule(%Property{} = prop, level, acc) do
-    ["#{String.duplicate("  ", level)}#{prop.attr}: #{prop.value};\n" | acc]
+    ["#{String.duplicate("  ", level + 1)}#{prop.attr}: #{prop.value};\n" | acc]
   end
 
   defp expand_rule(%Apply{} = apply, level, acc) do
-    ["#{String.duplicate("  ", level)}@apply #{apply.value};\n" | acc]
+    ["#{String.duplicate("  ", level + 1)}@apply #{apply.value};\n" | acc]
   end
 end
