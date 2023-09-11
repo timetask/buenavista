@@ -1,5 +1,6 @@
 defmodule BuenaVista.Config do
   alias BuenaVista.Bundle
+  alias BuenaVista.Helpers
 
   @default_bundle_name Application.compile_env(:buenavista, :default_bundle)
 
@@ -12,11 +13,11 @@ defmodule BuenaVista.Config do
                 Keyword.get(bundle, :name) ||
                   raise "Bundle config error: missing key :name. Provided bundle: #{inspect(bundle)}"
 
-              parent_hydrator = Keyword.get(bundle, :parent_hydrator)
+              hydrator_parent = Keyword.get(bundle, :hydrator_parent)
 
-              parent_nomenclator =
-                Keyword.get(bundle, :parent_nomenclator, BuenaVista.Template.DefaultNomenclator) ||
-                  raise "Bundle config error: missing key :parent_nomenclator. Provided bundle: #{inspect(bundle)}"
+              nomenclator_parent =
+                Keyword.get(bundle, :nomenclator_parent, BuenaVista.Template.DefaultNomenclator) ||
+                  raise "Bundle config error: missing key :nomenclator_parent. Provided bundle: #{inspect(bundle)}"
 
               component_apps =
                 Keyword.get(bundle, :component_apps) ||
@@ -41,10 +42,16 @@ defmodule BuenaVista.Config do
                 raise "Bundle config error: missing key :produce_css. Provided bundle: #{inspect(bundle)}"
               end
 
+              hydrator_module = Helpers.module_name(bundle, :hydrator)
+              hydrator_file = Helpers.config_file_path(bundle, :hydrator)
+
+              nomenclator_module = Helpers.module_name(bundle, :nomenclator)
+              nomenclator_file = Helpers.config_file_path(bundle, :nomenclator)
+
               %Bundle{
                 name: name,
-                parent_hydrator: parent_hydrator,
-                parent_nomenclator: parent_nomenclator,
+                hydrator: %{parent: hydrator_parent, module: hydrator_module, path: hydrator_file},
+                nomenclator: %{parent: nomenclator_parent, module: nomenclator_module, path: nomenclator_file},
                 component_apps: component_apps,
                 config_out_dir: config_out_dir,
                 config_base_module: config_base_module,

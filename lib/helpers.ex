@@ -40,8 +40,15 @@ defmodule BuenaVista.Helpers do
   iex> module_name(%Bundle{name: "admin_dark", config_base_module: MyApp.Components}, :hydrator)
   MyApp.Components.AdminDarkHydrator
   """
+
   def module_name(%Bundle{} = bundle, module_type) when module_type in [:nomenclator, :hydrator] do
     Module.concat([bundle.config_base_module, camelize("#{bundle.name}_#{module_type}")])
+  end
+
+  def module_name(bundle, module_type) when is_list(bundle) and module_type in [:nomenclator, :hydrator] do
+    bundle_name = Keyword.get(bundle, :name)
+    config_base_module = Keyword.get(bundle, :config_base_module)
+    Module.concat([config_base_module, camelize("#{bundle_name}_#{module_type}")])
   end
 
   @doc """
@@ -57,6 +64,14 @@ defmodule BuenaVista.Helpers do
     filename = "#{underscore(bundle.name)}_#{module_type}.ex"
 
     Path.join(bundle.config_out_dir, filename)
+  end
+
+  def config_file_path(bundle, module_type) when is_list(bundle) and module_type in [:nomenclator, :hydrator] do
+    bundle_name = Keyword.get(bundle, :name)
+    config_out_dir = Keyword.get(bundle, :config_out_dir)
+    filename = "#{underscore(bundle_name)}_#{module_type}.ex"
+
+    Path.join(config_out_dir, filename)
   end
 
   def pretty_module(module) do

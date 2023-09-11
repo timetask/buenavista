@@ -35,18 +35,15 @@ defmodule BuenaVista.Generator do
   # Core Functions
   # ----------------------------------------
   defp sync_nomenclator(%Bundle{} = bundle, modules) do
-    module_name = Helpers.module_name(bundle, :nomenclator)
-    nomenclator_file = Helpers.config_file_path(bundle, :nomenclator)
-
     assigns = [
-      module_name: module_name,
-      existing_defs: module_name.get_class_name_defs(),
+      module_name: bundle.nomenclator.module,
+      existing_defs: bundle.nomenclator.module.get_class_name_defs(),
       delegate: bundle.parent_nomenclator,
       modules: modules
     ]
 
-    create_file(nomenclator_file, nomenclator_template(assigns), force: true)
-    System.cmd("mix", ["format", nomenclator_file])
+    create_file(bundle.nomenclator.path, nomenclator_template(assigns), force: true)
+    System.cmd("mix", ["format", bundle.nomenclator.path])
   end
 
   defp sync_hydrator(%Bundle{} = bundle, modules) do
