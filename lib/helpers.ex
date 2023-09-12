@@ -134,4 +134,26 @@ defmodule BuenaVista.Helpers do
       css: css
     }
   end
+
+  def get_nomenclator(%Bundle{} = bundle) do
+    case bundle.nomenclator do
+      %Bundle.Nomenclator{module_name: module_name} -> module_name
+      module_name -> module_name
+    end
+  end
+
+  def get_hydrator(%Bundle{} = bundle) do
+    case bundle.hydrator do
+      %Bundle.Hydrator{module_name: module_name} -> module_name
+      module_name -> module_name
+    end
+  end
+
+  def last_module_alias(module) do
+    module.__info__(:module)
+    |> Atom.to_string()
+    |> String.split(".")
+    |> List.last()
+    |> underscore()
+  end
 end

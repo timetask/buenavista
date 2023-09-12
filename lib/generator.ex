@@ -22,30 +22,27 @@ defmodule BuenaVista.Generator do
     # end
   end
 
-  def sync(%Bundle{} = bundle) do
+  # ----------------------------------------
+  # Config 
+  # ----------------------------------------
+  def sync_config(%Bundle{} = bundle) do
     modules = Helpers.find_component_modules(bundle.apps)
     sync_nomenclator(bundle, modules)
     sync_hydrator(bundle, modules)
   end
 
-  # ----------------------------------------
-  # Core Functions
-  # ----------------------------------------
   defp sync_nomenclator(%Bundle{} = bundle, modules) do
     if match?(%Bundle.Nomenclator{}, bundle.nomenclator) do
+      nomenclator = Helpers.get_nomenclator(bundle)
+
       assigns = [
-        module_name: bundle.nomenclator.module_name,
-        existing_class_names: existing_defs(bundle, :nomenclator)[:class_names],
+        module_name: nomenclator,
+        existing_class_names: nomenclator.get_class_names(),
         parent: bundle.nomenclator.parent,
         modules: modules
       ]
 
-      dir = Path.dirname(bundle.nomenclator.file)
-
-      unless File.exists?(dir) do
-        create_directory(dir, force: true)
-      end
-
+      maybe_create_dir(bundle.nomenclator.file)
       create_file(bundle.nomenclator.file, nomenclator_template(assigns), force: true)
       System.cmd("mix", ["format", bundle.nomenclator.file])
     end
@@ -53,61 +50,38 @@ defmodule BuenaVista.Generator do
 
   defp sync_hydrator(%Bundle{} = bundle, modules) do
     if match?(%Bundle.Hydrator{}, bundle.hydrator) do
+      parent = bundle.hydrator.parent
+      hydrator = Helpers.get_hydrator(bundle)
+
+      {variables, styles} =
+        if function_exported?(hydrator, :__info__, 1) do
+          {hydrator.get_computed_variables(), hydrator.get_computed_styles()}
+        else
+          {parent.get_computed_variables(), parent.get_computed_styles()}
+        end
+
       assigns = [
-        module_name: bundle.hydrator.module_name,
-        variables: hydrator_variables(bundle),
-        existing_styles: existing_defs(bundle, :hydrator)[:styles],
-        parent: bundle.hydrator.parent,
+        module_name: hydrator,
+        variables: variables,
+        styles: styles,
+        parent: parent,
         modules: modules
       ]
 
-      dir = Path.dirname(bundle.hydrator.file)
-
-      unless File.exists?(dir) do
-        create_directory(dir, force: true)
-      end
-
+      maybe_create_dir(bundle.hydrator.file)
       create_file(bundle.hydrator.file, hydrator_template(assigns), force: true)
       System.cmd("mix", ["format", bundle.hydrator.file])
     end
   end
 
-  def hydrator_variables(bundle) do
-    parent_vars =
-      if is_nil(bundle.hydrator.parent),
-        do: [],
-        else: bundle.hydrator.parent.get_variables()
+  defp maybe_create_dir(file) do
+    dir = Path.dirname(file)
 
-    existing_vars = existing_defs(bundle, :hydrator)[:variables]
-
-    variables = for %Variable{} = var <- parent_vars, do: {var.key, %{parent: var, current: nil}}
-
-    for %Variable{} = variable <- existing_vars, reduce: variables do
-      acc ->
-        if entry = Keyword.get(acc, variable.key) do
-          Keyword.replace(acc, variable.key, %{parent: Map.get(entry, :parent), current: variable})
-        else
-          Keyword.put(acc, variable.key, %{parent: nil, current: variable})
-        end
+    unless File.exists?(dir) do
+      create_directory(dir, force: true)
     end
-    |> Enum.sort_by(& &1)
   end
 
-  defp existing_defs(bundle, :nomenclator) do
-    if function_exported?(bundle.nomenclator.module_name, :__info__, 1),
-      do: %{class_names: bundle.nomenclator.module_name.get_class_names()},
-      else: %{class_names: %{}}
-  end
-
-  defp existing_defs(bundle, :hydrator) do
-    if function_exported?(bundle.hydrator.module_name, :__info__, 1),
-      do: %{variables: bundle.hydrator.module_name.get_variables(), styles: bundle.hydrator.module_name.get_styles()},
-      else: %{variables: %{}, styles: %{}}
-  end
-
-  # ----------------------------------------
-  # Templates
-  # ----------------------------------------
   embed_template(:nomenclator, ~S/
   defmodule <%= Helpers.pretty_module(@module_name) %> do
     use BuenaVista.Nomenclator,<%= unless is_nil(@parent) do %>parent: <%= Helpers.pretty_module(@parent) %><% end %>
@@ -144,23 +118,15 @@ defmodule BuenaVista.Generator do
         <%= component_title_template(component: component) %>
 
         <%= for {class_key, _} <- component.classes do %>
-          <%= style_def(component.name, :classes, class_key, @existing_styles, @parent) %><% end %>
+          <%= style_def(@styles, component.name, :classes, class_key) %><% end %>
         <%= for variant <- component.variants do %>
           <%= for {option, _} <- variant.options do %>
-            <%= style_def(component.name, variant.name, option, @existing_styles, @parent) %><% end %>
+            <%= style_def(@styles, component.name, variant.name, option) %><% end %>
         <% end %>
       <% end %>
     <% end %>
   end
   /)
-
-  defp style_def(component, variant, option, existing_styles, parent) do
-    if style = Map.get(existing_styles, {component, variant, option}) do
-      ~s/style [:#{component}, :#{variant}, :#{option}], ~CSS"""\n #{style.css} """/
-    else
-      ~s/# style [:#{component}, :#{variant}, :#{option}], ~CSS""" \n# #{parent && parent.css(component, variant, option) |> comment_lines()}"""/
-    end
-  end
 
   defp class_name_def(component, variant, option, existing_class_names, parent) do
     if class_name = Map.get(existing_class_names, {component, variant, option}) do
@@ -170,16 +136,24 @@ defmodule BuenaVista.Generator do
     end
   end
 
-  def variable_def(variable) do
-    case variable do
-      %{parent: nil, current: nil} -> raise "weird"
-      %{parent: parent, current: nil} -> ~s|# variable :#{parent.key}, "#{parent.css_value}"|
-      %{parent: _parent, current: current} -> ~s|variable :#{current.key}, "#{current.css_value}"|
+  def variable_def(%Variable{} = variable) do
+    if variable.parent,
+      do: ~s|# variable :#{variable.key}, "#{variable.css_value}"|,
+      else: ~s|variable :#{variable.key}, "#{variable.css_value}"|
+  end
+
+  defp style_def(styles, component, variant, option) do
+    if style = Map.get(styles, {component, variant, option}) do
+      if style.parent,
+        do: ~s/# style [:#{component}, :#{variant}, :#{option}], ~CSS""" \n# #{style.css |> comment_lines()}"""/,
+        else: ~s/style [:#{component}, :#{variant}, :#{option}], ~CSS"""\n #{style.css} """/
+    else
+      ~s/# style [:#{component}, :#{variant}, :#{option}], ~CSS"""\n# """/
     end
   end
 
   defp comment_lines(content) do
-    String.replace(content, "\n", "\n#")
+    String.replace(content, "\n", "\n# ")
   end
 
   embed_template(:module_title, ~S/
@@ -193,4 +167,100 @@ defmodule BuenaVista.Generator do
     # <%= @component.name %>
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   /)
+
+  # ----------------------------------------
+  # CSS Files
+  # ----------------------------------------
+  def generate_css_files() do
+    for %Bundle{css: %Bundle.Css{out_dir: out_dir}} = bundle when is_binary(out_dir) <-
+          BuenaVista.Config.get_bundles() do
+      nomenclator = Helpers.get_nomenclator(bundle)
+      hydrator = Helpers.get_hydrator(bundle)
+
+      variables = hydrator.get_variables()
+
+      css_variables =
+        for {_, variable} <- variables, into: %{} do
+          {variable.key, "var(--#{variable.css_key})"}
+        end
+
+      module_paths =
+        for {module, components} <- BuenaVista.Helpers.find_component_modules(bundle.apps) do
+          module_name = Helpers.last_module_alias(module)
+          module_filename = "#{module_name}.css"
+          module_path = Path.join([out_dir, bundle.name, module_filename])
+
+          assigns = [
+            nomenclator: nomenclator,
+            hydrator: hydrator,
+            variables: css_variables,
+            components: components
+          ]
+
+          create_file(module_path, component_template(assigns), force: true)
+
+          System.cmd("prettier", [module_path, "--write"])
+          "#{bundle.name}/#{module_filename}"
+        end
+
+      root_path = Path.join(out_dir, "#{bundle.name}.css")
+
+      assigns = [
+        nomenclator: nomenclator,
+        hydrator: hydrator,
+        module_paths: module_paths,
+        variables: variables
+      ]
+
+      create_file(root_path, root_template(assigns), force: true)
+      System.cmd("prettier", [root_path, "--write"])
+    end
+  end
+
+  embed_template(:root, """
+  /* ***********************************************************
+                                                
+                   BuenaVista Component Library
+
+      > Source Code: https://github.com/timetask/buenavista
+      > Nomenclator: <%= inspect(@nomenclator) %>
+      > Hydrator: <%= inspect(@hydrator) %>
+
+  *********************************************************** */
+  <%= for path <- @module_paths do %>@import "<%= path %>";
+  <% end %>
+
+  :root {
+    <%= for {_, variable} <- @variables do %>--<%= variable.css_key %>: <%= variable.css_value %>;
+    <% end %>
+  }
+  """)
+
+  embed_template(:component, """
+  <%= for {_, component} <- @components do %>
+
+  /* Component: <%= component.name  %> */
+  .<%= apply(@nomenclator, :class_name, [component.name, :classes, :base_class]) %> {
+    <%= apply(@hydrator, :css, [component.name, :classes, :base_class, @variables]) %>
+
+    <%= for {class_key, _} <- component.classes, class_key != :base_class do %>
+      .<%= apply(@nomenclator, :class_name, [component.name, :classes, class_key]) %> {
+        <%= apply(@hydrator, :css, [component.name, :classes, class_key, @variables]) %>
+      }
+    <% end %>
+
+    <%= for variant <- component.variants do %>
+      /* Variant: <%= variant.name %> */
+
+      <%= for {option, _class} <- variant.options do %>
+        <%= if class_name = apply(@nomenclator, :class_name, [component.name, variant.name, option]) do %>
+          &.<%= class_name %> {
+            <%= apply(@hydrator, :css, [component.name, variant.name, option, @variables]) %>
+          } 
+        <% end %>
+      <% end %>
+    <% end %>
+  }
+  <% end %>
+  """)
 end

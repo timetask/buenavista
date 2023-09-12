@@ -10,7 +10,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Config do
   @shortdoc "Generates an initial Nomenclator and Hydrator modules"
   def run(_opts) do
     for %BuenaVista.Bundle{} = bundle <- BuenaVista.Config.get_bundles() do
-      BuenaVista.Generator.sync(bundle)
+      BuenaVista.Generator.sync_config(bundle)
 
       if match?(%BuenaVista.Bundle.Nomenclator{}, bundle.nomenclator) do
         unless function_exported?(bundle.nomenclator.module_name, :__info__, 1) do

@@ -84,7 +84,7 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
 
     for bundle <- bundles do
       %BuenaVista.Bundle{} = bundle = BuenaVista.Helpers.build_bundle(bundle)
-      BuenaVista.Generator.sync(bundle)
+      BuenaVista.Generator.sync_config(bundle)
     end
   end
 end

@@ -1,10 +1,10 @@
 defmodule BuenaVista.Hydrator do
   defmodule Variable do
-    defstruct [:key, :css_key, :css_value]
+    defstruct [:key, :css_key, :css_value, :parent]
   end
 
   defmodule Style do
-    defstruct [:key, :css]
+    defstruct [:key, :css, :parent]
   end
 
   defmacro variable(key, value) when is_atom(key) and is_binary(value) do
@@ -26,11 +26,10 @@ defmodule BuenaVista.Hydrator do
   end
 
   def __before_compile__(env) do
-    var_defs = Module.get_attribute(env.module, :__var_defs__)
-    Module.put_attribute(env.module, :variables, var_defs)
+    variables = Module.get_attribute(env.module, :__var_defs__)
+    Module.put_attribute(env.module, :variables, variables)
 
-    style_defs = Module.get_attribute(env.module, :__style_defs__)
-    styles = for %Style{} = style <- style_defs, into: %{}, do: {style.key, style}
+    styles = Module.get_attribute(env.module, :__style_defs__)
     Module.put_attribute(env.module, :styles, styles)
   end
 
@@ -47,21 +46,21 @@ defmodule BuenaVista.Hydrator do
       Module.register_attribute(__MODULE__, :styles, persist: true)
 
       Module.register_attribute(__MODULE__, :parent, persist: true)
-      Module.put_attribute(__MODULE__, :parent, Keyword.get(opts, :parent))
+      Module.put_attribute(__MODULE__, :parent, Keyword.get(opts, :parent, nil))
 
-      def css(component, variant, option) do
+      def css(component, variant, option, variables) do
         case Map.get(get_styles(), {component, variant, option}) do
           %Style{} = style ->
-            style.css
+            EEx.eval_string(style.css, assigns: variables)
 
           _ ->
             if is_nil(@parent),
               do: raise("Unhandled style definiton :#{component} :#{variant} :#{option} in #{__MODULE__}"),
-              else: @parent.css(component, variant, option)
+              else: @parent.css(component, variant, option, variables)
         end
       end
 
-      defoverridable css: 3
+      defoverridable css: 4
 
       def get_variables() do
         :attributes
@@ -69,13 +68,41 @@ defmodule BuenaVista.Hydrator do
         |> Keyword.get(:variables)
       end
 
-      def get_styles() do
-        [styles] =
+      def get_computed_variables(parent \\ false) do
+        module_variables = for var <- get_variables(), do: %{var | parent: parent}
+
+        if is_nil(@parent) do
+          module_variables
+        else
+          parent_variables = @parent.get_computed_variables(true)
+
+          for var <- module_variables, reduce: parent_variables do
+            acc ->
+              if Keyword.has_key?(acc, var.key) do
+                Keyword.replace(acc, var.key, var)
+              else
+                Keyword.put(acc, var.key, var)
+              end
+          end
+        end
+      end
+
+      def get_styles(parent \\ false) do
+        module_styles =
           :attributes
           |> __MODULE__.__info__()
           |> Keyword.get(:styles)
+      end
 
-        styles
+      def get_computed_styles(parent \\ false) do
+        module_styles = for style <- get_styles(), into: %{}, do: {style.key, %{style | parent: parent}}
+
+        if is_nil(@parent) do
+          module_styles
+        else
+          parent_styles = @parent.get_computed_styles(true)
+          Map.merge(parent_styles, module_styles)
+        end
       end
     end
   end
