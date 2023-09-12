@@ -60,5 +60,17 @@ defmodule BuenaVista.CssFormatterTest do
                  }
                """
     end
+
+    test "allow variables" do
+      css = """
+                  background: <%= @app_bg %>;
+      """
+
+      result = format(css, [])
+
+      assert result == """
+               background: <%= @app_bg %>;
+             """
+    end
   end
 end
