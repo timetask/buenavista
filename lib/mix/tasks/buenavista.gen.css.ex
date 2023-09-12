@@ -16,8 +16,20 @@ defmodule Mix.Tasks.Buenavista.Gen.Css do
   def generate_css_files() do
     for %Bundle{css: %Bundle.Css{out_dir: out_dir}} = bundle when is_binary(out_dir) <-
           BuenaVista.Config.get_bundles() do
+      nomenclator =
+        case bundle.nomenclator do
+          %Bundle.Nomenclator{module_name: module_name} -> module_name
+          module_name -> module_name
+        end
+
+      hydrator =
+        case bundle.hydrator do
+          %Bundle.Hydrator{module_name: module_name} -> module_name
+          module_name -> module_name
+        end
+
       module_paths =
-        for {module, components} <- BuenaVista.Helpers.find_component_modules(bundle) do
+        for {module, components} <- BuenaVista.Helpers.find_component_modules(bundle.apps) do
           module_name =
             module.__info__(:module)
             |> Atom.to_string()
@@ -26,27 +38,27 @@ defmodule Mix.Tasks.Buenavista.Gen.Css do
             |> underscore()
 
           module_filename = "#{module_name}.css"
-          module_path = Path.join(out_dir, module_filename)
+          module_path = Path.join([out_dir, bundle.name, module_filename])
 
           assigns = [
-            nomenclator: bundle.nomenclator.module,
-            hydrator: bundle.hydrator.module,
+            nomenclator: nomenclator,
+            hydrator: hydrator,
             components: components
           ]
 
           create_file(module_path, component_template(assigns), force: true)
 
           System.cmd("prettier", [module_path, "--write"])
-          "#{module_name}/#{module_filename}"
+          "#{bundle.name}/#{module_filename}"
         end
 
-      variables = bundle.hydrator.module.get_variables()
+      variables = hydrator.get_variables()
 
       root_path = Path.join(out_dir, "#{bundle.name}.css")
 
       assigns = [
-        nomenclator: bundle.nomenclator.module,
-        hydrator: bundle.hydrator.module,
+        nomenclator: nomenclator,
+        hydrator: hydrator,
         module_paths: module_paths,
         variables: variables
       ]
@@ -55,67 +67,6 @@ defmodule Mix.Tasks.Buenavista.Gen.Css do
       System.cmd("prettier", [root_path, "--write"])
     end
   end
-
-  # def generate_css_files(name, out_dir, nomenclator, hydrator) do
-  #   name = if is_nil(name), do: "buenavista", else: name |> underscore()
-  #   out_dir = if is_nil(out_dir), do: "lib/assets/css", else: out_dir
-
-  #   nomenclator =
-  #     if is_nil(nomenclator),
-  #       do: Application.get_env(:buenavista, :nomenclator, BuenaVista.Nomenclator.Default),
-  #       else: String.to_existing_atom("Elixir." <> nomenclator)
-
-  #   hydrator =
-  #     if is_nil(hydrator),
-  #       do: Application.get_env(:buenavista, :hydrator, BuenaVista.Hydrators.Empty),
-  #       else: String.to_existing_atom("Elixir." <> hydrator)
-
-  #   modules_base_dir = Path.join(out_dir, name)
-
-  #   unless File.dir?(out_dir), do: create_directory(out_dir)
-  #   unless File.dir?(modules_base_dir), do: create_directory(modules_base_dir)
-
-  #   module_paths =
-  #     for {module, components} <- BuenaVista.Helpers.find_component_modules(modules_base_dir) do
-  #       module_name =
-  #         module.__info__(:module)
-  #         |> Atom.to_string()
-  #         |> String.split(".")
-  #         |> List.last()
-  #         |> underscore()
-
-  #       module_filename = "#{module_name}.css"
-  #       module_path = Path.join(modules_base_dir, module_filename)
-
-  #       assigns = [
-  #         nomenclator: nomenclator,
-  #         hydrator: hydrator,
-  #         components: components
-  #       ]
-
-  #       create_file(module_path, component_template(assigns), force: true)
-
-  #       System.cmd("prettier", [module_path, "--write"])
-  #       "#{name}/#{module_filename}"
-  #     end
-
-  #   variables = hydrator.variables() |> flatten_variables()
-
-  #   root_path = Path.join(out_dir, "#{name}.css")
-
-  #   assigns = [
-  #     nomenclator: nomenclator,
-  #     hydrator: hydrator,
-  #     module_paths: module_paths,
-  #     variables: variables
-  #   ]
-
-  #   create_file(root_path, root_template(assigns), force: true)
-  #   System.cmd("prettier", [root_path, "--write"])
-  # end
-
-  # defp join_key(nil, key), do: key
-  # defp join_key(parent_key, key), do: "#{parent_key}-#{key}"
 
   embed_template(:root, """
   /* ***********************************************************
