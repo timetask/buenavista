@@ -1,8 +1,6 @@
 defmodule BuenaVista.Template.CssHydrator do
   use BuenaVista.Hydrator, parent: BuenaVista.Template.EmptyHydrator
 
-  variable :sidebar_width, "30px"
-
   # --------------------------------------------------------------------------------
   # BuenaVista.Components.Modal
   # --------------------------------------------------------------------------------

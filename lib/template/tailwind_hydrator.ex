@@ -1,7 +1,6 @@
 defmodule BuenaVista.Template.TailwindHydrator do
   use BuenaVista.Hydrator, parent: BuenaVista.Template.EmptyHydrator
 
-  variable :app_bg, "gray"
   # variable :sidebar_width, "30px"
 
   # --------------------------------------------------------------------------------
@@ -12,12 +11,8 @@ defmodule BuenaVista.Template.TailwindHydrator do
   # drawer
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  style [:drawer, :classes, :base_class], ~CSS"""
-    @apply bg-red-100;
-
-    background: <%= @app_bg %>;
-  """
-
+  # style [:drawer, :classes, :base_class], ~CSS""" 
+  # """
   # style [:drawer, :classes, :modal_content_class], ~CSS""" 
   # """
   # style [:drawer, :classes, :close_btn_class], ~CSS""" 

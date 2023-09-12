@@ -23,40 +23,53 @@ defmodule BuenaVista.Generator do
   end
 
   def sync(%Bundle{} = bundle) do
-    modules = Helpers.find_component_modules(bundle)
+    modules = Helpers.find_component_modules(bundle.apps)
     sync_nomenclator(bundle, modules)
-
-    unless is_nil(bundle.hydrator.parent) do
-      sync_hydrator(bundle, modules)
-    end
+    sync_hydrator(bundle, modules)
   end
 
   # ----------------------------------------
   # Core Functions
   # ----------------------------------------
   defp sync_nomenclator(%Bundle{} = bundle, modules) do
-    assigns = [
-      module_name: bundle.nomenclator.module,
-      existing_class_names: existing_defs(bundle, :nomenclator)[:class_names],
-      parent: bundle.nomenclator.parent,
-      modules: modules
-    ]
+    if match?(%Bundle.Nomenclator{}, bundle.nomenclator) do
+      assigns = [
+        module_name: bundle.nomenclator.module_name,
+        existing_class_names: existing_defs(bundle, :nomenclator)[:class_names],
+        parent: bundle.nomenclator.parent,
+        modules: modules
+      ]
 
-    create_file(bundle.nomenclator.path, nomenclator_template(assigns), force: true)
-    System.cmd("mix", ["format", bundle.nomenclator.path])
+      dir = Path.dirname(bundle.nomenclator.file)
+
+      unless File.exists?(dir) do
+        create_directory(dir, force: true)
+      end
+
+      create_file(bundle.nomenclator.file, nomenclator_template(assigns), force: true)
+      System.cmd("mix", ["format", bundle.nomenclator.file])
+    end
   end
 
   defp sync_hydrator(%Bundle{} = bundle, modules) do
-    assigns = [
-      variables: hydrator_variables(bundle),
-      module_name: bundle.hydrator.module,
-      existing_styles: existing_defs(bundle, :hydrator)[:styles],
-      parent: bundle.hydrator.parent,
-      modules: modules
-    ]
+    if match?(%Bundle.Hydrator{}, bundle.hydrator) do
+      assigns = [
+        module_name: bundle.hydrator.module_name,
+        variables: hydrator_variables(bundle),
+        existing_styles: existing_defs(bundle, :hydrator)[:styles],
+        parent: bundle.hydrator.parent,
+        modules: modules
+      ]
 
-    create_file(bundle.hydrator.path, hydrator_template(assigns), force: true)
-    System.cmd("mix", ["format", bundle.hydrator.path])
+      dir = Path.dirname(bundle.hydrator.file)
+
+      unless File.exists?(dir) do
+        create_directory(dir, force: true)
+      end
+
+      create_file(bundle.hydrator.file, hydrator_template(assigns), force: true)
+      System.cmd("mix", ["format", bundle.hydrator.file])
+    end
   end
 
   def hydrator_variables(bundle) do
@@ -81,14 +94,14 @@ defmodule BuenaVista.Generator do
   end
 
   defp existing_defs(bundle, :nomenclator) do
-    if function_exported?(bundle.nomenclator.module, :__info__, 1),
-      do: %{class_names: bundle.nomenclator.module.get_class_names()},
+    if function_exported?(bundle.nomenclator.module_name, :__info__, 1),
+      do: %{class_names: bundle.nomenclator.module_name.get_class_names()},
       else: %{class_names: %{}}
   end
 
   defp existing_defs(bundle, :hydrator) do
-    if function_exported?(bundle.hydrator.module, :__info__, 1),
-      do: %{variables: bundle.hydrator.module.get_variables(), styles: bundle.hydrator.module.get_styles()},
+    if function_exported?(bundle.hydrator.module_name, :__info__, 1),
+      do: %{variables: bundle.hydrator.module_name.get_variables(), styles: bundle.hydrator.module_name.get_styles()},
       else: %{variables: %{}, styles: %{}}
   end
 
@@ -96,7 +109,7 @@ defmodule BuenaVista.Generator do
   # Templates
   # ----------------------------------------
   embed_template(:nomenclator, ~S/
-  defmodule <%= inspect @module_name %> do
+  defmodule <%= Helpers.pretty_module(@module_name) %> do
     use BuenaVista.Nomenclator,<%= unless is_nil(@parent) do %>parent: <%= Helpers.pretty_module(@parent) %><% end %>
 
     <%= for {module, components} <- @modules do %>
@@ -118,7 +131,7 @@ defmodule BuenaVista.Generator do
   /)
 
   embed_template(:hydrator, ~S/
-  defmodule <%= inspect @module_name %> do
+  defmodule <%= Helpers.pretty_module(@module_name) %> do
     use BuenaVista.Hydrator<%= unless is_nil(@parent) do %>, parent: <%= Helpers.pretty_module(@parent) %><% end %>
    
     <%= for {_, variable} <- @variables do %>
@@ -142,8 +155,8 @@ defmodule BuenaVista.Generator do
   /)
 
   defp style_def(component, variant, option, existing_styles, parent) do
-    if css = Map.get(existing_styles, {component, variant, option}) do
-      ~s/style [:#{component}, :#{variant}, :#{option})], ~CSS"""\n #{css} """/
+    if style = Map.get(existing_styles, {component, variant, option}) do
+      ~s/style [:#{component}, :#{variant}, :#{option}], ~CSS"""\n #{style.css} """/
     else
       ~s/# style [:#{component}, :#{variant}, :#{option}], ~CSS""" \n# #{parent && parent.css(component, variant, option) |> comment_lines()}"""/
     end

@@ -16,56 +16,74 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
     bundles = [
       [
         name: "css",
-        component_apps: [:buenavista],
-        hydrator_parent: BuenaVista.Template.EmptyHydrator,
-        config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Template,
-        css_out_dir: nil
+        apps: [:buenavista],
+        nomenclator: BuenaVista.Template.DefaultNomenclator,
+        hydrator: [
+          parent: BuenaVista.Template.EmptyHydrator,
+          base_module_name: BuenaVista.Template,
+          out_dir: "lib/template"
+        ],
+        css: [out_dir: nil]
       ],
       [
         name: "tailwind",
-        hydrator_parent: BuenaVista.Template.EmptyHydrator,
-        component_apps: [:buenavista],
-        config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Template,
-        css_out_dir: nil
+        apps: [:buenavista],
+        nomenclator: BuenaVista.Template.DefaultNomenclator,
+        hydrator: [
+          parent: BuenaVista.Template.EmptyHydrator,
+          base_module_name: BuenaVista.Template,
+          out_dir: "lib/template"
+        ],
+        css: [out_dir: nil]
       ],
       [
         name: "tailwind_inline",
-        nomenclator_parent: BuenaVista.Template.EmptyNomenclator,
-        component_apps: [:buenavista],
-        config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Template,
-        css_out_dir: nil
+        apps: [:buenavista],
+        nomenclator: [
+          parent: BuenaVista.Template.EmptyNomenclator,
+          base_module_name: BuenaVista.Template,
+          out_dir: "lib/template"
+        ],
+        hydrator: nil,
+        css: [out_dir: nil]
       ],
       [
         name: "bootstrap",
-        nomenclator_parent: BuenaVista.Template.EmptyNomenclator,
-        component_apps: [:buenavista],
-        config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Template,
-        css_out_dir: nil
+        apps: [:buenavista],
+        nomenclator: [
+          parent: BuenaVista.Template.EmptyNomenclator,
+          base_module_name: BuenaVista.Template,
+          out_dir: "lib/template"
+        ],
+        hydrator: nil,
+        css: [out_dir: nil]
       ],
       [
         name: "bulma",
-        nomenclator_parent: BuenaVista.Template.EmptyNomenclator,
-        component_apps: [:buenavista],
-        config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Template,
-        css_out_dir: nil
+        apps: [:buenavista],
+        nomenclator: [
+          parent: BuenaVista.Template.EmptyNomenclator,
+          base_module_name: BuenaVista.Template,
+          out_dir: "lib/template"
+        ],
+        hydrator: nil,
+        css: [out_dir: nil]
       ],
       [
         name: "foundation",
-        nomenclator_parent: BuenaVista.Template.EmptyNomenclator,
-        component_apps: [:buenavista],
-        config_out_dir: "lib/template",
-        config_base_module: BuenaVista.Template,
-        css_out_dir: nil
+        apps: [:buenavista],
+        nomenclator: [
+          parent: BuenaVista.Template.EmptyNomenclator,
+          base_module_name: BuenaVista.Template,
+          out_dir: "lib/template"
+        ],
+        hydrator: nil,
+        css: [out_dir: nil]
       ]
     ]
 
     for bundle <- bundles do
-      %BuenaVista.Bundle{} = bundle = BuenaVista.Config.pack_bundle(bundle)
+      %BuenaVista.Bundle{} = bundle = BuenaVista.Helpers.build_bundle(bundle)
       BuenaVista.Generator.sync(bundle)
     end
   end

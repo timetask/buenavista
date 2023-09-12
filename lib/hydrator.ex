@@ -27,8 +27,6 @@ defmodule BuenaVista.Hydrator do
 
   def __before_compile__(env) do
     var_defs = Module.get_attribute(env.module, :__var_defs__)
-    dbg(var_defs)
-    # variables = for %Variable{} = variable <- var_defs, into: %{}, do: {variable.key, variable}
     Module.put_attribute(env.module, :variables, var_defs)
 
     style_defs = Module.get_attribute(env.module, :__style_defs__)
@@ -50,6 +48,20 @@ defmodule BuenaVista.Hydrator do
 
       Module.register_attribute(__MODULE__, :parent, persist: true)
       Module.put_attribute(__MODULE__, :parent, Keyword.get(opts, :parent))
+
+      def css(component, variant, option) do
+        case Map.get(get_styles(), {component, variant, option}) do
+          %Style{} = style ->
+            style.css
+
+          _ ->
+            if is_nil(@parent),
+              do: raise("Unhandled style definiton :#{component} :#{variant} :#{option} in #{__MODULE__}"),
+              else: @parent.css(component, variant, option)
+        end
+      end
+
+      defoverridable css: 3
 
       def get_variables() do
         :attributes

@@ -1,11 +1,21 @@
 defmodule BuenaVista.Bundle do
+  defmodule Nomenclator do
+    defstruct [:parent, :module_name, :file]
+  end
+
+  defmodule Hydrator do
+    defstruct [:parent, :module_name, :file]
+  end
+
+  defmodule Css do
+    defstruct [:out_dir]
+  end
+
   defstruct [
     :name,
+    :apps,
     :nomenclator,
     :hydrator,
-    :component_apps,
-    :config_out_dir,
-    :config_base_module,
-    :css_out_dir
+    :css
   ]
 end

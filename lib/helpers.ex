@@ -4,11 +4,11 @@ defmodule BuenaVista.Helpers do
   alias BuenaVista.Bundle
 
   @doc """
-  Returns all BuenaVista module and components.
+  Returns all BuenaVista modules and components.
   """
-  def find_component_modules(%Bundle{} = bundle) do
+  def find_component_modules(apps) when is_list(apps) do
     modules =
-      for app <- bundle.component_apps,
+      for app <- apps,
           spec = Application.spec(app),
           module <- Keyword.get(spec, :modules),
           {:module, module} = Code.ensure_loaded(module),
@@ -31,50 +31,107 @@ defmodule BuenaVista.Helpers do
   @doc """
   Generates module names for nomenclators and hydrators
 
-  iex> module_name(%Bundle{name: "admin", config_base_module: MyApp.Components.Config}, :nomenclator)
+  iex> module_name("admin", MyApp.Components.Config, :nomenclator)
   MyApp.Components.Config.AdminNomenclator
 
-  iex> module_name(%Bundle{name: "admin_light", config_base_module: MyApp.Components.Config}, :nomenclator)
+  iex> module_name("admin_light", MyApp.Components.Config, :nomenclator)
   MyApp.Components.Config.AdminLightNomenclator
 
-  iex> module_name(%Bundle{name: "admin_dark", config_base_module: MyApp.Components}, :hydrator)
+  iex> module_name("admin_dark", MyApp.Components, :hydrator)
   MyApp.Components.AdminDarkHydrator
   """
-
-  def module_name(%Bundle{} = bundle, module_type) when module_type in [:nomenclator, :hydrator] do
-    Module.concat([bundle.config_base_module, camelize("#{bundle.name}_#{module_type}")])
-  end
-
-  def module_name(bundle, module_type) when is_list(bundle) and module_type in [:nomenclator, :hydrator] do
-    bundle_name = Keyword.get(bundle, :name)
-    config_base_module = Keyword.get(bundle, :config_base_module)
-    Module.concat([config_base_module, camelize("#{bundle_name}_#{module_type}")])
+  def module_name(name, base_module_name, module_type) when module_type in [:nomenclator, :hydrator] do
+    Module.concat([base_module_name, camelize("#{name}_#{module_type}")])
   end
 
   @doc """
   Generates the path where to write the specified module.
 
-  iex> config_file_path(%Bundle{name: "admin", config_out_dir: "/tmp/config"}, :nomenclator)
+  iex> config_file_path("admin", "/tmp/config", :nomenclator)
   "/tmp/config/admin_nomenclator.ex"
 
-  iex> config_file_path(%Bundle{name: "admin_dark", config_out_dir: "lib/components/config"}, :hydrator)
+  iex> config_file_path( "admin_dark",  "lib/components/config", :hydrator)
   "lib/components/config/admin_dark_hydrator.ex"
   """
-  def config_file_path(%Bundle{} = bundle, module_type) when module_type in [:nomenclator, :hydrator] do
-    filename = "#{underscore(bundle.name)}_#{module_type}.ex"
+  def config_file_path(name, out_dir, module_type) when module_type in [:nomenclator, :hydrator] do
+    filename = "#{underscore(name)}_#{module_type}.ex"
 
-    Path.join(bundle.config_out_dir, filename)
-  end
-
-  def config_file_path(bundle, module_type) when is_list(bundle) and module_type in [:nomenclator, :hydrator] do
-    bundle_name = Keyword.get(bundle, :name)
-    config_out_dir = Keyword.get(bundle, :config_out_dir)
-    filename = "#{underscore(bundle_name)}_#{module_type}.ex"
-
-    Path.join(config_out_dir, filename)
+    Path.join(out_dir, filename)
   end
 
   def pretty_module(module) do
     module |> Atom.to_string() |> String.replace("Elixir.", "")
+  end
+
+  @doc """
+  Converts config keyword list en Bundle structs.
+  """
+  def build_bundle(bundle) when is_list(bundle) do
+    name =
+      Keyword.get(bundle, :name) ||
+        raise "Bundle config error: missing key :name. Provided bundle: #{inspect(bundle)}"
+
+    name = underscore(name)
+
+    apps =
+      Keyword.get(bundle, :apps) ||
+        raise "Bundle config error: missing key :apps. Provided bundle: #{inspect(bundle)}"
+
+    unless is_list(apps) do
+      raise ":apps in bundle #{inspect(bundle)} must be a list of apps."
+    end
+
+    hydrator =
+      case Keyword.get(bundle, :hydrator) do
+        hydrator_conf when is_list(hydrator_conf) ->
+          base_module_name = Keyword.get(hydrator_conf, :base_module_name)
+          out_dir = Keyword.get(hydrator_conf, :out_dir)
+
+          hydrator_module_name = module_name(name, base_module_name, :hydrator)
+          hydrator_file = config_file_path(name, out_dir, :hydrator)
+
+          %Bundle.Hydrator{
+            parent: Keyword.get(hydrator_conf, :parent),
+            module_name: hydrator_module_name,
+            file: hydrator_file
+          }
+
+        module when is_atom(module) ->
+          module
+      end
+
+    nomenclator =
+      case Keyword.get(bundle, :nomenclator) do
+        nomenclator_conf when is_list(nomenclator_conf) ->
+          base_module_name = Keyword.get(nomenclator_conf, :base_module_name)
+          out_dir = Keyword.get(nomenclator_conf, :out_dir)
+
+          nomenclator_module_name = module_name(name, base_module_name, :nomenclator)
+          nomenclator_file = config_file_path(name, out_dir, :nomenclator)
+
+          %Bundle.Nomenclator{
+            parent: Keyword.get(nomenclator_conf, :parent),
+            module_name: nomenclator_module_name,
+            file: nomenclator_file
+          }
+
+        module when is_atom(module) ->
+          module
+      end
+
+    css =
+      if css_conf = Keyword.get(bundle, :css),
+        do: %Bundle.Css{
+          out_dir: Keyword.get(css_conf, :out_dir)
+        },
+        else: nil
+
+    %Bundle{
+      name: name,
+      apps: apps,
+      hydrator: hydrator,
+      nomenclator: nomenclator,
+      css: css
+    }
   end
 end
