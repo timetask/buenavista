@@ -23,21 +23,21 @@ defmodule BuenaVista.CssFormatterTest do
 
       assert result ==
                """
-               background: green;
-               border: 1px solid red;
+                 background: green;
+                 border: 1px solid red;
 
-               &:hover, .other {
-                 background: blue;
-                 color: black;
+                 &:hover, .other {
+                   background: blue;
+                   color: black;
 
-                 .nested {
-                   height: 45px;
+                   .nested {
+                     height: 45px;
+                   }
                  }
-               }
 
-               .non-nested {
-                 display: none;
-               }
+                 .non-nested {
+                   display: none;
+                 }
                """
     end
 
@@ -53,11 +53,11 @@ defmodule BuenaVista.CssFormatterTest do
 
       assert result ==
                """
-               @apply text-blue-400;
+                 @apply text-blue-400;
 
-               .nested {
-                 @apply bg-green-100;
-               }
+                 .nested {
+                   @apply bg-green-100;
+                 }
                """
     end
   end
