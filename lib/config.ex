@@ -1,4 +1,6 @@
 defmodule BuenaVista.Config do
+  import Macro, only: [underscore: 1]
+
   alias BuenaVista.Bundle
   alias BuenaVista.Helpers
 
@@ -9,10 +11,6 @@ defmodule BuenaVista.Config do
             end)
 
   def pack_bundle(bundle) when is_list(bundle) do
-    unless is_list(bundle) do
-      raise ":bundles config should a a list of keyword lists. Got: #{inspect(bundle)}."
-    end
-
     name =
       Keyword.get(bundle, :name) ||
         raise "Bundle config error: missing key :name. Provided bundle: #{inspect(bundle)}"
@@ -20,8 +18,7 @@ defmodule BuenaVista.Config do
     hydrator_parent = Keyword.get(bundle, :hydrator_parent)
 
     nomenclator_parent =
-      Keyword.get(bundle, :nomenclator_parent, BuenaVista.Template.DefaultNomenclator) ||
-        raise "Bundle config error: missing key :nomenclator_parent. Provided bundle: #{inspect(bundle)}"
+      Keyword.get(bundle, :nomenclator_parent, BuenaVista.Template.DefaultNomenclator)
 
     component_apps =
       Keyword.get(bundle, :component_apps) ||
@@ -39,12 +36,8 @@ defmodule BuenaVista.Config do
       Keyword.get(bundle, :config_base_module) ||
         raise "Bundle config error: missing key :config_base_module. Provided bundle: #{inspect(bundle)}"
 
-    produce_css =
-      Keyword.get(bundle, :produce_css, true)
-
-    unless produce_css in [true, false] do
-      raise "Bundle config error: missing key :produce_css. Provided bundle: #{inspect(bundle)}"
-    end
+    css_out_dir =
+      Keyword.get(bundle, :css_out_dir, nil)
 
     hydrator_module = Helpers.module_name(bundle, :hydrator)
     hydrator_file = Helpers.config_file_path(bundle, :hydrator)
@@ -53,13 +46,13 @@ defmodule BuenaVista.Config do
     nomenclator_file = Helpers.config_file_path(bundle, :nomenclator)
 
     %Bundle{
-      name: name,
+      name: underscore(name),
       hydrator: %{parent: hydrator_parent, module: hydrator_module, path: hydrator_file},
       nomenclator: %{parent: nomenclator_parent, module: nomenclator_module, path: nomenclator_file},
       component_apps: component_apps,
       config_out_dir: config_out_dir,
       config_base_module: config_base_module,
-      produce_css: produce_css
+      css_out_dir: css_out_dir
     }
   end
 

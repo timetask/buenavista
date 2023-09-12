@@ -1,155 +1,220 @@
 defmodule BuenaVista.Template.CssHydrator do
-  use BuenaVista.Hydrator
-  @delegate BuenaVista.Template.EmptyHydrator
+  use BuenaVista.Hydrator, parent: BuenaVista.Template.EmptyHydrator
 
-  # defp variables(), do: [] 
+  variable :sidebar_width, "30px"
 
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
   # BuenaVista.Components.Modal
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
 
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # drawer
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:drawer, :classes, :base_class), do: ~CSS||
-  # def css(:drawer, :classes, :modal_content_class), do: ~CSS||
-  # def css(:drawer, :classes, :close_btn_class), do: ~CSS||
+  # style [:drawer, :classes, :base_class], ~CSS""" 
+  # """
+  # style [:drawer, :classes, :modal_content_class], ~CSS""" 
+  # """
+  # style [:drawer, :classes, :close_btn_class], ~CSS""" 
+  # """
 
-  # def css(:drawer, :position, :top), do: ~CSS||
-  # def css(:drawer, :position, :right), do: ~CSS||
-  # def css(:drawer, :position, :bottom), do: ~CSS||
-  # def css(:drawer, :position, :left), do: ~CSS||
+  # style [:drawer, :position, :top], ~CSS""" 
+  # """
+  # style [:drawer, :position, :right], ~CSS""" 
+  # """
+  # style [:drawer, :position, :bottom], ~CSS""" 
+  # """
+  # style [:drawer, :position, :left], ~CSS""" 
+  # """
 
-  # def css(:drawer, :size, :sm), do: ~CSS||
-  # def css(:drawer, :size, :md), do: ~CSS||
-  # def css(:drawer, :size, :lg), do: ~CSS||
-  # def css(:drawer, :size, :full), do: ~CSS||
+  # style [:drawer, :size, :sm], ~CSS""" 
+  # """
+  # style [:drawer, :size, :md], ~CSS""" 
+  # """
+  # style [:drawer, :size, :lg], ~CSS""" 
+  # """
+  # style [:drawer, :size, :full], ~CSS""" 
+  # """
 
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # modal
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:modal, :classes, :base_class), do: ~CSS||
-  # def css(:modal, :classes, :content_class), do: ~CSS||
-  # def css(:modal, :classes, :close_class), do: ~CSS||
+  # style [:modal, :classes, :base_class], ~CSS""" 
+  # """
+  # style [:modal, :classes, :content_class], ~CSS""" 
+  # """
+  # style [:modal, :classes, :close_class], ~CSS""" 
+  # """
 
-  # def css(:modal, :position, :centered), do: ~CSS||
-  # def css(:modal, :position, :top), do: ~CSS||
+  # style [:modal, :position, :centered], ~CSS""" 
+  # """
+  # style [:modal, :position, :top], ~CSS""" 
+  # """
 
-  # def css(:modal, :size, :sm), do: ~CSS||
-  # def css(:modal, :size, :md), do: ~CSS||
-  # def css(:modal, :size, :lg), do: ~CSS||
-  # def css(:modal, :size, :full), do: ~CSS||
+  # style [:modal, :size, :sm], ~CSS""" 
+  # """
+  # style [:modal, :size, :md], ~CSS""" 
+  # """
+  # style [:modal, :size, :lg], ~CSS""" 
+  # """
+  # style [:modal, :size, :full], ~CSS""" 
+  # """
 
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
   # BuenaVista.Components.Layout
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
 
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # multi_column_layout
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:multi_column_layout, :classes, :base_class), do: ~CSS||
+  # style [:multi_column_layout, :classes, :base_class], ~CSS""" 
+  # """
 
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # sidebar_layout
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:sidebar_layout, :classes, :base_class), do: ~CSS||
-  # def css(:sidebar_layout, :classes, :sidebar_class), do: ~CSS||
-  # def css(:sidebar_layout, :classes, :main_class), do: ~CSS||
+  # style [:sidebar_layout, :classes, :base_class], ~CSS""" 
+  # """
+  # style [:sidebar_layout, :classes, :sidebar_class], ~CSS""" 
+  # """
+  # style [:sidebar_layout, :classes, :main_class], ~CSS""" 
+  # """
 
-  # def css(:sidebar_layout, :position, :left), do: ~CSS||
-  # def css(:sidebar_layout, :position, :right), do: ~CSS||
+  # style [:sidebar_layout, :position, :left], ~CSS""" 
+  # """
+  # style [:sidebar_layout, :position, :right], ~CSS""" 
+  # """
 
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
   # BuenaVista.Components.Input
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
 
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # input
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:input, :classes, :base_class), do: ~CSS||
+  # style [:input, :classes, :base_class], ~CSS""" 
+  # """
 
-  # def css(:input, :type, :text), do: ~CSS||
-  # def css(:input, :type, :number), do: ~CSS||
-  # def css(:input, :type, :email), do: ~CSS||
-  # def css(:input, :type, :password), do: ~CSS||
-  # def css(:input, :type, :radio), do: ~CSS||
-  # def css(:input, :type, :checkbox), do: ~CSS||
-  # def css(:input, :type, :hidden), do: ~CSS||
+  # style [:input, :type, :text], ~CSS""" 
+  # """
+  # style [:input, :type, :number], ~CSS""" 
+  # """
+  # style [:input, :type, :email], ~CSS""" 
+  # """
+  # style [:input, :type, :password], ~CSS""" 
+  # """
+  # style [:input, :type, :radio], ~CSS""" 
+  # """
+  # style [:input, :type, :checkbox], ~CSS""" 
+  # """
+  # style [:input, :type, :hidden], ~CSS""" 
+  # """
 
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # input_group
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:input_group, :classes, :base_class), do: ~CSS||
+  # style [:input_group, :classes, :base_class], ~CSS""" 
+  # """
 
-  # def css(:input_group, :layout, :vertical), do: ~CSS||
-  # def css(:input_group, :layout, :table), do: ~CSS||
-  # def css(:input_group, :layout, :stacked), do: ~CSS||
+  # style [:input_group, :layout, :vertical], ~CSS""" 
+  # """
+  # style [:input_group, :layout, :table], ~CSS""" 
+  # """
+  # style [:input_group, :layout, :stacked], ~CSS""" 
+  # """
 
-  # def css(:input_group, :state, :default), do: ~CSS||
-  # def css(:input_group, :state, :success), do: ~CSS||
-  # def css(:input_group, :state, :danger), do: ~CSS||
+  # style [:input_group, :state, :default], ~CSS""" 
+  # """
+  # style [:input_group, :state, :success], ~CSS""" 
+  # """
+  # style [:input_group, :state, :danger], ~CSS""" 
+  # """
 
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # label
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:label, :classes, :base_class), do: ~CSS||
+  # style [:label, :classes, :base_class], ~CSS""" 
+  # """
 
-  # def css(:label, :state, :default), do: ~CSS||
-  # def css(:label, :state, :success), do: ~CSS||
-  # def css(:label, :state, :danger), do: ~CSS||
+  # style [:label, :state, :default], ~CSS""" 
+  # """
+  # style [:label, :state, :success], ~CSS""" 
+  # """
+  # style [:label, :state, :danger], ~CSS""" 
+  # """
 
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
   # BuenaVista.Components.Form
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
 
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # form
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:form, :classes, :base_class), do: ~CSS||
+  # style [:form, :classes, :base_class], ~CSS""" 
+  # """
 
-  # def css(:form, :display, :block), do: ~CSS||
-  # def css(:form, :display, :inline), do: ~CSS||
+  # style [:form, :display, :block], ~CSS""" 
+  # """
+  # style [:form, :display, :inline], ~CSS""" 
+  # """
 
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
   # BuenaVista.Components.Button
-  # ----------------------------------------
+  # --------------------------------------------------------------------------------
 
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
   # button
-  # - - - - - - - - - - - - - - - - - - - - 
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-  # def css(:button, :classes, :base_class), do: ~CSS||
+  # style [:button, :classes, :base_class], ~CSS""" 
+  # """
 
-  # def css(:button, :size, :xs), do: ~CSS||
-  # def css(:button, :size, :sm), do: ~CSS||
-  # def css(:button, :size, :md), do: ~CSS||
-  # def css(:button, :size, :lg), do: ~CSS||
+  # style [:button, :size, :xs], ~CSS""" 
+  # """
+  # style [:button, :size, :sm], ~CSS""" 
+  # """
+  # style [:button, :size, :md], ~CSS""" 
+  # """
+  # style [:button, :size, :lg], ~CSS""" 
+  # """
 
-  # def css(:button, :color, :nav), do: ~CSS||
-  # def css(:button, :color, :ctrl), do: ~CSS||
-  # def css(:button, :color, :primary), do: ~CSS||
-  # def css(:button, :color, :success), do: ~CSS||
-  # def css(:button, :color, :danger), do: ~CSS||
-  # def css(:button, :color, :warning), do: ~CSS||
-  # def css(:button, :color, :info), do: ~CSS||
+  # style [:button, :color, :nav], ~CSS""" 
+  # """
+  # style [:button, :color, :ctrl], ~CSS""" 
+  # """
+  # style [:button, :color, :primary], ~CSS""" 
+  # """
+  # style [:button, :color, :success], ~CSS""" 
+  # """
+  # style [:button, :color, :danger], ~CSS""" 
+  # """
+  # style [:button, :color, :warning], ~CSS""" 
+  # """
+  # style [:button, :color, :info], ~CSS""" 
+  # """
 
-  # def css(:button, :style, :filled), do: ~CSS||
-  # def css(:button, :style, :outline), do: ~CSS||
-  # def css(:button, :style, :soft), do: ~CSS||
-  # def css(:button, :style, :link), do: ~CSS||
-  # def css(:button, :style, :transparent), do: ~CSS||
+  # style [:button, :style, :filled], ~CSS""" 
+  # """
+  # style [:button, :style, :outline], ~CSS""" 
+  # """
+  # style [:button, :style, :soft], ~CSS""" 
+  # """
+  # style [:button, :style, :link], ~CSS""" 
+  # """
+  # style [:button, :style, :transparent], ~CSS""" 
+  # """
 
-  # def css(:button, :border, :none), do: ~CSS||
-  # def css(:button, :border, :thin), do: ~CSS||
-  # def css(:button, :border, :thick), do: ~CSS||
-
-  defdelegate css(component, variant, option), to: @delegate
+  # style [:button, :border, :none], ~CSS""" 
+  # """
+  # style [:button, :border, :thin], ~CSS""" 
+  # """
+  # style [:button, :border, :thick], ~CSS""" 
+  # """
 end

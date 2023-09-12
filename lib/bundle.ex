@@ -6,6 +6,6 @@ defmodule BuenaVista.Bundle do
     :component_apps,
     :config_out_dir,
     :config_base_module,
-    :produce_css
+    :css_out_dir
   ]
 end

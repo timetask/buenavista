@@ -11,58 +11,62 @@ defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
   @requirements ["app.config"]
   @shortdoc "Generates an initial Nomenclator and Hydrator modules"
   def run(_opts) do
+    Mix.Task.run("app.config")
+
     bundles = [
       [
         name: "css",
         component_apps: [:buenavista],
-        parent_hydrator: BuenaVista.Template.EmptyHydrator,
+        hydrator_parent: BuenaVista.Template.EmptyHydrator,
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Template,
-        produce_css: false
+        css_out_dir: nil
       ],
       [
         name: "tailwind",
-        parent_hydrator: BuenaVista.Template.EmptyHydrator,
+        hydrator_parent: BuenaVista.Template.EmptyHydrator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Template,
-        produce_css: false
+        css_out_dir: nil
       ],
       [
         name: "tailwind_inline",
-        parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
+        nomenclator_parent: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Template,
-        produce_css: false
+        css_out_dir: nil
       ],
       [
         name: "bootstrap",
-        parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
+        nomenclator_parent: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Template,
-        produce_css: false
+        css_out_dir: nil
       ],
       [
         name: "bulma",
-        parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
+        nomenclator_parent: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Template,
-        produce_css: false
+        css_out_dir: nil
       ],
       [
         name: "foundation",
-        parent_nomenclator: BuenaVista.Template.EmptyNomenclator,
+        nomenclator_parent: BuenaVista.Template.EmptyNomenclator,
         component_apps: [:buenavista],
         config_out_dir: "lib/template",
         config_base_module: BuenaVista.Template,
-        produce_css: false
+        css_out_dir: nil
       ]
     ]
 
-    Application.put_env(:buenavista, :bundles, bundles)
-    Mix.Tasks.Buenavista.Sync.Config.run([])
+    for bundle <- bundles do
+      %BuenaVista.Bundle{} = bundle = BuenaVista.Config.pack_bundle(bundle)
+      BuenaVista.Generator.sync(bundle)
+    end
   end
 end
