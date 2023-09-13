@@ -8,8 +8,15 @@ defmodule Mix.Tasks.Buenavista.Gen.Config do
   @requirements ["app.config"]
 
   @shortdoc "Generates an initial Nomenclator and Hydrator modules"
-  def run(_opts) do
-    for %BuenaVista.Bundle{} = bundle <- BuenaVista.Config.get_bundles() do
+  def run(opts) do
+    {parsed, _, _} = OptionParser.parse(opts, strict: [core: :boolean])
+
+    bundles =
+      if Keyword.get(parsed, :core, false),
+        do: BuenaVista.Config.get_bundles(),
+        else: get_core_bundles()
+
+    for %BuenaVista.Bundle{} = bundle <- bundles do
       BuenaVista.Generator.sync_config(bundle)
 
       if match?(%BuenaVista.Bundle.Nomenclator{}, bundle.nomenclator) do
@@ -24,5 +31,23 @@ defmodule Mix.Tasks.Buenavista.Gen.Config do
         end
       end
     end
+  end
+
+  defp get_core_bundles() do
+    bundles = [
+      [
+        name: "buenavista",
+        apps: [:buenavista],
+        nomenclator: BuenaVista.Template.DefaultNomenclator,
+        hydrator: [
+          parent: BuenaVista.Template.EmptyHydrator,
+          base_module_name: BuenaVista.Template,
+          out_dir: "lib/template"
+        ],
+        css: nil
+      ]
+    ]
+
+    for bundle <- bundles, do: BuenaVista.Helpers.build_bundle(bundle)
   end
 end
