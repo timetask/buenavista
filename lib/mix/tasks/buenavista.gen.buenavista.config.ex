@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Buenavista.Sync.Buenavista.Config do
+defmodule Mix.Tasks.Buenavista.Gen.Buenavista.Config do
   @moduledoc """
   Syncs BuenaVista's base nomenclators and hydrators with the librarie's
   components configurations.

@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Buenavista.Sync.Config do
+defmodule Mix.Tasks.Buenavista.Gen.Config do
   @moduledoc """
 
   """
