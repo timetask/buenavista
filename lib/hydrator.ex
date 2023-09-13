@@ -26,7 +26,28 @@ defmodule BuenaVista.Hydrator do
   end
 
   def __before_compile__(env) do
-    variables = Module.get_attribute(env.module, :__var_defs__)
+    parent = Module.get_attribute(env.module, :parent)
+    local_variables = Module.get_attribute(env.module, :__var_defs__)
+
+    variables =
+      if is_nil(parent) do
+        for var <- local_variables, reduce: :gb_trees.empty() do
+          tree ->
+            :gb_trees.insert(var.key, var, tree)
+        end
+      else
+        parent_tree =
+          :gb_trees.map(
+            fn _k, var -> %{var | parent: true} end,
+            parent.get_variables_tree()
+          )
+
+        for var <- local_variables, reduce: parent_tree do
+          tree ->
+            :gb_trees.enter(var.key, %{var | parent: false}, tree)
+        end
+      end
+
     Module.put_attribute(env.module, :variables, variables)
 
     styles = Module.get_attribute(env.module, :__style_defs__)
@@ -49,7 +70,7 @@ defmodule BuenaVista.Hydrator do
       Module.put_attribute(__MODULE__, :parent, Keyword.get(opts, :parent, nil))
 
       def css(component, variant, option, variables) do
-        case Map.get(get_styles(), {component, variant, option}) do
+        case Map.get(get_computed_styles(), {component, variant, option}) do
           %Style{} = style ->
             EEx.eval_string(style.css, assigns: variables)
 
@@ -62,29 +83,17 @@ defmodule BuenaVista.Hydrator do
 
       defoverridable css: 4
 
-      def get_variables() do
-        :attributes
-        |> __MODULE__.__info__()
-        |> Keyword.get(:variables)
+      def get_variables_tree() do
+        [variables_tree] =
+          :attributes
+          |> __MODULE__.__info__()
+          |> Keyword.get(:variables)
+
+        variables_tree
       end
 
-      def get_computed_variables(parent \\ false) do
-        module_variables = for var <- get_variables(), do: %{var | parent: parent}
-
-        if is_nil(@parent) do
-          module_variables
-        else
-          parent_variables = @parent.get_computed_variables(true)
-
-          for var <- module_variables, reduce: parent_variables do
-            acc ->
-              if Keyword.has_key?(acc, var.key) do
-                Keyword.replace(acc, var.key, var)
-              else
-                Keyword.put(acc, var.key, var)
-              end
-          end
-        end
+      def get_variables_list() do
+        :gb_trees.to_list(get_variables_tree())
       end
 
       def get_styles(parent \\ false) do

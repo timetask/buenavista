@@ -23,7 +23,7 @@ defmodule BuenaVista.Generator do
   end
 
   # ----------------------------------------
-  # Config 
+  # Config
   # ----------------------------------------
   def sync_config(%Bundle{} = bundle) do
     modules = Helpers.find_component_modules(bundle.apps)
@@ -55,9 +55,9 @@ defmodule BuenaVista.Generator do
 
       {variables, styles} =
         if function_exported?(hydrator, :__info__, 1) do
-          {hydrator.get_computed_variables(), hydrator.get_computed_styles()}
+          {hydrator.get_variables_list(), hydrator.get_computed_styles()}
         else
-          {parent.get_computed_variables(), parent.get_computed_styles()}
+          {parent.get_variables_list(), parent.get_computed_styles()}
         end
 
       assigns = [
@@ -177,7 +177,7 @@ defmodule BuenaVista.Generator do
       nomenclator = Helpers.get_nomenclator(bundle)
       hydrator = Helpers.get_hydrator(bundle)
 
-      variables = hydrator.get_variables()
+      variables = hydrator.get_variables_list()
 
       css_variables =
         for {_, variable} <- variables, into: %{} do
