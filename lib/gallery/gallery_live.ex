@@ -14,7 +14,7 @@ defmodule BuenaVista.Gallery.GalleryLive do
 
   # Shortcut for generating JS commands
   # alias Phoenix.LiveView.JS
-  @sidebar_title Application.compile_env(:buenavista_gallery, :sidebar_title)
+  @config Application.compile_env(:buenavista, :gallery)
 
   @impl true
   def mount(params, _session, socket) do
@@ -29,7 +29,8 @@ defmodule BuenaVista.Gallery.GalleryLive do
 
   @impl true
   def render(assigns) do
-    assigns = assign_new(assigns, :title, fn -> @sidebar_title end)
+    assigns =
+      assign_new(assigns, :title, fn -> Keyword.get(@config, :sidebar_title, "BuenaVista Component Library") end)
 
     ~H"""
     <.sidebar_layout>
@@ -42,7 +43,7 @@ defmodule BuenaVista.Gallery.GalleryLive do
           </.link>
         </div>
       </:sidebar>
-      <:main></:main>
+      <:main>Main content</:main>
     </.sidebar_layout>
     """
   end

@@ -1,11 +1,12 @@
 defmodule BuenaVista.Gallery.URL do
-  @base_url Application.compile_env(:buenavista_gallery, :base_url)
+  @config Application.compile_env(:buenavista, :gallery)
 
   def index() do
-    @base_url
+    Keyword.get(@config, :base_url)
   end
 
   def component(%BuenaVista.Component{} = component) do
-    Path.join(@base_url, Atom.to_string(component.name))
+    base_url = Keyword.get(@config, :base_url)
+    Path.join(base_url, Atom.to_string(component.name))
   end
 end
