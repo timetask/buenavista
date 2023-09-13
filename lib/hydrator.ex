@@ -38,11 +38,11 @@ defmodule BuenaVista.Hydrator do
       else
         parent_tree =
           :gb_trees.map(
-            fn _k, var -> %{var | parent: true} end,
+            fn _k, %Variable{} = var -> %{var | parent: true} end,
             parent.get_variables_tree()
           )
 
-        for var <- local_variables, reduce: parent_tree do
+        for %Variable{} = var <- local_variables, reduce: parent_tree do
           tree ->
             :gb_trees.enter(var.key, %{var | parent: false}, tree)
         end
@@ -50,7 +50,25 @@ defmodule BuenaVista.Hydrator do
 
     Module.put_attribute(env.module, :variables, variables)
 
-    styles = Module.get_attribute(env.module, :__style_defs__)
+    local_styles = Module.get_attribute(env.module, :__style_defs__)
+
+    styles =
+      if is_nil(parent) do
+        for %Style{} = style <- local_styles, into: %{} do
+          {style.key, %{style | parent: false}}
+        end
+      else
+        parent_map =
+          for {key, style} <- parent.get_styles_map(), into: %{} do
+            {key, %{style | parent: true}}
+          end
+
+        for %Style{} = style <- local_styles, reduce: parent_map do
+          style_map ->
+            Map.put(style_map, style.key, %{style | parent: false})
+        end
+      end
+
     Module.put_attribute(env.module, :styles, styles)
   end
 
@@ -70,7 +88,7 @@ defmodule BuenaVista.Hydrator do
       Module.put_attribute(__MODULE__, :parent, Keyword.get(opts, :parent, nil))
 
       def css(component, variant, option, variables) do
-        case Map.get(get_computed_styles(), {component, variant, option}) do
+        case Map.get(get_styles_map(), {component, variant, option}) do
           %Style{} = style ->
             EEx.eval_string(style.css, assigns: variables)
 
@@ -96,22 +114,13 @@ defmodule BuenaVista.Hydrator do
         :gb_trees.to_list(get_variables_tree())
       end
 
-      def get_styles(parent \\ false) do
-        module_styles =
+      def get_styles_map() do
+        [styles_map] =
           :attributes
           |> __MODULE__.__info__()
           |> Keyword.get(:styles)
-      end
 
-      def get_computed_styles(parent \\ false) do
-        module_styles = for style <- get_styles(), into: %{}, do: {style.key, %{style | parent: parent}}
-
-        if is_nil(@parent) do
-          module_styles
-        else
-          parent_styles = @parent.get_computed_styles(true)
-          Map.merge(parent_styles, module_styles)
-        end
+        styles_map
       end
     end
   end

@@ -55,9 +55,9 @@ defmodule BuenaVista.Generator do
 
       {variables, styles} =
         if function_exported?(hydrator, :__info__, 1) do
-          {hydrator.get_variables_list(), hydrator.get_computed_styles()}
+          {hydrator.get_variables_list(), hydrator.get_styles_map()}
         else
-          {parent.get_variables_list(), parent.get_computed_styles()}
+          {parent.get_variables_list(), parent.get_styles_map()}
         end
 
       assigns = [
