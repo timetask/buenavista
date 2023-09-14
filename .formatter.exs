@@ -4,7 +4,9 @@ locals_without_parens = [
   variant: 3,
   component: 1,
   component: 2,
-  extra_classes: 1
+  classes: 1,
+  field: 1,
+  field: 2
 ]
 
 [

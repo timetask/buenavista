@@ -36,7 +36,7 @@ defmodule Mix.Tasks.Buenavista.Gen.Config do
   defp get_core_bundles() do
     bundles = [
       [
-        name: "buenavista",
+        name: "default",
         apps: [:buenavista],
         nomenclator: BuenaVista.Template.DefaultNomenclator,
         hydrator: [

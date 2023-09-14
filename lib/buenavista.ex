@@ -11,4 +11,7 @@ defmodule BuenaVista do
 
   # Layout
   defdelegate sidebar_layout(assigns), to: BuenaVista.Components.Layout
+
+  # Navigation
+  defdelegate navigation(assigns), to: BuenaVista.Components.Navigation
 end

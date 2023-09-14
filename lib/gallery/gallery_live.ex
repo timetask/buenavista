@@ -35,17 +35,25 @@ defmodule BuenaVista.Gallery.GalleryLive do
     ~H"""
     <.sidebar_layout>
       <:sidebar>
-        <h1><%= @title %></h1>
-        <div :for={{module, components} <- @modules}>
+        <h1><.link patch={URL.index()}><%= @title %></.link></h1>
+        <section :for={{module, components} <- @modules}>
           <h4><%= Helpers.pretty_module(module) %></h4>
-          <.link :for={{_, component} <- components} navigate={URL.component(component)}>
-            <%= component.name %>
-          </.link>
-        </div>
+          <.navigation orientation={:vertical} items={build_component_items(components)}>
+            <:link :let={component}>
+              <%= component.name %>
+            </:link>
+          </.navigation>
+        </section>
       </:sidebar>
-      <:main>Main content</:main>
+      <:main><%= @live_action %></:main>
     </.sidebar_layout>
     """
+  end
+
+  defp build_component_items(components) do
+    for {_, component} <- components do
+      %{url: URL.component(component), nav: :patch, item: component}
+    end
   end
 
   defp get_current_bundle(params) do
