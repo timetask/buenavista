@@ -12,7 +12,7 @@ defmodule BuenaVista.Components.Layout do
   slot :sidebar, required: true
   slot :main, required: true
 
-  extra_classes [:sidebar_class, :main_class]
+  classes [:sidebar_class, :main_class]
 
   component sidebar_layout(assigns) do
     ~H"""

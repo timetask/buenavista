@@ -6,7 +6,7 @@ defmodule BuenaVista.Components.Modal do
 
   attr :id, :string, required: true
 
-  extra_classes [:content_class, :close_class]
+  classes [:content_class, :close_class]
 
   component modal(assigns) do
     ~H"""
@@ -24,7 +24,7 @@ defmodule BuenaVista.Components.Modal do
 
   attr :id, :string, required: true
 
-  extra_classes [:modal_content_class, :close_btn_class]
+  classes [:modal_content_class, :close_btn_class]
 
   component drawer(assigns) do
     ~H"""

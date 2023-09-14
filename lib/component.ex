@@ -32,7 +32,7 @@ defmodule BuenaVista.Component do
     end
   end
 
-  defmacro extra_classes(class_list) when is_list(class_list) do
+  defmacro classes(class_list) when is_list(class_list) do
     quote do
       Module.put_attribute(__MODULE__, :__classes_defs__, unquote(class_list))
     end
@@ -104,7 +104,7 @@ defmodule BuenaVista.Component do
         var!(assigns) =
           var!(assigns)
           |> __assign_variant_classes(component, nomenclator)
-          |> __assign_extra_classes(component, nomenclator)
+          |> __assign_classes(component, nomenclator)
 
         unquote(body)
       end
@@ -170,7 +170,7 @@ defmodule BuenaVista.Component do
         assign_new(assigns, :variant_classes, fn -> join_classes(classes) end)
       end
 
-      def __assign_extra_classes(assigns, %Component{} = component, nomenclator) do
+      def __assign_classes(assigns, %Component{} = component, nomenclator) do
         for {class_key, class_name} <- component.classes, reduce: assigns do
           assigns ->
             class_name =
