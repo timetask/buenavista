@@ -93,7 +93,8 @@ defmodule BuenaVista.Helpers do
           %Bundle.Hydrator{
             parent: Keyword.get(hydrator_conf, :parent),
             module_name: hydrator_module_name,
-            file: hydrator_file
+            file: hydrator_file,
+            imports: Keyword.get(hydrator_conf, :imports, [])
           }
 
         module when is_atom(module) ->

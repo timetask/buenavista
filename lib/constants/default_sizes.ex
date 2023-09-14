@@ -34,10 +34,4 @@ defmodule BuenaVista.Constants.DefaultSizes do
   def size(72), do: "18rem"
   def size(80), do: "20rem"
   def size(96), do: "24rem"
-
-  def size(:font, :xs), do: size(2)
-  def size(:font, :sm), do: size(3)
-  def size(:font, :md), do: size(4)
-  def size(:font, :lg), do: size(6)
-  def size(:font, :xl), do: size(8)
 end

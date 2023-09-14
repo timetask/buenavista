@@ -62,7 +62,8 @@ defmodule BuenaVista.Generator do
 
       assigns = [
         module_name: hydrator,
-        variables: variables,
+        imports: bundle.hydrator.imports,
+        variables: grouped_variables(variables),
         styles: styles,
         parent: parent,
         modules: modules
@@ -72,6 +73,13 @@ defmodule BuenaVista.Generator do
       create_file(bundle.hydrator.file, hydrator_template(assigns), force: true)
       System.cmd("mix", ["format", bundle.hydrator.file])
     end
+  end
+
+  defp grouped_variables(variables) do
+    Enum.group_by(variables, fn {_, var} ->
+      [component | _] = var.key |> Atom.to_string() |> String.split("_")
+      component
+    end)
   end
 
   defp maybe_create_dir(file) do
@@ -108,8 +116,13 @@ defmodule BuenaVista.Generator do
   defmodule <%= Helpers.pretty_module(@module_name) %> do
     use BuenaVista.Hydrator<%= unless is_nil(@parent) do %>, parent: <%= Helpers.pretty_module(@parent) %><% end %>
    
-    <%= for {_, variable} <- @variables do %>
+    <%= for import <- @imports do %>
+      import <%= Helpers.pretty_module(import) %><% end %>
+
+    <%= for {group, variables} <- @variables do %>
+    # <%= group %><%= for {_, variable} <- variables do %>
       <%= variable_def(variable) %><% end %>
+    <% end %>
 
     <%= for {module, components} <- @modules do %>
       <%= module_title_template(module: module) %>

@@ -4,7 +4,7 @@ defmodule BuenaVista.Bundle do
   end
 
   defmodule Hydrator do
-    defstruct [:parent, :module_name, :file]
+    defstruct [:parent, :module_name, :file, :imports]
   end
 
   defmodule Css do
