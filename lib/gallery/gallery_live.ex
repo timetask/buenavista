@@ -3,7 +3,6 @@ defmodule BuenaVista.Gallery.GalleryLive do
     layout: {Timetask.LayoutsHTML, :base}
 
   import BuenaVista
-  # import BuenaVista.CssSigil
 
   alias BuenaVista.Bundle
   alias BuenaVista.Gallery.URL

@@ -1,3 +1,7 @@
-defmodule BuenaVista.CssSigil do
+defmodule BuenaVista.CssSigils do
   defmacro sigil_CSS({:<<>>, _, [binary]}, []) when is_binary(binary), do: binary
+
+  defmacro sigil_FUNC({:<<>>, _, [func_body]}, []) do
+    {:function, func_body}
+  end
 end

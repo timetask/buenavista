@@ -42,7 +42,11 @@ defmodule Mix.Tasks.Buenavista.Gen.Config do
         hydrator: [
           parent: BuenaVista.Template.EmptyHydrator,
           base_module_name: BuenaVista.Template,
-          out_dir: "lib/template"
+          out_dir: "lib/template",
+          imports: [
+            BuenaVista.Constants.DefaultColors,
+            BuenaVista.Constants.DefaultSizes
+          ]
         ],
         css: nil
       ]

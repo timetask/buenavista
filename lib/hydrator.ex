@@ -1,16 +1,27 @@
 defmodule BuenaVista.Hydrator do
   defmodule Variable do
-    defstruct [:key, :css_key, :css_value, :parent]
+    defstruct [:key, :css_key, :css_value, :property, :parent]
   end
 
   defmodule Style do
     defstruct [:key, :css, :parent]
   end
 
-  defmacro variable(key, value) when is_atom(key) and is_binary(value) do
+  defmacro variable(key, value) when is_atom(key) do
     quote bind_quoted: [key: key, value: value] do
       css_key = var_key_to_css_name(key)
-      var_def = %Variable{key: key, css_key: css_key, css_value: value}
+
+      {css_value, property} =
+        case value do
+          {:function, func} ->
+            {css_value, []} = Code.eval_string(func, [], __ENV__)
+            {css_value, value}
+
+          css_value ->
+            {css_value, :raw_value}
+        end
+
+      var_def = %Variable{key: key, css_key: css_key, css_value: css_value, property: property}
 
       Module.put_attribute(__MODULE__, :__var_defs__, var_def)
     end
@@ -75,8 +86,10 @@ defmodule BuenaVista.Hydrator do
   defmacro __using__(opts \\ []) do
     quote bind_quoted: [opts: opts] do
       @before_compile BuenaVista.Hydrator
+
+      # import BuenaVista.Constants.DefaultColors
       import BuenaVista.Hydrator
-      import BuenaVista.CssSigil
+      import BuenaVista.CssSigils
 
       Module.register_attribute(__MODULE__, :__var_defs__, accumulate: true)
       Module.register_attribute(__MODULE__, :__style_defs__, accumulate: true)

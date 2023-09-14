@@ -150,9 +150,12 @@ defmodule BuenaVista.Generator do
   end
 
   def variable_def(%Variable{} = variable) do
-    if variable.parent,
-      do: ~s|# variable :#{variable.key}, "#{variable.css_value}"|,
-      else: ~s|variable :#{variable.key}, "#{variable.css_value}"|
+    case {variable.parent, variable.property} do
+      {true, {:function, func_body}} -> ~s|# variable :#{variable.key}, ~FUNC[#{func_body}]|
+      {false, {:function, func_body}} -> ~s|variable :#{variable.key}, ~FUNC[#{func_body}]|
+      {true, :raw_value} -> ~s|# variable :#{variable.key}, "#{variable.css_value}"|
+      {false, :raw_value} -> ~s|variable :#{variable.key}, "#{variable.css_value}"|
+    end
   end
 
   defp style_def(styles, component, variant, option) do
