@@ -1,11 +1,93 @@
 defmodule BuenaVista.Template.DefaultHydrator do
   use BuenaVista.Hydrator, parent: BuenaVista.Template.EmptyHydrator
 
-  variable :navigation_horizontal_gap, "0"
-  variable :navigation_horizontal_padding, "0"
-  variable :navigation_item_padding, "10px 15px"
-  variable :navigation_vertical_gap, "0"
-  variable :navigation_vertical_padding, "0"
+  import BuenaVista.Constants.DefaultColors
+  import BuenaVista.Constants.DefaultSizes
+
+  # color
+  variable :color_text, ~FUNC[color(:red, 500)]
+  variable :color_text_subtle, "#78716c"
+  variable :color_title, "#292524"
+
+  # font
+  variable :font_lg, "1.5rem"
+  variable :font_md, "1rem"
+  variable :font_sm, "0.75rem"
+  variable :font_xl, "2rem"
+  variable :font_xs, "0.5rem"
+  variable :font_xxl, "2.5rem"
+
+  # gap
+  variable :gap_lg, "0.75rem"
+  variable :gap_md, "0.5rem"
+  variable :gap_sm, "0.25rem"
+  variable :gap_xl, "1rem"
+
+  # padding
+  variable :padding_lg, "0.75rem"
+  variable :padding_md, "0.5rem"
+  variable :padding_sm, "0.25rem"
+  variable :padding_xl, "1rem"
+
+  # sidebar
+  variable :sidebar_width, "20rem"
+
+  # ---------------------------------------------------------------------
+  # BuenaVista.Components.Typography
+  # ---------------------------------------------------------------------
+
+  # heading
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  style [:heading, :classes, :base_class], ~CSS"""
+    flex-direction: column;
+    align-items: flex-start;
+    display: flex;
+    color: <%= @color_text %>;
+  """
+
+  style [:heading, :classes, :tag_class], ~CSS"""
+    font-weight: bold;
+  """
+
+  style [:heading, :classes, :inline_class], ~CSS"""
+    font-weight: 300;
+    font-size: 70%;
+  """
+
+  # style [:heading, :classes, :actions_class], ~CSS"""
+  # """
+
+  # style [:heading, :decoration, :none], ~CSS"""
+  # """
+  # style [:heading, :decoration, :accent], ~CSS"""
+  # """
+  style [:heading, :decoration, :spaced_uppcase], ~CSS"""
+    font-weight: 300;
+    color: <%= @color_text_subtle %>;
+    text-transform: uppercase;
+    letter-spacing: 0.2rem;
+  """
+
+  style [:heading, :size, :sm], ~CSS"""
+    font-size: <%= @font_sm %>;
+  """
+
+  style [:heading, :size, :md], ~CSS"""
+    font-size: <%= @font_md %>;
+  """
+
+  style [:heading, :size, :lg], ~CSS"""
+    font-size: <%= @font_lg %>;
+  """
+
+  style [:heading, :size, :xl], ~CSS"""
+    font-size: <%= @font_xl %>;
+  """
+
+  style [:heading, :size, :xxl], ~CSS"""
+    font-size: <%= @font_xxl %>;
+  """
 
   # ---------------------------------------------------------------------
   # BuenaVista.Components.Navigation
@@ -19,18 +101,15 @@ defmodule BuenaVista.Template.DefaultHydrator do
   """
 
   style [:navigation, :classes, :list_item_class], ~CSS"""
-    padding: <%= @navigation_item_padding %>;
+    padding: <%= @padding_sm %> <%= @padding_md %>;
   """
 
   style [:navigation, :orientation, :vertical], ~CSS"""
-    gap: <%= @navigation_vertical_gap %>;
-    padding: <%= @navigation_vertical_padding %>;
     flex-direction: column;
   """
 
   style [:navigation, :orientation, :horizontal], ~CSS"""
-    gap: <%= @navigation_horizontal_gap %>;
-    padding: <%= @navigation_horizontal_padding %>;
+    gap: <%= @gap_sm %>;
     flex-direction: row;
   """
 
@@ -102,16 +181,14 @@ defmodule BuenaVista.Template.DefaultHydrator do
 
   # sidebar_layout
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  variable :sidebar_width, "20rem"
 
   style [:sidebar_layout, :classes, :base_class], ~CSS"""
-    flex-wrap: wrap;
     display: flex;
   """
 
   style [:sidebar_layout, :classes, :sidebar_class], ~CSS"""
+    width: <%= @sidebar_width %>;
     flex-grow: 1;
-    flex-basis: <%= @sidebar_width %>;
   """
 
   style [:sidebar_layout, :classes, :main_class], ~CSS"""
@@ -122,8 +199,9 @@ defmodule BuenaVista.Template.DefaultHydrator do
 
   # style [:sidebar_layout, :position, :left], ~CSS"""
   # """
-  # style [:sidebar_layout, :position, :right], ~CSS"""
-  # """
+  style [:sidebar_layout, :position, :right], ~CSS"""
+    flex-direction: row-reversed;
+  """
 
   # ---------------------------------------------------------------------
   # BuenaVista.Components.Input

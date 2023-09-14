@@ -34,9 +34,13 @@ defmodule BuenaVista.Gallery.GalleryLive do
     ~H"""
     <.sidebar_layout>
       <:sidebar>
-        <h1><.link patch={URL.index()}><%= @title %></.link></h1>
+        <.heading tag={:h1} size={:lg}>
+          <.link patch={URL.index()}><%= @title %></.link>
+        </.heading>
         <section :for={{module, components} <- @modules}>
-          <h4><%= Helpers.pretty_module(module) %></h4>
+          <.heading tag={:h3} size={:md} decoration={:spaced_uppcase}>
+            <%= Helpers.pretty_module(module) %>
+          </.heading>
           <.navigation orientation={:vertical} items={build_component_items(components)}>
             <:link :let={component}>
               <%= component.name %>

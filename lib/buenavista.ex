@@ -14,4 +14,7 @@ defmodule BuenaVista do
 
   # Navigation
   defdelegate navigation(assigns), to: BuenaVista.Components.Navigation
+
+  # Text
+  defdelegate heading(assigns), to: BuenaVista.Components.Typography
 end
