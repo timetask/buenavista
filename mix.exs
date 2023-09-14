@@ -40,6 +40,7 @@ defmodule BuenaVista.MixProject do
       {:phoenix_live_view, "~> 0.18"},
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:typed_struct, "~> 0.1.4"},
       {:gettext, "~> 0.20"}
     ]
   end
