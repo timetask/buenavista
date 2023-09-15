@@ -3,9 +3,9 @@ defmodule BuenaVista.Template.DefaultNomenclator do
 
   def class_name(_, _, :none), do: nil
 
-  def class_name(:button, :border, option), do: "button-border-#{option}"
+  def class_name(_, :state, :default), do: nil
 
-  def class_name(:label, :state, :default), do: nil
+  def class_name(:button, :border, option), do: "button-border-#{option}"
 
   def class_name(:sidebar_layout, :position, :left), do: nil
 
