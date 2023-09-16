@@ -72,5 +72,21 @@ defmodule BuenaVista.CssFormatterTest do
                background: <%= @app_bg %>;
              """
     end
+
+    test "allow class_name call at scope begin" do
+      css = """
+              color: yellow;    .<%= class_name(:component, :variant, :name) %> {background: blue;}
+      """
+
+      result = format(css, [])
+
+      assert result == """
+               color: yellow;
+
+               .<%= class_name(:component, :variant, :name) %> {
+                 background: blue;
+               }
+             """
+    end
   end
 end

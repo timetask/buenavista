@@ -2,7 +2,7 @@ Definitions.
 
 APPLY       = \@apply[a-z0-9-\s"'()\[\],#]+;
 PROPERTY    = [a-z-]+\s*:[a-z0-9\s"'(),#<>%=@_\-:\.]+;
-BEGIN_SCOPE = [.&]+[a-z\s,.:&-]*{
+BEGIN_SCOPE = [.&]+[a-z\s,.:&-_<>%=()]+{
 END_SCOPE   = }
 WHITESPACE  = [\s\t\n\r]
 
