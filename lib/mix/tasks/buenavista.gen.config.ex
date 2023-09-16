@@ -13,8 +13,8 @@ defmodule Mix.Tasks.Buenavista.Gen.Config do
 
     bundles =
       if Keyword.get(parsed, :core, false),
-        do: BuenaVista.Config.get_bundles(),
-        else: get_core_bundles()
+        do: get_core_bundles(),
+        else: BuenaVista.Config.get_bundles()
 
     for %BuenaVista.Bundle{} = bundle <- bundles do
       BuenaVista.Generator.sync_config(bundle)
