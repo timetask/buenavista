@@ -40,25 +40,30 @@ defmodule BuenaVista.Hydrator do
     parent = Module.get_attribute(env.module, :parent)
     local_variables = Module.get_attribute(env.module, :__var_defs__)
 
+    local_variables = Enum.reverse(local_variables)
+
     variables =
       if is_nil(parent) do
-        for var <- local_variables, reduce: :gb_trees.empty() do
-          tree ->
-            :gb_trees.insert(var.key, var, tree)
+        for var <- local_variables, reduce: [] do
+          acc -> Keyword.put(acc, var.key, %{var | parent: false})
         end
       else
-        parent_tree =
-          :gb_trees.map(
-            fn _k, %Variable{} = var -> %{var | parent: true} end,
-            parent.get_variables_tree()
-          )
+        parent_vars =
+          for {key, var} <- parent.get_variables() do
+            {key, %{var | parent: true}}
+          end
 
-        for %Variable{} = var <- local_variables, reduce: parent_tree do
-          tree ->
-            :gb_trees.enter(var.key, %{var | parent: false}, tree)
+        for %Variable{} = var <- local_variables, reduce: parent_vars do
+          acc ->
+            if Keyword.has_key?(acc, var.key) do
+              Keyword.replace(acc, var.key, %{var | parent: false})
+            else
+              Keyword.put(acc, var.key, %{var | parent: false})
+            end
         end
       end
 
+    # Stored in reverse so that group_by re sorts them
     Module.put_attribute(env.module, :variables, variables)
 
     local_styles = Module.get_attribute(env.module, :__style_defs__)
@@ -123,17 +128,11 @@ defmodule BuenaVista.Hydrator do
           else: @nomenclator.class_name(a, b, c)
       end
 
-      def get_variables_tree() do
-        [variables_tree] =
-          :attributes
-          |> __MODULE__.__info__()
-          |> Keyword.get(:variables)
-
-        variables_tree
-      end
-
-      def get_variables_list() do
-        :gb_trees.to_list(get_variables_tree())
+      def get_variables() do
+        case :attributes |> __MODULE__.__info__() |> Keyword.get(:variables) do
+          variables when is_list(variables) -> variables
+          _ -> []
+        end
       end
 
       def get_styles_map() do

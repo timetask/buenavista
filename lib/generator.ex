@@ -84,16 +84,22 @@ defmodule BuenaVista.Generator do
 
       {variables, styles} =
         if function_exported?(hydrator, :__info__, 1) do
-          {hydrator.get_variables_list(), hydrator.get_styles_map()}
+          {hydrator.get_variables(), hydrator.get_styles_map()}
         else
-          {parent.get_variables_list() |> set_parent_true(), parent.get_styles_map() |> set_parent_true()}
+          {parent.get_variables() |> set_parent_true(), parent.get_styles_map() |> set_parent_true()}
         end
+
+      grouped_variables =
+        ordered_group_by(variables, fn {key, _var} ->
+          [key | _rest] = key |> Atom.to_string() |> String.split("_")
+          key
+        end)
 
       assigns = [
         module_name: hydrator,
         nomenclator: nomenclator,
         imports: bundle.hydrator.imports,
-        variables: grouped_variables(variables),
+        variables: grouped_variables,
         styles: styles,
         parent: parent,
         modules: modules
@@ -113,11 +119,22 @@ defmodule BuenaVista.Generator do
     for {key, val} <- items, into: %{}, do: {key, %{val | parent: true}}
   end
 
-  defp grouped_variables(variables) do
-    Enum.group_by(variables, fn {_, var} ->
-      [component | _] = var.key |> Atom.to_string() |> String.split("_")
-      component
-    end)
+  defp ordered_group_by(items, group_fn) when is_list(items) and is_function(group_fn) do
+    for item <- items, reduce: [] do
+      acc ->
+        key =
+          case group_fn.(item) do
+            key when is_atom(key) -> key
+            key when is_binary(key) -> String.to_atom(key)
+          end
+
+        if Keyword.has_key?(acc, key) do
+          children = Keyword.get(acc, key)
+          Keyword.replace(acc, key, [item | children])
+        else
+          Keyword.put(acc, key, [item])
+        end
+    end
   end
 
   defp maybe_create_dir(file) do
@@ -182,7 +199,7 @@ defmodule BuenaVista.Generator do
     nomenclator = Helpers.get_nomenclator(bundle)
     hydrator = Helpers.get_hydrator(bundle)
 
-    variables = hydrator.get_variables_list()
+    variables = hydrator.get_variables()
 
     css_variables =
       for {_, variable} <- variables, into: %{} do
@@ -239,7 +256,7 @@ defmodule BuenaVista.Generator do
   defp generate_root_css_file(%Bundle{} = bundle, module_paths) when is_list(module_paths) do
     nomenclator = Helpers.get_nomenclator(bundle)
     hydrator = Helpers.get_hydrator(bundle)
-    variables = hydrator.get_variables_list()
+    variables = hydrator.get_variables()
     root_path = Path.join(bundle.css.out_dir, "#{bundle.name}.css")
 
     assigns = [

@@ -11,28 +11,28 @@ defmodule BuenaVista.Template.DefaultHydrator do
   variable :color_text_subtle, "#78716c"
   variable :color_title, "#292524"
 
+  # sidebar
+  variable :sidebar_width, "20rem"
+
   # font
-  variable :font_lg, ~FUNC[size(5)]
-  variable :font_md, ~FUNC[size(4)]
-  variable :font_sm, ~FUNC[size(3)]
-  variable :font_xl, ~FUNC[size(6)]
   variable :font_xs, ~FUNC[size(2)]
+  variable :font_sm, ~FUNC[size(3)]
+  variable :font_md, ~FUNC[size(4)]
+  variable :font_lg, ~FUNC[size(5)]
+  variable :font_xl, ~FUNC[size(6)]
   variable :font_xxl, ~FUNC[size(7)]
 
   # gap
-  variable :gap_lg, "0.75rem"
-  variable :gap_md, "0.5rem"
   variable :gap_sm, "0.25rem"
+  variable :gap_md, "0.5rem"
+  variable :gap_lg, "0.75rem"
   variable :gap_xl, "1rem"
 
   # padding
-  variable :padding_lg, "0.75rem"
-  variable :padding_md, "0.5rem"
   variable :padding_sm, "0.25rem"
+  variable :padding_md, "0.5rem"
+  variable :padding_lg, "0.75rem"
   variable :padding_xl, "1rem"
-
-  # sidebar
-  variable :sidebar_width, "20rem"
 
   # ---------------------------------------------------------------------
   # BuenaVista.Components.Typography
