@@ -87,7 +87,6 @@ defmodule BuenaVista.Hydrator do
     quote bind_quoted: [opts: opts] do
       @before_compile BuenaVista.Hydrator
 
-      # import BuenaVista.Constants.DefaultColors
       import BuenaVista.Hydrator
       import BuenaVista.CssSigils
 
@@ -100,10 +99,14 @@ defmodule BuenaVista.Hydrator do
       Module.register_attribute(__MODULE__, :parent, persist: true)
       Module.put_attribute(__MODULE__, :parent, Keyword.get(opts, :parent, nil))
 
+      Module.register_attribute(__MODULE__, :nomenclator, persist: true)
+      Module.put_attribute(__MODULE__, :nomenclator, Keyword.get(opts, :nomenclator, nil))
+
       def css(component, variant, option, variables) do
         case Map.get(get_styles_map(), {component, variant, option}) do
           %Style{} = style ->
-            EEx.eval_string(style.css, assigns: variables)
+            css_template = "<% import #{inspect(__MODULE__)}, only: [class_name: 3]%>" <> style.css
+            EEx.eval_string(css_template, assigns: variables)
 
           _ ->
             if is_nil(@parent),
@@ -113,6 +116,12 @@ defmodule BuenaVista.Hydrator do
       end
 
       defoverridable css: 4
+
+      def class_name(a, b, c) do
+        if is_nil(@nomenclator),
+          do: raise("Can't call class_name/3 inside #{inspect(__MODULE__)} without setting a nomenclator"),
+          else: @nomenclator.class_name(a, b, c)
+      end
 
       def get_variables_tree() do
         [variables_tree] =

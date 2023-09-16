@@ -5,7 +5,7 @@ defmodule BuenaVista.Components.Typography do
   variant :decoration, [:none, :accent, :spaced_uppcase], :none
   variant :size, [:sm, :md, :lg, :xl, :xxl], :lg
 
-  classes [:tag_class, :inline_class, :actions_class]
+  classes [:title_tag_class, :inline_class, :actions_class]
 
   slot :inner_block
 
@@ -18,7 +18,7 @@ defmodule BuenaVista.Components.Typography do
   component heading(assigns) do
     ~H"""
     <div class={[@base_class, @variant_classes]}>
-      <.dynamic_tag name={Atom.to_string(@tag)} class={@tag_class}>
+      <.dynamic_tag name={Atom.to_string(@tag)} class={@title_tag_class}>
         <%= render_slot(@inner_block) %>
         <span :if={@secondary} class={@inline_class}><%= render_slot(@secondary) %></span>
       </.dynamic_tag>

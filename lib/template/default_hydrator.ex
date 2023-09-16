@@ -1,5 +1,7 @@
 defmodule BuenaVista.Template.DefaultHydrator do
-  use BuenaVista.Hydrator, parent: BuenaVista.Template.EmptyHydrator
+  use BuenaVista.Hydrator,
+    nomenclator: BuenaVista.Template.DefaultNomenclator,
+    parent: BuenaVista.Template.EmptyHydrator
 
   import BuenaVista.Constants.DefaultColors
   import BuenaVista.Constants.DefaultSizes
@@ -10,12 +12,12 @@ defmodule BuenaVista.Template.DefaultHydrator do
   variable :color_title, "#292524"
 
   # font
-  variable :font_lg, "1.5rem"
-  variable :font_md, "1rem"
-  variable :font_sm, "0.75rem"
-  variable :font_xl, "2rem"
-  variable :font_xs, "0.5rem"
-  variable :font_xxl, "2.5rem"
+  variable :font_lg, ~FUNC[size(5)]
+  variable :font_md, ~FUNC[size(4)]
+  variable :font_sm, ~FUNC[size(3)]
+  variable :font_xl, ~FUNC[size(6)]
+  variable :font_xs, ~FUNC[size(2)]
+  variable :font_xxl, ~FUNC[size(7)]
 
   # gap
   variable :gap_lg, "0.75rem"
@@ -40,18 +42,18 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   style [:heading, :classes, :base_class], ~CSS"""
+    color: <%= @color_text %>;
     flex-direction: column;
     align-items: flex-start;
     display: flex;
-    color: <%= @color_text %>;
   """
 
-  style [:heading, :classes, :tag_class], ~CSS"""
+  style [:heading, :classes, :title_tag_class], ~CSS"""
     font-weight: bold;
   """
 
   style [:heading, :classes, :inline_class], ~CSS"""
-    font-weight: 300;
+    font-weight: normal;
     font-size: 70%;
   """
 
@@ -63,10 +65,13 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # style [:heading, :decoration, :accent], ~CSS"""
   # """
   style [:heading, :decoration, :spaced_uppcase], ~CSS"""
-    font-weight: 300;
     color: <%= @color_text_subtle %>;
     text-transform: uppercase;
     letter-spacing: 0.2rem;
+
+    .<%= class_name(:heading, :classes, :title_tag_class) %> {
+      font-weight: 300;
+    }
   """
 
   style [:heading, :size, :sm], ~CSS"""
@@ -93,15 +98,22 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # BuenaVista.Components.Navigation
   # ---------------------------------------------------------------------
 
+  # navigation_item
+  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+  # style [:navigation_item, :classes, :base_class], ~CSS"""
+  # """
+
+  # style [:navigation_item, :state, :default], ~CSS"""
+  # """
+  # style [:navigation_item, :state, :selected], ~CSS"""
+  # """
+
   # navigation
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   style [:navigation, :classes, :base_class], ~CSS"""
     display: flex;
-  """
-
-  style [:navigation, :classes, :list_item_class], ~CSS"""
-    padding: <%= @padding_sm %> <%= @padding_md %>;
   """
 
   style [:navigation, :orientation, :vertical], ~CSS"""
