@@ -6,6 +6,10 @@ defmodule BuenaVista.Template.DefaultHydrator do
   import BuenaVista.Constants.DefaultColors
   import BuenaVista.Constants.DefaultSizes
 
+  # ---------------------------------------------------------------------
+  # Variables
+  # ---------------------------------------------------------------------
+
   # color
   var :color_title, ~VAR[color(:gray, 900)]
   var :color_text, ~VAR[color(:gray, 600)]
@@ -37,11 +41,8 @@ defmodule BuenaVista.Template.DefaultHydrator do
   var :size_xl, ~VAR[size(4)]
 
   # ---------------------------------------------------------------------
-  # BuenaVista.Components.Typography
+  # BuenaVista.Components.Typography                             heading
   # ---------------------------------------------------------------------
-
-  # heading
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   style [:heading, :classes, :base_class], ~CSS"""
     color: <%= @color_text %>;
@@ -97,11 +98,8 @@ defmodule BuenaVista.Template.DefaultHydrator do
   """
 
   # ---------------------------------------------------------------------
-  # BuenaVista.Components.Navigation
+  # BuenaVista.Components.Navigation                     navigation_item
   # ---------------------------------------------------------------------
-
-  # navigation_item
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   # style [:navigation_item, :classes, :base_class], ~CSS"""
   # """
@@ -111,8 +109,9 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # style [:navigation_item, :state, :selected], ~CSS"""
   # """
 
-  # navigation
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # ---------------------------------------------------------------------
+  # BuenaVista.Components.Navigation                          navigation
+  # ---------------------------------------------------------------------
 
   style [:navigation, :classes, :base_class], ~CSS"""
     display: flex;
@@ -128,11 +127,8 @@ defmodule BuenaVista.Template.DefaultHydrator do
   """
 
   # ---------------------------------------------------------------------
-  # BuenaVista.Components.Modal
+  # BuenaVista.Components.Modal                                   drawer
   # ---------------------------------------------------------------------
-
-  # drawer
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   # style [:drawer, :classes, :base_class], ~CSS"""
   # """
@@ -159,8 +155,9 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # style [:drawer, :size, :full], ~CSS"""
   # """
 
-  # modal
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # ---------------------------------------------------------------------
+  # BuenaVista.Components.Modal                                    modal
+  # ---------------------------------------------------------------------
 
   # style [:modal, :classes, :base_class], ~CSS"""
   # """
@@ -184,17 +181,15 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # """
 
   # ---------------------------------------------------------------------
-  # BuenaVista.Components.Layout
+  # BuenaVista.Components.Layout                     multi_column_layout
   # ---------------------------------------------------------------------
-
-  # multi_column_layout
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   # style [:multi_column_layout, :classes, :base_class], ~CSS"""
   # """
 
-  # sidebar_layout
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # ---------------------------------------------------------------------
+  # BuenaVista.Components.Layout                          sidebar_layout
+  # ---------------------------------------------------------------------
 
   style [:sidebar_layout, :classes, :base_class], ~CSS"""
     display: flex;
@@ -218,11 +213,8 @@ defmodule BuenaVista.Template.DefaultHydrator do
   """
 
   # ---------------------------------------------------------------------
-  # BuenaVista.Components.Input
+  # BuenaVista.Components.Input                                    input
   # ---------------------------------------------------------------------
-
-  # input
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   # style [:input, :classes, :base_class], ~CSS"""
   # """
@@ -242,8 +234,9 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # style [:input, :type, :hidden], ~CSS"""
   # """
 
-  # input_group
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # ---------------------------------------------------------------------
+  # BuenaVista.Components.Input                              input_group
+  # ---------------------------------------------------------------------
 
   # style [:input_group, :classes, :base_class], ~CSS"""
   # """
@@ -262,8 +255,9 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # style [:input_group, :state, :danger], ~CSS"""
   # """
 
-  # label
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  # ---------------------------------------------------------------------
+  # BuenaVista.Components.Input                                    label
+  # ---------------------------------------------------------------------
 
   # style [:label, :classes, :base_class], ~CSS"""
   # """
@@ -276,11 +270,8 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # """
 
   # ---------------------------------------------------------------------
-  # BuenaVista.Components.Form
+  # BuenaVista.Components.Form                                      form
   # ---------------------------------------------------------------------
-
-  # form
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   # style [:form, :classes, :base_class], ~CSS"""
   # """
@@ -291,11 +282,8 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # """
 
   # ---------------------------------------------------------------------
-  # BuenaVista.Components.Button
+  # BuenaVista.Components.Button                                  button
   # ---------------------------------------------------------------------
-
-  # button
-  # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
   # style [:button, :classes, :base_class], ~CSS"""
   # """

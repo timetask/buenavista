@@ -48,10 +48,8 @@ defmodule BuenaVista.Generator do
     use BuenaVista.Nomenclator,<%= unless is_nil(@parent) do %>parent: <%= Helpers.pretty_module(@parent) %><% end %>
 
     <%= for {module, components} <- @modules do %>
-      <%= module_title_template(module: module) %>
-
       <%= for {_, component} <- components do %>
-        <%= component_title_template(component: component) %>
+        <%= comment_title_template(title: justify_between(Atom.to_string(component.name), Helpers.pretty_module(module), 68)) %>
 
         <%= for {class_key, _} <- component.classes do %>
           <%= class_name_def(component.name, :classes, class_key, @existing_class_names, @parent) %><% end %>
@@ -154,16 +152,16 @@ defmodule BuenaVista.Generator do
     <%= for import <- @imports do %>
       import <%= Helpers.pretty_module(import) %><% end %>
 
+    <%= comment_title_template(title: "Variables") %>
+    
     <%= for {group, variables} <- @variables do %>
     # <%= group %><%= for {_, variable} <- variables do %>
       <%= variable_def(variable) %><% end %>
     <% end %>
 
     <%= for {module, components} <- @modules do %>
-      <%= module_title_template(module: module) %>
-
       <%= for {_, component} <- components do %>
-        <%= component_title_template(component: component) %>
+        <%= comment_title_template(title: justify_between(Helpers.pretty_module(module), Atom.to_string(component.name), 68)) %>
 
         <%= for {class_key, _} <- component.classes do %>
           <%= style_def(@styles, component.name, :classes, class_key) %><% end %>
@@ -276,8 +274,8 @@ defmodule BuenaVista.Generator do
                    BuenaVista Component Library
 
       > Source Code: https://github.com/timetask/buenavista
-      > Nomenclator: <%= inspect(@nomenclator) %>
-      > Hydrator: <%= inspect(@hydrator) %>
+      > Nomenclator: <%= Helpers.pretty_module(@nomenclator) %>
+      > Hydrator: <%= Helpers.pretty_module(@hydrator) %>
 
   *********************************************************** */
   <%= for path <- @module_paths do %>@import "<%= path %>";
@@ -296,14 +294,17 @@ defmodule BuenaVista.Generator do
     String.replace(content, "\n", "\n# ")
   end
 
-  embed_template(:module_title, ~S/
+  embed_template(:comment_title, ~S/
     # ---------------------------------------------------------------------
-    # <%= Helpers.pretty_module(@module) %>
+    # <%= @title %>
     # ---------------------------------------------------------------------
   /)
 
-  embed_template(:component_title, ~S/
-    # <%= @component.name %>
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  /)
+  defp justify_between(s1, s2, total) when is_binary(s1) and is_binary(s2) and is_integer(total) do
+    s1_len = String.length(s1)
+    s2_len = String.length(s2)
+    spaces = max(total - s1_len - s2_len, 1)
+
+    s1 <> String.duplicate(" ", spaces) <> s2
+  end
 end
