@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Buenavista.Gen.Config do
+defmodule Mix.Tasks.Bv.Gen.Config do
   @moduledoc """
 
   """

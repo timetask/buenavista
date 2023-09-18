@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Buenavista.Gen.Css do
+defmodule Mix.Tasks.Bv.Gen.Css do
   use Mix.Task
   require Logger
 
