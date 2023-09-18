@@ -7,7 +7,7 @@ defmodule BuenaVista.Hydrator do
     defstruct [:key, :css, :parent]
   end
 
-  defmacro variable(key, value) when is_atom(key) do
+  defmacro var(key, value) when is_atom(key) do
     quote bind_quoted: [key: key, value: value] do
       css_key = var_key_to_css_name(key)
 
@@ -120,13 +120,13 @@ defmodule BuenaVista.Hydrator do
         end
       end
 
-      defoverridable css: 4
-
-      def class_name(a, b, c) do
+      def class_name(component, variant, option) do
         if is_nil(@nomenclator),
           do: raise("Can't call class_name/3 inside #{inspect(__MODULE__)} without setting a nomenclator"),
-          else: @nomenclator.class_name(a, b, c)
+          else: @nomenclator.class_name(component, variant, option)
       end
+
+      defoverridable css: 4, class_name: 3
 
       def get_variables() do
         case :attributes |> __MODULE__.__info__() |> Keyword.get(:variables) do
