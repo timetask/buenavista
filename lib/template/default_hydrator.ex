@@ -7,32 +7,34 @@ defmodule BuenaVista.Template.DefaultHydrator do
   import BuenaVista.Constants.DefaultSizes
 
   # color
-  variable :color_text, ~FUNC[color(:red, 500)]
-  variable :color_text_subtle, "#78716c"
-  variable :color_title, "#292524"
+  variable :color_title, ~VAR[color(:gray, 900)]
+  variable :color_text, ~VAR[color(:gray, 600)]
+  variable :color_text_subtle, ~VAR[color(:gray, 400)]
 
   # sidebar
   variable :sidebar_width, "20rem"
 
   # font
-  variable :font_xs, ~FUNC[size(2)]
-  variable :font_sm, ~FUNC[size(3)]
-  variable :font_md, ~FUNC[size(4)]
-  variable :font_lg, ~FUNC[size(5)]
-  variable :font_xl, ~FUNC[size(6)]
-  variable :font_xxl, ~FUNC[size(7)]
+  variable :font_xs, ~VAR[size(2)]
+  variable :font_sm, ~VAR[size(3)]
+  variable :font_md, ~VAR[size(4)]
+  variable :font_lg, ~VAR[size(5)]
+  variable :font_xl, ~VAR[size(6)]
+  variable :font_xxl, ~VAR[size(7)]
 
   # gap
-  variable :gap_sm, "0.25rem"
-  variable :gap_md, "0.5rem"
-  variable :gap_lg, "0.75rem"
-  variable :gap_xl, "1rem"
+  variable :gap_xs, ~VAR[size(0.5)]
+  variable :gap_sm, ~VAR[size(1)]
+  variable :gap_md, ~VAR[size(2)]
+  variable :gap_lg, ~VAR[size(3)]
+  variable :gap_xl, ~VAR[size(4)]
 
   # padding
-  variable :padding_sm, "0.25rem"
-  variable :padding_md, "0.5rem"
-  variable :padding_lg, "0.75rem"
-  variable :padding_xl, "1rem"
+  variable :size_xs, ~VAR[size(0.5)]
+  variable :size_sm, ~VAR[size(1)]
+  variable :size_md, ~VAR[size(2)]
+  variable :size_lg, ~VAR[size(3)]
+  variable :size_xl, ~VAR[size(4)]
 
   # ---------------------------------------------------------------------
   # BuenaVista.Components.Typography
