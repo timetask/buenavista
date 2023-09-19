@@ -41,7 +41,8 @@ defmodule BuenaVista.MixProject do
       {:floki, ">= 0.30.0", only: :test},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:typed_struct, "~> 0.1.4"},
-      {:gettext, "~> 0.20"}
+      {:gettext, "~> 0.20"},
+      {:file_system, "~> 0.2", only: [:dev, :test]}
     ]
   end
 end
