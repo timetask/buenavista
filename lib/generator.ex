@@ -30,23 +30,29 @@ defmodule BuenaVista.Generator do
   end
 
   def generate_css_files() do
-    for %Bundle{css: %Bundle.Css{out_dir: out_dir}} = bundle when is_binary(out_dir) <-
-          BuenaVista.Config.get_bundles(),
-        reduce: %{} do
-      cache ->
-        {modules, cache} =
-          case Map.get(cache, bundle.apps) do
-            nil ->
-              modules = BuenaVista.Helpers.find_component_modules(bundle.apps)
-              {modules, Map.put(cache, bundle.apps, modules)}
+    %{out_dirs: out_dirs} =
+      for %Bundle{css: %Bundle.Css{out_dir: out_dir}} = bundle when is_binary(out_dir) <-
+            BuenaVista.Config.get_bundles(),
+          reduce: %{cache: %{}, out_dirs: %{}} do
+        %{cache: cache, out_dirs: out_dirs} ->
+          {modules, cache} =
+            case Map.get(cache, bundle.apps) do
+              nil ->
+                modules = BuenaVista.Helpers.find_component_modules(bundle.apps)
+                {modules, Map.put(cache, bundle.apps, modules)}
 
-            modules ->
-              {modules, cache}
-          end
+              modules ->
+                {modules, cache}
+            end
 
-        module_paths = generate_modules_css_files(bundle, modules)
-        generate_root_css_file(bundle, module_paths)
-        cache
+          module_paths = generate_modules_css_files(bundle, modules)
+          generate_root_css_file(bundle, module_paths)
+
+          %{cache: cache, out_dirs: Map.put(out_dirs, out_dir, true)}
+      end
+
+    for {out_dir, true} <- out_dirs do
+      System.cmd("prettier", [out_dir, "--write"])
     end
   end
 
@@ -224,10 +230,8 @@ defmodule BuenaVista.Generator do
     nomenclator = Helpers.get_nomenclator(bundle)
     hydrator = Helpers.get_hydrator(bundle)
 
-    variables = hydrator.get_variables()
-
-    css_variables =
-      for {_, variable} <- variables, into: %{} do
+    variables =
+      for {_, variable} <- hydrator.get_variables(), into: %{} do
         {variable.key, "var(--#{variable.css_key})"}
       end
 
@@ -239,13 +243,12 @@ defmodule BuenaVista.Generator do
       assigns = [
         nomenclator: nomenclator,
         hydrator: hydrator,
-        variables: css_variables,
+        variables: variables,
         components: components
       ]
 
       create_file(module_path, component_template(assigns), force: true)
 
-      System.cmd("prettier", [module_path, "--write"])
       "#{bundle.name}/#{module_filename}"
     end
   end
@@ -292,7 +295,6 @@ defmodule BuenaVista.Generator do
     ]
 
     create_file(root_path, root_template(assigns), force: true)
-    System.cmd("prettier", [root_path, "--write"])
   end
 
   embed_template(:root, """
