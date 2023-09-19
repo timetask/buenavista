@@ -9,17 +9,44 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   # Public API
   # ----------------------------------------
-  def sync_config(%Bundle{} = bundle) do
-    modules = Helpers.find_component_modules(bundle.apps)
-    sync_nomenclator(bundle, modules)
-    sync_hydrator(bundle, modules)
+  def sync_config(bundles) when is_list(bundles) do
+    for %BuenaVista.Bundle{} = bundle <- bundles, reduce: %{} do
+      cache ->
+        {modules, cache} =
+          case Map.get(cache, bundle.apps) do
+            nil ->
+              modules = BuenaVista.Helpers.find_component_modules(bundle.apps)
+              {modules, Map.put(cache, bundle.apps, modules)}
+
+            modules ->
+              {modules, cache}
+          end
+
+        sync_nomenclator(bundle, modules)
+        sync_hydrator(bundle, modules)
+
+        cache
+    end
   end
 
   def generate_css_files() do
     for %Bundle{css: %Bundle.Css{out_dir: out_dir}} = bundle when is_binary(out_dir) <-
-          BuenaVista.Config.get_bundles() do
-      module_paths = generate_modules_css_files(bundle)
-      generate_root_css_file(bundle, module_paths)
+          BuenaVista.Config.get_bundles(),
+        reduce: %{} do
+      cache ->
+        {modules, cache} =
+          case Map.get(cache, bundle.apps) do
+            nil ->
+              modules = BuenaVista.Helpers.find_component_modules(bundle.apps)
+              {modules, Map.put(cache, bundle.apps, modules)}
+
+            modules ->
+              {modules, cache}
+          end
+
+        module_paths = generate_modules_css_files(bundle, modules)
+        generate_root_css_file(bundle, module_paths)
+        cache
     end
   end
 
@@ -193,7 +220,7 @@ defmodule BuenaVista.Generator do
     end
   end
 
-  defp generate_modules_css_files(%Bundle{} = bundle) do
+  defp generate_modules_css_files(%Bundle{} = bundle, modules) do
     nomenclator = Helpers.get_nomenclator(bundle)
     hydrator = Helpers.get_hydrator(bundle)
 
@@ -204,7 +231,7 @@ defmodule BuenaVista.Generator do
         {variable.key, "var(--#{variable.css_key})"}
       end
 
-    for {module, components} <- BuenaVista.Helpers.find_component_modules(bundle.apps) do
+    for {module, components} <- modules do
       module_name = Helpers.last_module_alias(module)
       module_filename = "#{module_name}.css"
       module_path = Path.join([bundle.css.out_dir, bundle.name, module_filename])

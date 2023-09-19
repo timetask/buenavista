@@ -16,21 +16,7 @@ defmodule Mix.Tasks.Bv.Gen.Config do
         do: get_core_bundles(),
         else: BuenaVista.Config.get_bundles()
 
-    for %BuenaVista.Bundle{} = bundle <- bundles do
-      BuenaVista.Generator.sync_config(bundle)
-
-      if match?(%BuenaVista.Bundle.Nomenclator{}, bundle.nomenclator) do
-        unless function_exported?(bundle.nomenclator.module_name, :__info__, 1) do
-          Code.compile_file(bundle.nomenclator.file)
-        end
-      end
-
-      if match?(%BuenaVista.Bundle.Hydrator{}, bundle.hydrator) do
-        unless function_exported?(bundle.hydrator.module_name, :__info__, 1) do
-          Code.compile_file(bundle.hydrator.file)
-        end
-      end
-    end
+    BuenaVista.Generator.sync_config(bundles)
   end
 
   defp get_core_bundles() do
