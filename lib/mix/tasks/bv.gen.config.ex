@@ -9,14 +9,26 @@ defmodule Mix.Tasks.Bv.Gen.Config do
 
   @shortdoc "Generates an initial Nomenclator and Hydrator modules"
   def run(opts) do
-    {parsed, _, _} = OptionParser.parse(opts, strict: [core: :boolean])
+    {parsed_opts, _, _} = OptionParser.parse(opts, strict: [core: :boolean, bundle: :keep], aliases: [b: :bundle])
 
-    bundles =
-      if Keyword.get(parsed, :core, false),
-        do: get_core_bundles(),
-        else: BuenaVista.Config.get_bundles()
+    parsed_opts
+    |> get_bundles()
+    |> maybe_filter_bundles_by_name(parsed_opts)
+    |> BuenaVista.Generator.sync_config()
+  end
 
-    BuenaVista.Generator.sync_config(bundles)
+  defp get_bundles(parsed_opts) do
+    if Keyword.get(parsed_opts, :core, false),
+      do: get_core_bundles(),
+      else: BuenaVista.Config.get_bundles()
+  end
+
+  defp maybe_filter_bundles_by_name(bundles, parsed_opts) do
+    filter_bundle_names = Keyword.get_values(parsed_opts, :bundle)
+
+    if Enum.empty?(filter_bundle_names),
+      do: bundles,
+      else: Enum.filter(bundles, fn bundle -> bundle.name in filter_bundle_names end)
   end
 
   defp get_core_bundles() do

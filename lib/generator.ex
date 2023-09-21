@@ -29,10 +29,9 @@ defmodule BuenaVista.Generator do
     end
   end
 
-  def generate_css_files() do
+  def generate_css_files(bundles) do
     %{out_dirs: out_dirs} =
-      for %Bundle{css: %Bundle.Css{out_dir: out_dir}} = bundle when is_binary(out_dir) <-
-            BuenaVista.Config.get_bundles(),
+      for %Bundle{css: %Bundle.Css{out_dir: out_dir}} = bundle when is_binary(out_dir) <- bundles,
           reduce: %{cache: %{}, out_dirs: %{}} do
         %{cache: cache, out_dirs: out_dirs} ->
           {modules, cache} =
