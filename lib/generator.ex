@@ -71,7 +71,6 @@ defmodule BuenaVista.Generator do
 
       maybe_create_dir(bundle.nomenclator.file)
       create_file(bundle.nomenclator.file, nomenclator_template(assigns), force: true)
-      System.cmd("mix", ["format", bundle.nomenclator.file])
     end
   end
 
@@ -137,7 +136,6 @@ defmodule BuenaVista.Generator do
 
       maybe_create_dir(bundle.hydrator.file)
       create_file(bundle.hydrator.file, hydrator_template(assigns), force: true)
-      System.cmd("mix", ["format", bundle.hydrator.file])
     end
   end
 
@@ -188,20 +186,20 @@ defmodule BuenaVista.Generator do
     
     <%= for {group, variables} <- @variables do %>
     # <%= group %><%= for {_, variable} <- variables do %>
-      <%= variable_def(variable) %><% end %>
+    <%= variable_def(variable) %><% end %>
     <% end %>
 
     <%= for {module, components} <- @modules do %>
-      <%= for {_, component} <- components do %>
-        <%= comment_title_template(title: justify_between(Helpers.pretty_module(module), Atom.to_string(component.name), 68)) %>
+    <%= for {_, component} <- components do %>
+    <%= comment_title_template(title: justify_between(Helpers.pretty_module(module), Atom.to_string(component.name), 68)) %>
 
-        <%= for {class_key, _} <- component.classes do %>
-          <%= style_def(@styles, component.name, :classes, class_key) %><% end %>
-        <%= for variant <- component.variants do %>
-          <%= for {option, _} <- variant.options do %>
-            <%= style_def(@styles, component.name, variant.name, option) %><% end %>
-        <% end %>
-      <% end %>
+    <%= for {class_key, _} <- component.classes do %>
+    <%= if apply(@nomenclator, :class_name, [component.name, :classes, class_key]) do %><%= style_def(@styles, component.name, :classes, class_key) %><% end %><% end %>
+    <%= for variant <- component.variants do %>
+    <%= for {option, _} <- variant.options do %>
+    <%= if apply(@nomenclator, :class_name, [component.name, variant.name, option]) do %><%= style_def(@styles, component.name, variant.name, option) %><% end %><% end %>
+    <% end %>
+    <% end %>
     <% end %>
   end
   /)
@@ -218,8 +216,8 @@ defmodule BuenaVista.Generator do
   defp style_def(styles, component, variant, option) do
     if style = Map.get(styles, {component, variant, option}) do
       if style.parent,
-        do: ~s/# style [:#{component}, :#{variant}, :#{option}], ~CSS""" \n# #{style.css |> comment_lines()}"""/,
-        else: ~s/style [:#{component}, :#{variant}, :#{option}], ~CSS"""\n #{style.css} """/
+        do: ~s/# style [:#{component}, :#{variant}, :#{option}], ~CSS""" \n# #{style.css |> comment_lines()}  """/,
+        else: ~s/style [:#{component}, :#{variant}, :#{option}], ~CSS"""\n #{style.css}    """/
     else
       ~s/# style [:#{component}, :#{variant}, :#{option}], ~CSS"""\n# """/
     end
@@ -260,9 +258,11 @@ defmodule BuenaVista.Generator do
     <%= apply(@hydrator, :css, [component.name, :classes, :base_class, @variables]) %>
 
     <%= for {class_key, _} <- component.classes, class_key != :base_class do %>
-      .<%= apply(@nomenclator, :class_name, [component.name, :classes, class_key]) %> {
-        <%= apply(@hydrator, :css, [component.name, :classes, class_key, @variables]) %>
-      }
+      <%= if class_name = apply(@nomenclator, :class_name, [component.name, :classes, class_key]) do %>
+      <%= if css = apply(@hydrator, :css, [component.name, :classes, class_key, @variables]) do %>
+      .<%= class_name %>{
+        <%= css %>
+      }<% end %><% end %>
     <% end %>
 
     <%= for variant <- component.variants do %>
@@ -270,9 +270,10 @@ defmodule BuenaVista.Generator do
 
       <%= for {option, _class} <- variant.options do %>
         <%= if class_name = apply(@nomenclator, :class_name, [component.name, variant.name, option]) do %>
+        <%= if css = apply(@hydrator, :css, [component.name, variant.name, option, @variables]) do %>
           &.<%= class_name %> {
-            <%= apply(@hydrator, :css, [component.name, variant.name, option, @variables]) %>
-          } 
+            <%= css  %>
+          }<% end %>
         <% end %>
       <% end %>
     <% end %>
