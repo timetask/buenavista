@@ -1,4 +1,4 @@
-defmodule BuenaVista.Bundle do
+defmodule BuenaVista.Theme do
   defmodule Nomenclator do
     defstruct [:parent, :module_name, :file]
   end

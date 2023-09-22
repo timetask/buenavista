@@ -10,13 +10,16 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # Variables
   # ---------------------------------------------------------------------
 
+  # app
+  var :app_gutter, ~VAR[size(2)]
+
   # color
   var :color_title, ~VAR[color(:gray, 900)]
   var :color_text, ~VAR[color(:gray, 600)]
   var :color_text_subtle, ~VAR[color(:gray, 400)]
 
   # sidebar
-  var :sidebar_width, "20rem"
+  var :sidebar_width, ~VAR[size(80)]
 
   # font
   var :font_xs, ~VAR[size(2)]
@@ -60,11 +63,10 @@ defmodule BuenaVista.Template.DefaultHydrator do
     font-size: 70%;
   """
 
-  # style [:heading, :classes, :actions_class], ~CSS"""
-  # """
+  style [:heading, :classes, :actions_class], ~CSS"""
+    color: red;
+  """
 
-  # style [:heading, :decoration, :none], ~CSS"""
-  # """
   # style [:heading, :decoration, :accent], ~CSS"""
   # """
   style [:heading, :decoration, :spaced_uppcase], ~CSS"""
@@ -104,8 +106,6 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # style [:navigation_item, :classes, :base_class], ~CSS"""
   # """
 
-  # style [:navigation_item, :state, :default], ~CSS"""
-  # """
   # style [:navigation_item, :state, :selected], ~CSS"""
   # """
 
@@ -206,8 +206,6 @@ defmodule BuenaVista.Template.DefaultHydrator do
     flex-basis: 0;
   """
 
-  # style [:sidebar_layout, :position, :left], ~CSS"""
-  # """
   style [:sidebar_layout, :position, :right], ~CSS"""
     flex-direction: row-reversed;
   """
@@ -248,8 +246,6 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # style [:input_group, :layout, :stacked], ~CSS"""
   # """
 
-  # style [:input_group, :state, :default], ~CSS"""
-  # """
   # style [:input_group, :state, :success], ~CSS"""
   # """
   # style [:input_group, :state, :danger], ~CSS"""
@@ -262,8 +258,6 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # style [:label, :classes, :base_class], ~CSS"""
   # """
 
-  # style [:label, :state, :default], ~CSS"""
-  # """
   # style [:label, :state, :success], ~CSS"""
   # """
   # style [:label, :state, :danger], ~CSS"""
@@ -323,8 +317,6 @@ defmodule BuenaVista.Template.DefaultHydrator do
   # style [:button, :style, :transparent], ~CSS"""
   # """
 
-  # style [:button, :border, :none], ~CSS"""
-  # """
   # style [:button, :border, :thin], ~CSS"""
   # """
   # style [:button, :border, :thick], ~CSS"""

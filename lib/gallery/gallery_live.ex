@@ -4,17 +4,17 @@ defmodule BuenaVista.Gallery.GalleryLive do
 
   import BuenaVista
 
-  alias BuenaVista.Bundle
   alias BuenaVista.Component
   alias BuenaVista.Gallery.URL
   alias BuenaVista.Helpers
+  alias BuenaVista.Theme
 
   @config Application.compile_env(:buenavista, :gallery)
 
   @impl true
   def mount(params, _session, socket) do
-    bundle = get_current_bundle(params)
-    modules = Helpers.find_component_modules(bundle.apps)
+    theme = get_current_theme(params)
+    modules = Helpers.find_component_modules(theme.apps)
 
     {:ok,
      socket
@@ -101,12 +101,12 @@ defmodule BuenaVista.Gallery.GalleryLive do
     end
   end
 
-  defp get_current_bundle(params) do
-    with bundle_name when is_binary(bundle_name) <- Map.get(params, "bundle"),
-         %Bundle{} = bundle <- BuenaVista.Config.find_bundle(bundle_name) do
-      bundle
+  defp get_current_theme(params) do
+    with theme_name when is_binary(theme_name) <- Map.get(params, "theme"),
+         %Theme{} = theme <- BuenaVista.Config.find_theme(theme_name) do
+      theme
     else
-      _ -> BuenaVista.Config.get_default_bundle()
+      _ -> BuenaVista.Config.get_default_theme()
     end
   end
 end

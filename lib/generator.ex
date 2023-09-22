@@ -2,50 +2,50 @@ defmodule BuenaVista.Generator do
   require Logger
   import Mix.Generator
 
-  alias BuenaVista.Bundle
+  alias BuenaVista.Theme
   alias BuenaVista.Helpers
   alias BuenaVista.Hydrator.Variable
 
   # ----------------------------------------
   # Public API
   # ----------------------------------------
-  def sync_config(bundles) when is_list(bundles) do
-    for %BuenaVista.Bundle{} = bundle <- bundles, reduce: %{} do
+  def sync_config(themes) when is_list(themes) do
+    for %BuenaVista.Theme{} = theme <- themes, reduce: %{} do
       cache ->
         {modules, cache} =
-          case Map.get(cache, bundle.apps) do
+          case Map.get(cache, theme.apps) do
             nil ->
-              modules = BuenaVista.Helpers.find_component_modules(bundle.apps)
-              {modules, Map.put(cache, bundle.apps, modules)}
+              modules = BuenaVista.Helpers.find_component_modules(theme.apps)
+              {modules, Map.put(cache, theme.apps, modules)}
 
             modules ->
               {modules, cache}
           end
 
-        sync_nomenclator(bundle, modules)
-        sync_hydrator(bundle, modules)
+        sync_nomenclator(theme, modules)
+        sync_hydrator(theme, modules)
 
         cache
     end
   end
 
-  def generate_css_files(bundles) do
+  def generate_css_files(themes) do
     %{out_dirs: out_dirs} =
-      for %Bundle{css: %Bundle.Css{out_dir: out_dir}} = bundle when is_binary(out_dir) <- bundles,
+      for %Theme{css: %Theme.Css{out_dir: out_dir}} = theme when is_binary(out_dir) <- themes,
           reduce: %{cache: %{}, out_dirs: %{}} do
         %{cache: cache, out_dirs: out_dirs} ->
           {modules, cache} =
-            case Map.get(cache, bundle.apps) do
+            case Map.get(cache, theme.apps) do
               nil ->
-                modules = BuenaVista.Helpers.find_component_modules(bundle.apps)
-                {modules, Map.put(cache, bundle.apps, modules)}
+                modules = BuenaVista.Helpers.find_component_modules(theme.apps)
+                {modules, Map.put(cache, theme.apps, modules)}
 
               modules ->
                 {modules, cache}
             end
 
-          module_paths = generate_modules_css_files(bundle, modules)
-          generate_root_css_file(bundle, module_paths)
+          module_paths = generate_modules_css_files(theme, modules)
+          generate_root_css_file(theme, module_paths)
 
           %{cache: cache, out_dirs: Map.put(out_dirs, out_dir, true)}
       end
@@ -58,19 +58,19 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   # Nomenclator
   # ----------------------------------------
-  defp sync_nomenclator(%Bundle{} = bundle, modules) do
-    if match?(%Bundle.Nomenclator{}, bundle.nomenclator) do
-      nomenclator = Helpers.get_nomenclator(bundle)
+  defp sync_nomenclator(%Theme{} = theme, modules) do
+    if match?(%Theme.Nomenclator{}, theme.nomenclator) do
+      nomenclator = Helpers.get_nomenclator(theme)
 
       assigns = [
         module_name: nomenclator,
         existing_class_names: nomenclator.get_class_names(),
-        parent: bundle.nomenclator.parent,
+        parent: theme.nomenclator.parent,
         modules: modules
       ]
 
-      maybe_create_dir(bundle.nomenclator.file)
-      create_file(bundle.nomenclator.file, nomenclator_template(assigns), force: true)
+      maybe_create_dir(theme.nomenclator.file)
+      create_file(theme.nomenclator.file, nomenclator_template(assigns), force: true)
     end
   end
 
@@ -105,11 +105,11 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   # Hydrator
   # ----------------------------------------
-  defp sync_hydrator(%Bundle{} = bundle, modules) do
-    if match?(%Bundle.Hydrator{}, bundle.hydrator) do
-      nomenclator = Helpers.get_nomenclator(bundle)
-      parent = bundle.hydrator.parent
-      hydrator = Helpers.get_hydrator(bundle)
+  defp sync_hydrator(%Theme{} = theme, modules) do
+    if match?(%Theme.Hydrator{}, theme.hydrator) do
+      nomenclator = Helpers.get_nomenclator(theme)
+      parent = theme.hydrator.parent
+      hydrator = Helpers.get_hydrator(theme)
 
       {variables, styles} =
         if function_exported?(hydrator, :__info__, 1) do
@@ -127,15 +127,15 @@ defmodule BuenaVista.Generator do
       assigns = [
         module_name: hydrator,
         nomenclator: nomenclator,
-        imports: bundle.hydrator.imports,
+        imports: theme.hydrator.imports,
         variables: grouped_variables,
         styles: styles,
         parent: parent,
         modules: modules
       ]
 
-      maybe_create_dir(bundle.hydrator.file)
-      create_file(bundle.hydrator.file, hydrator_template(assigns), force: true)
+      maybe_create_dir(theme.hydrator.file)
+      create_file(theme.hydrator.file, hydrator_template(assigns), force: true)
     end
   end
 
@@ -223,9 +223,9 @@ defmodule BuenaVista.Generator do
     end
   end
 
-  defp generate_modules_css_files(%Bundle{} = bundle, modules) do
-    nomenclator = Helpers.get_nomenclator(bundle)
-    hydrator = Helpers.get_hydrator(bundle)
+  defp generate_modules_css_files(%Theme{} = theme, modules) do
+    nomenclator = Helpers.get_nomenclator(theme)
+    hydrator = Helpers.get_hydrator(theme)
 
     variables =
       for {_, variable} <- hydrator.get_variables(), into: %{} do
@@ -235,7 +235,7 @@ defmodule BuenaVista.Generator do
     for {module, components} <- modules do
       module_name = Helpers.last_module_alias(module)
       module_filename = "#{module_name}.css"
-      module_path = Path.join([bundle.css.out_dir, bundle.name, module_filename])
+      module_path = Path.join([theme.css.out_dir, theme.name, module_filename])
 
       assigns = [
         nomenclator: nomenclator,
@@ -246,7 +246,7 @@ defmodule BuenaVista.Generator do
 
       create_file(module_path, component_template(assigns), force: true)
 
-      "#{bundle.name}/#{module_filename}"
+      "#{theme.name}/#{module_filename}"
     end
   end
 
@@ -281,11 +281,11 @@ defmodule BuenaVista.Generator do
   <% end %>
   """)
 
-  defp generate_root_css_file(%Bundle{} = bundle, module_paths) when is_list(module_paths) do
-    nomenclator = Helpers.get_nomenclator(bundle)
-    hydrator = Helpers.get_hydrator(bundle)
+  defp generate_root_css_file(%Theme{} = theme, module_paths) when is_list(module_paths) do
+    nomenclator = Helpers.get_nomenclator(theme)
+    hydrator = Helpers.get_hydrator(theme)
     variables = hydrator.get_variables()
-    root_path = Path.join(bundle.css.out_dir, "#{bundle.name}.css")
+    root_path = Path.join(theme.css.out_dir, "#{theme.name}.css")
 
     assigns = [
       nomenclator: nomenclator,

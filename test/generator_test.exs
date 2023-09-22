@@ -1,7 +1,7 @@
 defmodule BuenaVista.GeneratorTest do
   use ExUnit.Case
   import BuenaVista.Generator
-  alias BuenaVista.Bundle
+  alias BuenaVista.Theme
 
   doctest BuenaVista.Generator
 end

@@ -8,12 +8,11 @@ defmodule BuenaVista.Components.Typography do
   classes [:title_tag_class, :inline_class, :actions_class]
 
   slot :inner_block
+  slot :actions
 
   slot :secondary do
     attr :inline, :boolean
   end
-
-  slot :actions
 
   component heading(assigns) do
     ~H"""

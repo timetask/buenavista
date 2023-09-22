@@ -1,28 +1,28 @@
 defmodule BuenaVista.Config do
   alias BuenaVista.Helpers
 
-  @default_bundle_name Application.compile_env(:buenavista, :default_bundle)
+  @default_theme_name Application.compile_env(:buenavista, :default_theme)
 
-  @bundles (for bundle <- Application.compile_env(:buenavista, :bundles) || [] do
-              Helpers.build_bundle(bundle)
-            end)
+  @themes (for theme <- Application.compile_env(:buenavista, :themes) || [] do
+             Helpers.build_theme(theme)
+           end)
 
-  def get_bundles(), do: @bundles
+  def get_themes(), do: @themes
 
-  def find_bundle(bundle_name) when is_binary(bundle_name) do
-    Enum.find(get_bundles(), fn bundle -> bundle.name == bundle_name end)
+  def find_theme(theme_name) when is_binary(theme_name) do
+    Enum.find(get_themes(), fn theme -> theme.name == theme_name end)
   end
 
-  def get_default_bundle() do
-    find_bundle(@default_bundle_name)
+  def get_default_theme() do
+    find_theme(@default_theme_name)
   end
 
   def current_nomenclator() do
     BuenaVista.Template.DefaultNomenclator
   end
 
-  def available_bundles() do
-    Application.get_env(:buenavista, :bundles)
+  def available_themes() do
+    Application.get_env(:buenavista, :themes)
   end
 
   def gettext() do

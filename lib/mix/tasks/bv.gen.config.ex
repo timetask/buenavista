@@ -9,30 +9,30 @@ defmodule Mix.Tasks.Bv.Gen.Config do
 
   @shortdoc "Generates an initial Nomenclator and Hydrator modules"
   def run(opts) do
-    {parsed_opts, _, _} = OptionParser.parse(opts, strict: [core: :boolean, bundle: :keep], aliases: [b: :bundle])
+    {parsed_opts, _, _} = OptionParser.parse(opts, strict: [core: :boolean, theme: :keep], aliases: [t: :theme])
 
     parsed_opts
-    |> get_bundles()
-    |> maybe_filter_bundles_by_name(parsed_opts)
+    |> get_themes()
+    |> maybe_filter_themes_by_name(parsed_opts)
     |> BuenaVista.Generator.sync_config()
   end
 
-  defp get_bundles(parsed_opts) do
+  defp get_themes(parsed_opts) do
     if Keyword.get(parsed_opts, :core, false),
-      do: get_core_bundles(),
-      else: BuenaVista.Config.get_bundles()
+      do: get_core_themes(),
+      else: BuenaVista.Config.get_themes()
   end
 
-  defp maybe_filter_bundles_by_name(bundles, parsed_opts) do
-    filter_bundle_names = Keyword.get_values(parsed_opts, :bundle)
+  defp maybe_filter_themes_by_name(themes, parsed_opts) do
+    filter_theme_names = Keyword.get_values(parsed_opts, :theme)
 
-    if Enum.empty?(filter_bundle_names),
-      do: bundles,
-      else: Enum.filter(bundles, fn bundle -> bundle.name in filter_bundle_names end)
+    if Enum.empty?(filter_theme_names),
+      do: themes,
+      else: Enum.filter(themes, fn theme -> theme.name in filter_theme_names end)
   end
 
-  defp get_core_bundles() do
-    bundles = [
+  defp get_core_themes() do
+    themes = [
       [
         name: "default",
         apps: [:buenavista],
@@ -50,6 +50,6 @@ defmodule Mix.Tasks.Bv.Gen.Config do
       ]
     ]
 
-    for bundle <- bundles, do: BuenaVista.Helpers.build_bundle(bundle)
+    for theme <- themes, do: BuenaVista.Helpers.build_theme(theme)
   end
 end
