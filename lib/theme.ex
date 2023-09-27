@@ -13,7 +13,6 @@ defmodule BuenaVista.Theme do
 
   defstruct [
     :name,
-    :apps,
     :nomenclator,
     :hydrator,
     :css

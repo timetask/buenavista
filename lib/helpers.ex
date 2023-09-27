@@ -73,14 +73,6 @@ defmodule BuenaVista.Helpers do
 
     name = underscore(name)
 
-    apps =
-      Keyword.get(theme, :apps) ||
-        raise "Theme config error: missing key :apps. Provided theme: #{inspect(theme)}"
-
-    unless is_list(apps) do
-      raise ":apps in theme #{inspect(theme)} must be a list of apps."
-    end
-
     hydrator =
       case Keyword.get(theme, :hydrator) do
         hydrator_conf when is_list(hydrator_conf) ->
@@ -129,7 +121,6 @@ defmodule BuenaVista.Helpers do
 
     %Theme{
       name: name,
-      apps: apps,
       hydrator: hydrator,
       nomenclator: nomenclator,
       css: css

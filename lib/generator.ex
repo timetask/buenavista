@@ -2,9 +2,11 @@ defmodule BuenaVista.Generator do
   require Logger
   import Mix.Generator
 
-  alias BuenaVista.Theme
   alias BuenaVista.Helpers
   alias BuenaVista.Hydrator.Variable
+  alias BuenaVista.Theme
+
+  @component_apps Application.compile_env(:buenavista, :apps, [:buenavista])
 
   # ----------------------------------------
   # Public API
@@ -13,10 +15,10 @@ defmodule BuenaVista.Generator do
     for %BuenaVista.Theme{} = theme <- themes, reduce: %{} do
       cache ->
         {modules, cache} =
-          case Map.get(cache, theme.apps) do
+          case Map.get(cache, @component_apps) do
             nil ->
-              modules = BuenaVista.Helpers.find_component_modules(theme.apps)
-              {modules, Map.put(cache, theme.apps, modules)}
+              modules = BuenaVista.Helpers.find_component_modules(@component_apps)
+              {modules, Map.put(cache, @component_apps, modules)}
 
             modules ->
               {modules, cache}
@@ -39,10 +41,10 @@ defmodule BuenaVista.Generator do
           reduce: %{cache: %{}, out_dirs: %{}} do
         %{cache: cache, out_dirs: out_dirs} ->
           {modules, cache} =
-            case Map.get(cache, theme.apps) do
+            case Map.get(cache, @component_apps) do
               nil ->
-                modules = BuenaVista.Helpers.find_component_modules(theme.apps)
-                {modules, Map.put(cache, theme.apps, modules)}
+                modules = BuenaVista.Helpers.find_component_modules(@component_apps)
+                {modules, Map.put(cache, @component_apps, modules)}
 
               modules ->
                 {modules, cache}

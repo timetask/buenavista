@@ -1,7 +1,4 @@
 defmodule Mix.Tasks.Bv.Gen.Config do
-  @moduledoc """
-
-  """
   use Mix.Task
   require Logger
 
@@ -35,7 +32,6 @@ defmodule Mix.Tasks.Bv.Gen.Config do
     themes = [
       [
         name: "default",
-        apps: [:buenavista],
         nomenclator: BuenaVista.Template.DefaultNomenclator,
         hydrator: [
           parent: BuenaVista.Template.EmptyHydrator,
