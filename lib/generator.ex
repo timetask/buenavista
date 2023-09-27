@@ -6,19 +6,17 @@ defmodule BuenaVista.Generator do
   alias BuenaVista.Hydrator.Variable
   alias BuenaVista.Theme
 
-  @component_apps Application.compile_env(:buenavista, :apps, [:buenavista])
-
   # ----------------------------------------
   # Public API
   # ----------------------------------------
-  def sync_config(themes) when is_list(themes) do
+  def generate_config_files(themes, apps) when is_list(themes) do
     for %BuenaVista.Theme{} = theme <- themes, reduce: %{} do
       cache ->
         {modules, cache} =
-          case Map.get(cache, @component_apps) do
+          case Map.get(cache, apps) do
             nil ->
-              modules = BuenaVista.Helpers.find_component_modules(@component_apps)
-              {modules, Map.put(cache, @component_apps, modules)}
+              modules = BuenaVista.Helpers.find_component_modules(apps)
+              {modules, Map.put(cache, apps, modules)}
 
             modules ->
               {modules, cache}
@@ -35,16 +33,16 @@ defmodule BuenaVista.Generator do
     end
   end
 
-  def generate_css_files(themes) do
+  def generate_css_files(themes, apps) do
     %{out_dirs: out_dirs} =
       for %Theme{css: %Theme.Css{out_dir: out_dir}} = theme when is_binary(out_dir) <- themes,
           reduce: %{cache: %{}, out_dirs: %{}} do
         %{cache: cache, out_dirs: out_dirs} ->
           {modules, cache} =
-            case Map.get(cache, @component_apps) do
+            case Map.get(cache, apps) do
               nil ->
-                modules = BuenaVista.Helpers.find_component_modules(@component_apps)
-                {modules, Map.put(cache, @component_apps, modules)}
+                modules = BuenaVista.Helpers.find_component_modules(apps)
+                {modules, Map.put(cache, apps, modules)}
 
               modules ->
                 {modules, cache}
