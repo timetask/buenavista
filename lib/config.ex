@@ -10,7 +10,10 @@ defmodule BuenaVista.Config do
   def get_themes(), do: @themes
 
   def find_theme(theme_name) when is_binary(theme_name) do
-    Enum.find(get_themes(), fn theme -> theme.name == theme_name end)
+    case Enum.find(get_themes(), fn theme -> theme.name == theme_name end) do
+      %BuenaVista.Theme{} = theme -> {:ok, theme}
+      _ -> {:error, :not_found}
+    end
   end
 
   def get_default_theme() do
