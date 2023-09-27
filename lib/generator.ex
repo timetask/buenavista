@@ -23,7 +23,11 @@ defmodule BuenaVista.Generator do
           end
 
         sync_nomenclator(theme, modules)
-        sync_hydrator(theme, modules)
+        hydrator_path = sync_hydrator(theme, modules)
+
+        unless is_nil(hydrator_path) do
+          Code.compile_file(hydrator_path)
+        end
 
         cache
     end
@@ -136,6 +140,9 @@ defmodule BuenaVista.Generator do
 
       maybe_create_dir(theme.hydrator.file)
       create_file(theme.hydrator.file, hydrator_template(assigns), force: true)
+      theme.hydrator.file
+    else
+      nil
     end
   end
 
