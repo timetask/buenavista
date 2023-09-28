@@ -433,19 +433,16 @@ defmodule BuenaVista.CssProperties do
 
   def property_index(property), do: Map.get(@property_index, property)
 
-  def scope_index(selector) do
-    case selector do
-      "&:" <> rest ->
-        case Regex.run(~r/^[a-z-]+/, rest, capture: :first) do
-          [pseudo_class] -> Map.get(@pseudo_class_index, pseudo_class, 300)
-          _ -> 300
-        end
-
-      "[" <> rest ->
-        1_000 + :binary.first(rest)
-
-      "." <> rest ->
-        2_000 + :binary.first(rest)
+  def scope_first?(selector_a, selector_b) do
+    case {selector_type(selector_a), selector_type(selector_b)} do
+      {same, same} -> selector_a <= selector_b
+      {bigger, smaller} when bigger >= smaller -> true
+      {smaller, bigger} when smaller <= bigger -> false
     end
   end
+
+  defp selector_type("&:" <> _rest), do: 0
+  defp selector_type("&." <> _rest), do: 1
+  defp selector_type("[" <> _rest), do: 2
+  defp selector_type("." <> _rest), do: 3
 end

@@ -1,6 +1,6 @@
 defmodule BuenaVista.CssFormatter do
   @behaviour Mix.Tasks.Format
-  import BuenaVista.CssProperties, only: [property_index: 1, scope_index: 1]
+  import BuenaVista.CssProperties, only: [property_index: 1, scope_first?: 2]
 
   defmodule Property do
     defstruct [:attr, :value]
@@ -84,7 +84,7 @@ defmodule BuenaVista.CssFormatter do
   defp compare(%Property{}, %Scope{}), do: true
   defp compare(%Scope{}, %Property{}), do: false
   defp compare(%Property{} = a, %Property{} = b), do: property_index(a.attr) >= property_index(b.attr)
-  defp compare(%Scope{} = a, %Scope{} = b), do: scope_index(a.selector) <= scope_index(b.selector)
+  defp compare(%Scope{} = a, %Scope{} = b), do: scope_first?(a.selector, b.selector)
 
   def write_rules(rules) do
     rules
