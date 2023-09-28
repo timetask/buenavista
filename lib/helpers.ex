@@ -1,6 +1,6 @@
 defmodule BuenaVista.Helpers do
   import Macro, only: [camelize: 1, underscore: 1]
-
+  import IO.ANSI
   alias BuenaVista.Theme
 
   @doc """
@@ -147,5 +147,14 @@ defmodule BuenaVista.Helpers do
     |> String.split(".")
     |> List.last()
     |> underscore()
+  end
+
+  def write_and_format_module(file_path, content) do
+    filename = for _ <- 1..5, into: "", do: <<Enum.random('0123456789abcdef')>>
+    tmp_file = "/tmp/tmp_#{filename}.ex"
+    :ok = File.write(tmp_file, content)
+    System.cmd("mix", ["format", tmp_file])
+    File.rename(tmp_file, file_path)
+    IO.puts(green() <> "* creating " <> reset() <> file_path)
   end
 end

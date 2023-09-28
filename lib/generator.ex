@@ -26,6 +26,7 @@ defmodule BuenaVista.Generator do
         hydrator_path = sync_hydrator(theme, modules)
 
         unless is_nil(hydrator_path) do
+          Code.put_compiler_option(:ignore_module_conflict, true)
           Code.compile_file(hydrator_path)
         end
 
@@ -73,8 +74,7 @@ defmodule BuenaVista.Generator do
         modules: modules
       ]
 
-      maybe_create_dir(theme.nomenclator.file)
-      create_file(theme.nomenclator.file, nomenclator_template(assigns), force: true)
+      Helpers.write_and_format_module(theme.nomenclator.file, nomenclator_template(assigns))
     end
   end
 
@@ -138,8 +138,7 @@ defmodule BuenaVista.Generator do
         modules: modules
       ]
 
-      maybe_create_dir(theme.hydrator.file)
-      create_file(theme.hydrator.file, hydrator_template(assigns), force: true)
+      Helpers.write_and_format_module(theme.hydrator.file, hydrator_template(assigns))
       theme.hydrator.file
     else
       nil
@@ -169,14 +168,6 @@ defmodule BuenaVista.Generator do
         else
           Keyword.put(acc, key, [item])
         end
-    end
-  end
-
-  defp maybe_create_dir(file) do
-    dir = Path.dirname(file)
-
-    unless File.exists?(dir) do
-      create_directory(dir, force: true)
     end
   end
 
