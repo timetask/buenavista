@@ -1,7 +1,7 @@
 defmodule BuenaVista.CurrentThemePlug do
   def init(opts), do: opts
 
-  def call(conn, opts) do
+  def call(conn, _opts) do
     theme =
       if theme_name = conn.query_params["theme"] do
         case BuenaVista.Config.find_theme(theme_name) do

@@ -9,8 +9,8 @@ defmodule Mix.Tasks.Bv.Gen.Config do
   def run(opts) do
     {parsed_opts, _, _} = OptionParser.parse(opts, strict: [core: :boolean])
 
-    apps = @component_apps
     themes = get_themes(parsed_opts)
+    apps = @component_apps
 
     BuenaVista.Generator.generate_config_files(themes, apps)
   end
@@ -18,7 +18,15 @@ defmodule Mix.Tasks.Bv.Gen.Config do
   defp get_themes(parsed_opts) do
     if Keyword.get(parsed_opts, :core, false),
       do: get_core_themes(),
-      else: BuenaVista.Config.get_themes()
+      else: BuenaVista.Config.get_themes() |> filter_by_name(parsed_opts)
+  end
+
+  defp filter_by_name(themes, parsed_opts) do
+    theme_names = Keyword.get_values(parsed_opts, :theme)
+
+    if Enum.empty?(theme_names),
+      do: themes,
+      else: Enum.filter(themes, fn theme -> theme.name in theme_names end)
   end
 
   defp get_core_themes() do
