@@ -436,9 +436,9 @@ defmodule BuenaVista.CssProperties do
   def scope_first?(selector_a, selector_b) do
     case {selector_type(selector_a), selector_type(selector_b)} do
       {0, 0} -> pseudo_class_index(selector_a) <= pseudo_class_index(selector_a)
-      {same, same} -> selector_a <= selector_b
-      {bigger, smaller} when bigger >= smaller -> true
-      {smaller, bigger} when smaller <= bigger -> false
+      {same, same} -> selector_a >= selector_b
+      {a, b} when a <= b -> true
+      {a, b} when a >= b -> false
     end
   end
 
@@ -446,6 +446,8 @@ defmodule BuenaVista.CssProperties do
   defp selector_type("&." <> _rest), do: 1
   defp selector_type("[" <> _rest), do: 2
   defp selector_type("." <> _rest), do: 3
+  defp selector_type("*" <> _rest), do: 4
+  defp selector_type(_selector), do: 5
 
   defp pseudo_class_index(selector) do
     case Regex.run(~r/^[a-z-]+/, selector, capture: :first) do
