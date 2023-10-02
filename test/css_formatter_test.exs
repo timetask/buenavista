@@ -1,7 +1,6 @@
 defmodule BuenaVista.CssFormatterTest do
   use ExUnit.Case
   import BuenaVista.CssFormatter
-  import BuenaVista.CssSigils
 
   describe "format/2" do
     test "Nested formatting" do

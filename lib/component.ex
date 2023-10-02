@@ -2,7 +2,7 @@ defmodule BuenaVista.Component do
   use Phoenix.Component
 
   alias __MODULE__
-  defstruct [:name, :variants, :classes]
+  defstruct [:name, :variants, :classes, :module]
 
   defmodule Variant do
     defstruct [:name, :options, :default]
@@ -77,7 +77,7 @@ defmodule BuenaVista.Component do
           {class_key, class_name}
         end
 
-      component = %Component{name: component_name, variants: variants, classes: classes}
+      component = %Component{name: component_name, variants: variants, classes: classes, module: env.module}
 
       Module.put_attribute(env.module, :__bv_components__, {component.name, component})
     end

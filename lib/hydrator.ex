@@ -13,12 +13,28 @@ defmodule BuenaVista.Hydrator do
 
       {css_value, property} =
         case value do
-          {:function, func} ->
-            {css_value, []} = Code.eval_string(func, [], __ENV__)
-            {css_value, value}
+          {raw_body, formatted_code} ->
+            css_value =
+              Regex.replace(
+                ~r/#\{([^{}]*)\}/,
+                formatted_code,
+                fn _, func ->
+                  {css_value, []} = Code.eval_string(func, [], __ENV__)
+                  css_value
+                end,
+                global: true
+              )
 
-          css_value ->
-            {css_value, :raw_value}
+            {css_value, %{type: :var, raw_body: raw_body}}
+
+          css_value when is_binary(css_value) ->
+            {css_value, %{type: :raw_value}}
+
+          css_value when is_atom(css_value) ->
+            {Atom.to_string(css_value), %{type: :raw_value}}
+
+          css_value when is_integer(css_value) ->
+            {Integer.to_string(css_value), %{type: :raw_value}}
         end
 
       var_def = %Variable{key: key, css_key: css_key, css_value: css_value, property: property}
@@ -26,6 +42,20 @@ defmodule BuenaVista.Hydrator do
       Module.put_attribute(__MODULE__, :__var_defs__, var_def)
     end
   end
+
+    def typeof(a) do
+        cond do
+            is_float(a)    -> "float"
+            is_number(a)   -> "number"
+            is_atom(a)     -> "atom"
+            is_boolean(a)  -> "boolean"
+            is_binary(a)   -> "binary"
+            is_function(a) -> "function"
+            is_list(a)     -> "list"
+            is_tuple(a)    -> "tuple"
+            true           -> "idunno"
+        end    
+    end
 
   defmacro style(path, css) when is_list(path) do
     quote bind_quoted: [path: path, css: css] do

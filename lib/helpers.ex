@@ -150,7 +150,7 @@ defmodule BuenaVista.Helpers do
   end
 
   def write_and_format_module(file_path, content) do
-    filename = for _ <- 1..5, into: "", do: <<Enum.random('0123456789abcdef')>>
+    filename = for _ <- 1..5, into: "", do: <<Enum.random(~c"0123456789abcdef")>>
     tmp_file = "/tmp/tmp_#{filename}.ex"
     :ok = File.write(tmp_file, content)
     System.cmd("mix", ["format", tmp_file])
