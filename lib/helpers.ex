@@ -22,10 +22,11 @@ defmodule BuenaVista.Helpers do
     for module <- modules do
       case module.__buenavista_components() do
         [] -> nil
-        components -> {module, components}
+        components -> {module, Enum.reverse(components)}
       end
     end
     |> Enum.reject(&is_nil/1)
+    |> Enum.reverse() 
   end
 
   @doc """
