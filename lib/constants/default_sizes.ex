@@ -34,4 +34,5 @@ defmodule BuenaVista.Constants.DefaultSizes do
   def size(72), do: "18rem"
   def size(80), do: "20rem"
   def size(96), do: "24rem"
+  def size(112), do: "28rem"
 end
