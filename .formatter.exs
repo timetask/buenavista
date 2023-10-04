@@ -6,7 +6,9 @@ locals_without_parens = [
   component: 2,
   classes: 1,
   field: 1,
-  field: 2
+  field: 2,
+  galeria_routes: 2,
+  galeria_routes: 1
 ]
 
 [
