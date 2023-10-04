@@ -26,7 +26,7 @@ defmodule BuenaVista.Helpers do
       end
     end
     |> Enum.reject(&is_nil/1)
-    |> Enum.reverse() 
+    |> Enum.reverse()
   end
 
   @doc """
