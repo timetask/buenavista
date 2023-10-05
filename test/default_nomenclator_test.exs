@@ -7,7 +7,7 @@ defmodule BuenaVista.DefaultNomenclatorTest do
   end
 
   test "Extra classes" do
-    assert DefaultNomenclator.class_name(:first, :classes, :third) == "third"
+    assert DefaultNomenclator.class_name(:first_e, :classes, :third_element) == "first-e-third-element"
   end
 
   test "Base class" do

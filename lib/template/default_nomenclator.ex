@@ -14,15 +14,11 @@ defmodule BuenaVista.Template.DefaultNomenclator do
   end
 
   def class_name(component, :classes, class_key) do
-    component |> Atom.to_string() |> String.replace("_", "-")
-    class_key |> Atom.to_string() |> String.replace("_class", "") |> String.replace("_", "-")
-    "#{component}-#{class_key}"
+    class_key = class_key |> Atom.to_string() |> String.replace("_class", "")
+    String.replace("#{component}-#{class_key}", "_", "-")
   end
 
   def class_name(component, _variant, option) do
-    component = component |> Atom.to_string() |> String.replace("_", "-")
-    option = option |> Atom.to_string() |> String.replace("_", "-")
-
-    "#{component}-#{option}"
+    String.replace("#{component}-#{option}", "_", "-")
   end
 end
