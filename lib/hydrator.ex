@@ -144,6 +144,13 @@ defmodule BuenaVista.Hydrator do
 
       defoverridable css: 4, class_name: 3
 
+      def get_parent() do
+        case :attributes |> __MODULE__.__info__() |> Keyword.get(:parent) do
+          [parent] -> parent
+          _ -> nil
+        end
+      end
+
       def get_variables() do
         case :attributes |> __MODULE__.__info__() |> Keyword.get(:variables) do
           variables when is_list(variables) -> variables
