@@ -1,5 +1,5 @@
 defmodule BuenaVista.CssSigils do
-  @var_pattern ~r/(?!.*__)\$([a-z_]*)/
+  @var_pattern ~r/(?!.*__)\$([a-z]{1}[a-z0-9_]*)/
   @class_pattern ~r/(?=.*__)\$([a-z_]*)/
   @func_pattern ~r/([a-zA-Z]{1}[a-zA-Z0-9_]*\([a-zA-Z0-9.,:\s_]*\))/
 
