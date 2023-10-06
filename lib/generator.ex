@@ -192,7 +192,7 @@ defmodule BuenaVista.Generator do
     <%= comment_title_template(title: justify_between(Helpers.pretty_module(module), Atom.to_string(component.name), 68)) %>
 
     <%= for {class_key, _} <- component.classes do %>
-    <%= if apply(@nomenclator, :class_name, [component.name, :classes, class_key]) do %><%= style_def(@styles, component.name, :classes, class_key) %><% end %><% end %>
+    <%= if apply(@nomenclator, :class_name, [component.name, :classes, class_key]) do %><%= style_def(@styles, component.name, class_key) %><% end %><% end %>
     <%= for variant <- component.variants do %>
     <%= for {option, _} <- variant.options do %>
     <%= if apply(@nomenclator, :class_name, [component.name, variant.name, option]) do %><%= style_def(@styles, component.name, variant.name, option) %><% end %><% end %>
@@ -211,13 +211,23 @@ defmodule BuenaVista.Generator do
     end
   end
 
+  defp style_def(styles, component, class_key) do
+    if style = Map.get(styles, {component, :classes, class_key}) do
+      if style.parent,
+        do: ~s/# style :#{component}, :#{class_key}, ~CSS""" \n# #{style.css |> comment_lines()}  """/,
+        else: ~s/style :#{component}, :#{class_key}, ~CSS"""\n #{style.css}    """/
+    else
+      ~s/# style :#{component}, :#{class_key}, ~CSS"""\n# """/
+    end
+  end
+
   defp style_def(styles, component, variant, option) do
     if style = Map.get(styles, {component, variant, option}) do
       if style.parent,
-        do: ~s/# style [:#{component}, :#{variant}, :#{option}], ~CSS""" \n# #{style.css |> comment_lines()}  """/,
-        else: ~s/style [:#{component}, :#{variant}, :#{option}], ~CSS"""\n #{style.css}    """/
+        do: ~s/# style :#{component}, :#{variant}, :#{option}, ~CSS""" \n# #{style.css |> comment_lines()}  """/,
+        else: ~s/style :#{component}, :#{variant}, :#{option}, ~CSS"""\n #{style.css}    """/
     else
-      ~s/# style [:#{component}, :#{variant}, :#{option}], ~CSS"""\n# """/
+      ~s/# style :#{component}, :#{variant}, :#{option}, ~CSS"""\n# """/
     end
   end
 
