@@ -27,6 +27,6 @@ defmodule BuenaVista.CssSigilTest do
 
     test "Replaces $component__variant__option with <%= class_name(:name, :variant, :option) %>" do
       assert ~CSS[$a__b__c] =~ "<%= class_name(:a, :b, :c) %>"
-  end
     end
+  end
 end

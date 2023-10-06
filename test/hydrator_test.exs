@@ -1,7 +1,35 @@
 defmodule BuenaVista.HydratorTest do
   use ExUnit.Case
 
-  describe "Static variables" do
+  describe "style macro: " do
+    test "Stores class definition" do
+      defmodule ClassDefStyle do
+        use BuenaVista.Hydrator
+
+        style :component, :class_key, ~CSS"""
+          color: blue;
+        """
+      end
+
+      styles = ClassDefStyle.get_styles_map()
+      assert %BuenaVista.Hydrator.Style{} = Map.get(styles, {:component, :classes, :class_key})
+    end
+
+    test "Stores option style definition" do
+      defmodule OptionDefStyle do
+        use BuenaVista.Hydrator
+
+        style :component, :variant, :option, ~CSS"""
+          color: blue;
+        """
+      end
+
+      styles = OptionDefStyle.get_styles_map()
+      assert %BuenaVista.Hydrator.Style{} = Map.get(styles, {:component, :variant, :option})
+    end
+  end
+
+  describe "var macro: " do
     test "Allow binary variables" do
       defmodule BinaryVar do
         use BuenaVista.Hydrator
@@ -42,8 +70,8 @@ defmodule BuenaVista.HydratorTest do
     end
   end
 
-  describe "~VAR macro" do
-    test "with kernel function" do
+  describe "~VAR macro: " do
+    test "Can use kernel functions" do
       defmodule KernelFuncVar do
         use BuenaVista.Hydrator
 
@@ -56,7 +84,7 @@ defmodule BuenaVista.HydratorTest do
       assert variable.property == %{type: :var, raw_body: "floor(2.1)"}
     end
 
-    test "with imported function" do
+    test "Can use imported functions" do
       defmodule ImportedFuncVar do
         use BuenaVista.Hydrator
         import BuenaVista.Constants.DefaultSizes
@@ -70,7 +98,7 @@ defmodule BuenaVista.HydratorTest do
       assert variable.property == %{type: :var, raw_body: "size(2)"}
     end
 
-    test "with multiple function" do
+    test "Can use multiple functions" do
       defmodule MultipleFuncVar do
         use BuenaVista.Hydrator
         import BuenaVista.Constants.DefaultSizes

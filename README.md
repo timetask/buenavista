@@ -26,12 +26,13 @@
 
 [x] Allow `$variable` format in ~CSS.
 [x] Allow `$component__other` format in ~CSS
-[ ] Allow access to a particular variant css class.
+[x] Update style macro params
 
 [ ] Add a way to define global css.
 [ ] Add super() call for hydrators.
-
 [ ] Remove break list when ~CSS element is a scope.
+
+[ ] Allow access to a particular variant css class.
 
 ### Inspiration
 

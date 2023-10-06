@@ -52,12 +52,19 @@ defmodule BuenaVista.Hydrator do
     end
   end
 
-  defmacro style(path, css) when is_list(path) do
-    quote bind_quoted: [path: path, css: css] do
-      key = if is_tuple(path), do: path, else: List.to_tuple(path)
-      style_def = %Style{key: key, css: css}
+  defmacro style(component, class_key, css) when is_atom(component) and is_atom(class_key) do
+    quote bind_quoted: [component: component, class_key: class_key, css: css] do
+      style_def = %Style{key: {component, :classes, class_key}, css: css}
 
-      Module.put_attribute(__MODULE__, :__style_defs__, style_def)
+      :ok = Module.put_attribute(__MODULE__, :__style_defs__, style_def)
+    end
+  end
+
+  defmacro style(component, variant, option, css) when is_atom(component) and is_atom(option) and is_atom(variant) do
+    quote bind_quoted: [component: component, variant: variant, option: option, css: css] do
+      style_def = %Style{key: {component, variant, option}, css: css}
+
+      :ok = Module.put_attribute(__MODULE__, :__style_defs__, style_def)
     end
   end
 
