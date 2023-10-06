@@ -1,4 +1,7 @@
 defmodule BuenaVista.Hydrator do
+  # ----------------------------------------
+  # Data Structures
+  # ----------------------------------------
   defmodule Variable do
     defstruct [:key, :css_key, :css_value, :property, :parent]
   end
@@ -7,9 +10,15 @@ defmodule BuenaVista.Hydrator do
     defstruct [:key, :css, :parent]
   end
 
+  # ----------------------------------------
+  # Macros
+  # ----------------------------------------
   defmacro var(key, value) when is_atom(key) do
     quote bind_quoted: [key: key, value: value] do
-      css_key = var_key_to_css_name(key)
+      css_key =
+        key
+        |> Atom.to_string()
+        |> String.replace("_", "-")
 
       {css_value, property} =
         case value do
@@ -52,7 +61,15 @@ defmodule BuenaVista.Hydrator do
     end
   end
 
+  # ----------------------------------------
+  # Persist Module Attribute
+  # ----------------------------------------
   def __before_compile__(env) do
+    store_variables(env)
+    store_styles(env)
+  end
+
+  defp store_variables(env) do
     parent = Module.get_attribute(env.module, :parent)
     local_variables = Module.get_attribute(env.module, :__var_defs__)
 
@@ -81,7 +98,10 @@ defmodule BuenaVista.Hydrator do
 
     # Stored in reverse so that group_by re sorts them
     Module.put_attribute(env.module, :variables, variables)
+  end
 
+  defp store_styles(env) do
+    parent = Module.get_attribute(env.module, :parent)
     local_styles = Module.get_attribute(env.module, :__style_defs__)
 
     styles =
@@ -104,6 +124,9 @@ defmodule BuenaVista.Hydrator do
     Module.put_attribute(env.module, :styles, styles)
   end
 
+  # ----------------------------------------
+  # Code Injection
+  # ----------------------------------------
   defmacro __using__(opts \\ []) do
     quote bind_quoted: [opts: opts] do
       @before_compile BuenaVista.Hydrator
@@ -167,11 +190,5 @@ defmodule BuenaVista.Hydrator do
         styles_map
       end
     end
-  end
-
-  def var_key_to_css_name(key) do
-    key
-    |> Atom.to_string()
-    |> String.replace("_", "-")
   end
 end
