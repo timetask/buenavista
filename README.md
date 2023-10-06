@@ -24,9 +24,8 @@
 
 ### Roadmap
 
-[ ] Remove the need to :classes when calling `css` and `class_name`
-[ ] Allow `$variable` format in ~CSS.
-[ ] Allow `$component__other` format in ~CSS
+[x] Allow `$variable` format in ~CSS.
+[x] Allow `$component__other` format in ~CSS
 [ ] Allow access to a particular variant css class.
 
 [ ] Add a way to define global css.

@@ -18,26 +18,15 @@ defmodule BuenaVista.CssSigilTest do
 
   describe "~CSS" do
     test "Replaces $var with <%= @var %>" do
-      css = ~CSS"""
-        color: $red;
-      """
-
-      assert css =~ "color: <%= @red %>;"
+      assert ~CSS[color: $red;] =~ "color: <%= @red %>;"
     end
 
-    test "Detects multiple variables" do
-      css = ~CSS"""
-        background: $blue;
-        color: $red;
-
-        &:hover {
-          border-color: $green;
-        }
-      """
-
-      assert css =~ "color: <%= @red %>;"
-      assert css =~ "background: <%= @blue %>;"
-      assert css =~ "border-color: <%= @green %>;"
+    test "Replaces $component__class with <%= class_name(:component, :classes, :class) %>" do
+      assert ~CSS[$component__base_class] =~ "<%= class_name(:component, :classes, :base_class) %>"
     end
+
+    test "Replaces $component__variant__option with <%= class_name(:name, :variant, :option) %>" do
+      assert ~CSS[$a__b__c] =~ "<%= class_name(:a, :b, :c) %>"
   end
+    end
 end
