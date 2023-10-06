@@ -214,8 +214,8 @@ defmodule BuenaVista.Generator do
   defp style_def(styles, component, class_key) do
     if style = Map.get(styles, {component, :classes, class_key}) do
       if style.parent,
-        do: ~s/# style :#{component}, :#{class_key}, ~CSS""" \n# #{style.css |> comment_lines()}  """/,
-        else: ~s/style :#{component}, :#{class_key}, ~CSS"""\n #{style.css}    """/
+        do: ~s/# style :#{component}, :#{class_key}, ~CSS""" \n# #{style.raw_css |> comment_lines()}  """/,
+        else: ~s/style :#{component}, :#{class_key}, ~CSS"""\n #{style.raw_css}    """/
     else
       ~s/# style :#{component}, :#{class_key}, ~CSS"""\n# """/
     end
@@ -224,8 +224,8 @@ defmodule BuenaVista.Generator do
   defp style_def(styles, component, variant, option) do
     if style = Map.get(styles, {component, variant, option}) do
       if style.parent,
-        do: ~s/# style :#{component}, :#{variant}, :#{option}, ~CSS""" \n# #{style.css |> comment_lines()}  """/,
-        else: ~s/style :#{component}, :#{variant}, :#{option}, ~CSS"""\n #{style.css}    """/
+        do: ~s/# style :#{component}, :#{variant}, :#{option}, ~CSS""" \n# #{style.raw_css |> comment_lines()}  """/,
+        else: ~s/style :#{component}, :#{variant}, :#{option}, ~CSS"""\n #{style.raw_css}    """/
     else
       ~s/# style :#{component}, :#{variant}, :#{option}, ~CSS"""\n# """/
     end

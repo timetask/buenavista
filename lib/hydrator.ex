@@ -7,7 +7,7 @@ defmodule BuenaVista.Hydrator do
   end
 
   defmodule Style do
-    defstruct [:key, :css, :parent]
+    defstruct [:key, :raw_css, :eex_css, :parent]
   end
 
   # ----------------------------------------
@@ -54,7 +54,8 @@ defmodule BuenaVista.Hydrator do
 
   defmacro style(component, class_key, css) when is_atom(component) and is_atom(class_key) do
     quote bind_quoted: [component: component, class_key: class_key, css: css] do
-      style_def = %Style{key: {component, :classes, class_key}, css: css}
+      {raw_css, eex_css} = css
+      style_def = %Style{key: {component, :classes, class_key}, raw_css: raw_css, eex_css: eex_css}
 
       :ok = Module.put_attribute(__MODULE__, :__style_defs__, style_def)
     end
@@ -62,7 +63,8 @@ defmodule BuenaVista.Hydrator do
 
   defmacro style(component, variant, option, css) when is_atom(component) and is_atom(option) and is_atom(variant) do
     quote bind_quoted: [component: component, variant: variant, option: option, css: css] do
-      style_def = %Style{key: {component, variant, option}, css: css}
+      {raw_css, eex_css} = css
+      style_def = %Style{key: {component, variant, option}, raw_css: raw_css, eex_css: eex_css}
 
       :ok = Module.put_attribute(__MODULE__, :__style_defs__, style_def)
     end
@@ -156,7 +158,7 @@ defmodule BuenaVista.Hydrator do
       def css(component, variant, option, variables) do
         case Map.get(get_styles_map(), {component, variant, option}) do
           %Style{} = style ->
-            css_template = "<% import #{inspect(__MODULE__)}, only: [class_name: 3]%>" <> style.css
+            css_template = "<% import #{inspect(__MODULE__)}, only: [class_name: 3]%>" <> style.eex_css
             EEx.eval_string(css_template, assigns: variables)
 
           _ ->

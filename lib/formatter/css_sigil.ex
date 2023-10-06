@@ -7,13 +7,16 @@ defmodule BuenaVista.CssSigils do
     replaced_vars =
       Regex.replace(@var_pattern, raw_body, "<%= @\\1 %>", global: true)
 
-    Regex.replace(@class_pattern, replaced_vars, fn original, captured_class_var ->
-      case String.split(captured_class_var, "__") do
-        [component, class_key] -> "<%= class_name(:#{component}, :classes, :#{class_key}) %>"
-        [component, variant, option] -> "<%= class_name(:#{component}, :#{variant}, :#{option}) %>"
-        _ -> original
-      end
-    end)
+    formatted_body =
+      Regex.replace(@class_pattern, replaced_vars, fn original, captured_class_var ->
+        case String.split(captured_class_var, "__") do
+          [component, class_key] -> "<%= class_name(:#{component}, :classes, :#{class_key}) %>"
+          [component, variant, option] -> "<%= class_name(:#{component}, :#{variant}, :#{option}) %>"
+          _ -> original
+        end
+      end)
+
+    {raw_body, formatted_body}
   end
 
   defmacro sigil_VAR({:<<>>, _, [raw_body]}, []) do
