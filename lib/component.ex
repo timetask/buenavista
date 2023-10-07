@@ -2,7 +2,7 @@ defmodule BuenaVista.Component do
   use Phoenix.Component
 
   alias __MODULE__
-  defstruct [:name, :variants, :classes, :module]
+  defstruct [:name, :variants, :classes, :module, :attrs, :slots]
 
   defmodule Variant do
     defstruct [:name, :options, :default]
@@ -77,7 +77,26 @@ defmodule BuenaVista.Component do
           {class_key, class_name}
         end
 
-      component = %Component{name: component_name, variants: variants, classes: classes, module: env.module}
+      phoenix_components = Map.get(Module.get_attribute(env.module, :__components__), component_name)
+
+      excluded_names = for variant <- variants, do: variant.name
+      excluded_names = [:nomenclator | excluded_names]
+
+      attrs =
+        phoenix_components
+        |> Map.get(:attrs)
+        |> Enum.reject(fn attr ->
+          attr.name in excluded_names or attr.type == :global
+        end)
+
+      component = %Component{
+        name: component_name,
+        variants: variants,
+        classes: classes,
+        module: env.module,
+        attrs: attrs,
+        slots: phoenix_components.slots
+      }
 
       Module.put_attribute(env.module, :__bv_components__, {component.name, component})
     end

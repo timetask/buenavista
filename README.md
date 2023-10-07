@@ -27,7 +27,11 @@
 [x] Allow `$variable` format in ~CSS.
 [x] Allow `$component__other` format in ~CSS
 [x] Update style macro params
+[x] Add attributes and slots to component definition
 
+[ ] Create Galeria component config
+
+[ ] Fix comma separated scope indentation
 [ ] Add a way to define global css.
 [ ] Add super() call for hydrators.
 [ ] Remove break list when ~CSS element is a scope.
