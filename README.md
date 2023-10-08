@@ -1,42 +1,42 @@
 ```
 
+      〰                                                              〰
+                                          〰
+        ██████  ██    ██ ███████ ███    ██  █████      ██    ██ ██ ███████ ████████  █████
+        ██   ██ ██    ██ ██      ████   ██ ██   ██     ██    ██ ██ ██         ██    ██   ██    〰
+        ██████  ██    ██ █████   ██ ██  ██ ███████     ██    ██ ██ ███████    ██    ███████
+        ██   ██ ██    ██ ██      ██  ██ ██ ██   ██      ██  ██  ██      ██    ██    ██   ██
+        ██████   ██████  ███████ ██   ████ ██   ██       ████   ██ ███████    ██    ██   ██
 
-          〰                                     〰         〰
-             ██████  ██    ██ ███████ ███    ██  █████      ██    ██ ██ ███████ ████████  █████
-             ██   ██ ██    ██ ██      ████   ██ ██   ██     ██    ██ ██ ██         ██    ██   ██    〰
-             ██████  ██    ██ █████   ██ ██  ██ ███████     ██    ██ ██ ███████    ██    ███████
-             ██   ██ ██    ██ ██      ██  ██ ██ ██   ██      ██  ██  ██      ██    ██    ██   ██
-             ██████   ██████  ███████ ██   ████ ██   ██       ████   ██ ███████    ██    ██   ██
-    〰
-                                          - Phoenix Components -
+  〰                        - Phoenix Component Library and Design System -
 
-                                           Demo - Docs - Donate
+                                      Visit our online Galeria
 
-   〜      〜          〜       〜           〜       〜          〜       〜    〜      〜          〜       〜
+      〜          〜       〜           〜       〜          〜       〜    〜      〜          〜
 
-〜  ⏅   〜    〜〜     ⏅     〜〜     〜〜     〜〜     〜〜     〜〜     〜〜     〜〜     〜〜     〜〜     〜〜
- 〜        〜       〜            〜        〜            〜           〜              〜        〜
-   〜 〜   ⏅ 〜〜    ⏅  〜   〜   ⏅    〜〜〜   〜〜〜    〜〜〜   〜〜〜    〜〜〜   〜〜〜    〜〜〜   〜〜    〜〜〜
- 〜〜〜   〜〜    〜〜〜    〜〜〜   〜〜 〜  〜〜〜    〜 〜   〜〜    〜〜〜    〜 〜   〜〜    〜〜〜    〜 〜   〜〜
- 〜〜〜 〜〜 〜〜〜〜 〜〜 〜〜  〜〜〜〜〜〜 〜〜〜 〜〜〜 〜〜〜  〜〜〜〜 〜〜 〜〜〜〜〜 〜〜〜  〜〜〜〜〜〜〜〜  〜〜〜〜〜
- 〜〜〜〜〜〜〜 〜〜〜〜〜〜〜 〜〜〜  〜〜〜〜〜〜〜 〜〜〜〜〜〜〜 〜〜〜  〜〜〜〜〜〜〜 〜〜〜〜〜〜〜 〜〜〜  〜〜〜〜〜〜〜
+   〜    〜〜     ⏅     〜〜     〜〜     〜〜     〜〜     〜〜     〜〜     〜〜     〜〜     〜〜
+      〜       〜            〜        〜            〜           〜     ⏅        〜        〜
+ 〜   ⏅ 〜〜    ⏅  〜   〜   ⏅    〜〜〜   〜〜〜    〜〜〜   〜〜〜    〜〜〜   〜〜〜    〜〜〜
+〜   〜〜    〜〜〜    〜〜〜   〜〜 〜〜┏━━━━━━━━━━━━━━━━━━┓ 〜〜〜    〜 〜   〜〜    〜〜〜    〜
+〜 〜〜 〜〜〜〜 〜〜 〜〜  〜〜〜〜〜〜 ┃ ▾ How it works ▾ ┃〜 〜〜〜 〜〜〜 〜〜〜  〜〜〜〜 〜〜
+〜〜〜〜〜 〜〜〜〜〜〜〜 〜〜〜  〜〜〜 ┗━━━━━━━━━━━━━━━━━━┛〜〜〜〜 〜〜〜〜〜〜〜 〜〜〜  〜〜〜
 ```
 
-### Roadmap
+### Road to public release
 
-[x] Allow `$variable` format in ~CSS.
-[x] Allow `$component__other` format in ~CSS
-[x] Update style macro params
-[x] Add attributes and slots to component definition
+- [x] Allow `$variable` format in ~CSS.
+- [x] Allow `$component__other` format in ~CSS
+- [x] Update style macro params
+- [x] Add attributes and slots to component definition
 
-[ ] Create Galeria component config
+- [ ] Create Galeria component config
 
-[ ] Fix comma separated scope indentation
-[ ] Add a way to define global css.
-[ ] Add super() call for hydrators.
-[ ] Remove break list when ~CSS element is a scope.
+- [ ] Fix comma separated scope indentation
+- [ ] Add a way to define global css.
+- [ ] Add super() call for hydrators.
+- [ ] Remove break list when ~CSS element is a scope.
 
-[ ] Allow access to a particular variant css class.
+- [ ] Allow access to a particular variant css class.
 
 ### Inspiration
 
