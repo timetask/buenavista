@@ -1,13 +1,9 @@
 defmodule BuenaVista.Themes do
-  alias BuenaVista.Helpers
-
-  @default_theme_name ""
-
   @themes (
             apps = Application.compile_env(:buenavista, :apps)
             config = Application.compile_env(:buenavista, :config)
             themes = Application.compile_env(:buenavista, :themes)
-            Helpers.build_themes(apps: apps, config: config, themes: themes)
+            BuenaVista.ConfigReader.build_themes(apps: apps, config: config, themes: themes)
           )
 
   def get_themes(), do: @themes
@@ -20,7 +16,10 @@ defmodule BuenaVista.Themes do
   end
 
   def get_default_theme() do
-    find_theme(@default_theme_name)
+    case Enum.find(get_themes(), fn theme -> theme.default == true end) do
+      %BuenaVista.Theme{} = theme -> {:ok, theme}
+      _ -> {:error, :not_found}
+    end
   end
 
   def current_nomenclator() do
