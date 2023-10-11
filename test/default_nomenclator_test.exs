@@ -1,6 +1,6 @@
 defmodule BuenaVista.DefaultNomenclatorTest do
   use ExUnit.Case
-  alias BuenaVista.Template.DefaultNomenclator
+  alias BuenaVista.Themes.DefaultNomenclator
 
   test "Component variant option concatenation" do
     assert DefaultNomenclator.class_name(:first, :second, :third) == "first-third"

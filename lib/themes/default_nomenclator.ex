@@ -1,4 +1,4 @@
-defmodule BuenaVista.Template.DefaultNomenclator do
+defmodule BuenaVista.Themes.DefaultNomenclator do
   use BuenaVista.Nomenclator
 
   def class_name(_, _, :none), do: nil

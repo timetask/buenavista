@@ -1,4 +1,4 @@
-defmodule BuenaVista.Template.EmptyHydrator do
+defmodule BuenaVista.Themes.EmptyHydrator do
   use BuenaVista.Hydrator
 
   def css(_component, _variant, _option, _variables), do: ""

@@ -18,7 +18,7 @@ defmodule Mix.Tasks.Bv.Gen.Config do
   defp get_themes(parsed_opts) do
     if Keyword.get(parsed_opts, :core, false),
       do: get_core_themes(),
-      else: BuenaVista.Config.get_themes() |> filter_by_name(parsed_opts)
+      else: BuenaVista.Themes.get_themes() |> filter_by_name(parsed_opts)
   end
 
   defp filter_by_name(themes, parsed_opts) do
@@ -33,10 +33,10 @@ defmodule Mix.Tasks.Bv.Gen.Config do
     themes = [
       [
         name: "default",
-        nomenclator: BuenaVista.Template.DefaultNomenclator,
+        nomenclator: BuenaVista.Themes.DefaultNomenclator,
         hydrator: [
-          parent: BuenaVista.Template.EmptyHydrator,
-          base_module_name: BuenaVista.Template,
+          parent: BuenaVista.Themes.EmptyHydrator,
+          base_module_name: BuenaVista.Themes,
           out_dir: "lib/template",
           imports: [
             BuenaVista.Constants.DefaultColors,

@@ -64,7 +64,7 @@ defmodule BuenaVista.InputTest do
     test "Can assign a state class via module config" do
       defmodule NewNomenclator do
         @behaviour BuenaVista.Nomenclator
-        @delegate BuenaVista.Template.DefaultNomenclator
+        @delegate BuenaVista.Themes.DefaultNomenclator
 
         def class_name(:label, :state, :danger), do: "peligro!"
         defdelegate class_name(a, b, c), to: @delegate
@@ -84,7 +84,7 @@ defmodule BuenaVista.InputTest do
     test "Can assign a base_class via module config" do
       defmodule NewNomenclator2 do
         @behaviour BuenaVista.Nomenclator
-        @delegate BuenaVista.Template.DefaultNomenclator
+        @delegate BuenaVista.Themes.DefaultNomenclator
 
         def class_name(:label, :classes, :base_class), do: "form-label"
         defdelegate class_name(a, b, c), to: @delegate

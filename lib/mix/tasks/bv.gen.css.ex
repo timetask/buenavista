@@ -9,7 +9,7 @@ defmodule Mix.Tasks.Bv.Gen.Css do
   def run(opts) do
     {parsed_opts, _, _} = OptionParser.parse(opts, strict: [theme: :keep])
 
-    themes = BuenaVista.Config.get_themes() |> filter_by_name(parsed_opts)
+    themes = BuenaVista.Themes.get_themes() |> filter_by_name(parsed_opts)
     apps = @component_apps
 
     BuenaVista.Generator.generate_css_files(themes, apps)

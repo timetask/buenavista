@@ -1,7 +1,7 @@
-defmodule BuenaVista.Template.DefaultHydrator do
+defmodule BuenaVista.Themes.DefaultHydrator do
   use BuenaVista.Hydrator,
-    nomenclator: BuenaVista.Template.DefaultNomenclator,
-    parent: BuenaVista.Template.EmptyHydrator
+    nomenclator: BuenaVista.Themes.DefaultNomenclator,
+    parent: BuenaVista.Themes.EmptyHydrator
 
   import BuenaVista.Constants.DefaultColors
   import BuenaVista.Constants.DefaultSizes
