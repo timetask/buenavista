@@ -1,5 +1,5 @@
 defmodule BuenaVista.Components.ErrorHelpers do
-  import BuenaVista.Config, only: [gettext: 0]
+  import BuenaVista.Themes, only: [gettext: 0]
 
   def error_text({msg, opts}) do
     if count = opts[:count] do

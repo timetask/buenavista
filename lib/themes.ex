@@ -1,11 +1,14 @@
-defmodule BuenaVista.Config do
+defmodule BuenaVista.Themes do
   alias BuenaVista.Helpers
 
-  @default_theme_name Application.compile_env(:buenavista, :default_theme)
+  @default_theme_name ""
 
-  @themes (for theme <- Application.compile_env(:buenavista, :themes) || [] do
-             Helpers.build_theme(theme)
-           end)
+  @themes (
+            apps = Application.compile_env(:buenavista, :apps)
+            config = Application.compile_env(:buenavista, :config)
+            themes = Application.compile_env(:buenavista, :themes)
+            Helpers.build_themes(apps: apps, config: config, themes: themes)
+          )
 
   def get_themes(), do: @themes
 
@@ -21,7 +24,7 @@ defmodule BuenaVista.Config do
   end
 
   def current_nomenclator() do
-    BuenaVista.Template.DefaultNomenclator
+    BuenaVista.Themes.DefaultNomenclator
   end
 
   def available_themes() do
