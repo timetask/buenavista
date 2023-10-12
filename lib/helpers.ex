@@ -1,6 +1,5 @@
 defmodule BuenaVista.Helpers do
   import Macro, only: [underscore: 1]
-  import IO.ANSI
 
   @doc """
   Returns all BuenaVista modules and components.
@@ -42,11 +41,8 @@ defmodule BuenaVista.Helpers do
 
   def write_and_format_module(file_path, content) do
     :ok = file_path |> Path.dirname() |> File.mkdir_p()
-    filename = for _ <- 1..5, into: "", do: <<Enum.random(~c"0123456789abcdef")>>
-    tmp_file = "/tmp/tmp_#{filename}.ex"
-    :ok = File.write(tmp_file, content)
-    System.cmd("mix", ["format", tmp_file])
-    File.rename(tmp_file, file_path)
-    IO.puts(green() <> "* creating " <> reset() <> file_path)
+    {formatter, _} = Mix.Tasks.Format.formatter_for_file("source.ex")
+    File.write(formatter.(content), file_path)
+    IO.puts(IO.ANSI.green() <> "* creating " <> IO.ANSI.reset() <> file_path)
   end
 end
