@@ -137,13 +137,13 @@ defmodule BuenaVista.ConfigReader do
   Generates module names for nomenclators and hydrators
 
   iex> module_name(:buenavista, "admin", MyApp.Themes, :nomenclator)
-  MyApp.Themes.AdminBuenvistaNomenclator
+  MyApp.Themes.Admin.BuenavistaNomenclator
 
   iex> module_name(:my_components, "admin_light", MyApp.Themes, :nomenclator)
-  MyApp.Themes.AdminMyComponentsLightNomenclator
+  MyApp.Themes.AdminLight.MyComponentsNomenclator
 
   iex> module_name(:buenavista, "admin_dark", MyApp.Config.Themes, :hydrator)
-  MyApp.Config.Themes.AdminDarkHydrator
+  MyApp.Config.Themes.AdminDark.BuenavistaHydrator
   """
   def module_name(app_name, theme_name, base_module_name, module_type) when module_type in [:nomenclator, :hydrator] do
     Module.concat([base_module_name, camelize(theme_name), camelize("#{app_name}_#{module_type}")])
@@ -153,10 +153,10 @@ defmodule BuenaVista.ConfigReader do
   Generates the path where to write the specified module.
 
   iex> config_file_path(:buenavista, "admin", "/tmp/themes", :nomenclator)
-  "/tmp/themes/admin_buenavista_nomenclator.ex"
+  "/tmp/themes/admin/buenavista_nomenclator.ex"
 
-  iex> config_file_path(:my_app, "admin_dark", "lib/components/config", :hydrator)
-  "lib/components/config/admin_my_app_dark_hydrator.ex"
+  iex> config_file_path(:my_app, "admin_dark", "lib/themes", :hydrator)
+  "lib/themes/admin_dark/my_app_hydrator.ex"
   """
   def config_file_path(app_name, theme_name, out_dir, module_type) when module_type in [:nomenclator, :hydrator] do
     filename = "#{underscore(Atom.to_string(app_name))}_#{module_type}.ex"
