@@ -1,13 +1,26 @@
 defmodule BuenaVista.Hydrator do
+  use TypedStruct
+
   # ----------------------------------------
   # Data Structures
   # ----------------------------------------
   defmodule Variable do
-    defstruct [:key, :css_key, :css_value, :property, :parent]
+    typedstruct enforce: true do
+      field :key, String.t()
+      field :css_key, String.t()
+      field :css_value, String.t()
+      field :property, map()
+      field :parent, atom(), enforce: false
+    end
   end
 
   defmodule Style do
-    defstruct [:key, :raw_css, :eex_css, :parent]
+    typedstruct enforce: true do
+      field :key, String.t()
+      field :raw_css, String.t()
+      field :eex_css, String.t()
+      field :parent, atom(), enforce: false
+    end
   end
 
   # ----------------------------------------

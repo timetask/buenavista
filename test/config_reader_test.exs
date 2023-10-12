@@ -35,17 +35,17 @@ defmodule BuenaVista.ConfigReaderTest do
                  themes_dir: "lib/themes",
                  css_dir: "lib/assets/themes",
                  extend: :hydrator,
-                 gen_css?: true,
-                 default?: true,
-                 name: "light",
+                 gen_css?: false,
+                 default?: false,
+                 name: "base",
                  apps: [
                    %BuenaVista.Theme.App{
                      hydrator: %BuenaVista.Theme.Hydrator{
                        overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
-                       file: "lib/themes/light/timetask_hydrator.ex",
-                       parent_module: TestApp.Themes.Base.TimetaskHydrator,
-                       module: TestApp.Themes.Light.TimetaskHydrator
+                       file: "lib/themes/base/timetask_hydrator.ex",
+                       parent_module: BuenaVista.Themes.DefaultHydrator,
+                       module: TestApp.Themes.Base.TimetaskHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
                        overridable?: false,
@@ -59,9 +59,9 @@ defmodule BuenaVista.ConfigReaderTest do
                      hydrator: %BuenaVista.Theme.Hydrator{
                        overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
-                       file: "lib/themes/light/buenavista_components_hydrator.ex",
-                       parent_module: TestApp.Themes.Base.BuenavistaComponentsHydrator,
-                       module: TestApp.Themes.Light.BuenavistaComponentsHydrator
+                       file: "lib/themes/base/buenavista_components_hydrator.ex",
+                       parent_module: BuenaVista.Themes.DefaultHydrator,
+                       module: TestApp.Themes.Base.BuenavistaComponentsHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
                        overridable?: false,
@@ -119,17 +119,17 @@ defmodule BuenaVista.ConfigReaderTest do
                  themes_dir: "lib/themes",
                  css_dir: "lib/assets/themes",
                  extend: :hydrator,
-                 gen_css?: false,
-                 default?: false,
-                 name: "base",
+                 gen_css?: true,
+                 default?: true,
+                 name: "light",
                  apps: [
                    %BuenaVista.Theme.App{
                      hydrator: %BuenaVista.Theme.Hydrator{
                        overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
-                       file: "lib/themes/base/timetask_hydrator.ex",
-                       parent_module: BuenaVista.Themes.DefaultHydrator,
-                       module: TestApp.Themes.Base.TimetaskHydrator
+                       file: "lib/themes/light/timetask_hydrator.ex",
+                       parent_module: TestApp.Themes.Base.TimetaskHydrator,
+                       module: TestApp.Themes.Light.TimetaskHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
                        overridable?: false,
@@ -143,9 +143,9 @@ defmodule BuenaVista.ConfigReaderTest do
                      hydrator: %BuenaVista.Theme.Hydrator{
                        overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
-                       file: "lib/themes/base/buenavista_components_hydrator.ex",
-                       parent_module: BuenaVista.Themes.DefaultHydrator,
-                       module: TestApp.Themes.Base.BuenavistaComponentsHydrator
+                       file: "lib/themes/light/buenavista_components_hydrator.ex",
+                       parent_module: TestApp.Themes.Base.BuenavistaComponentsHydrator,
+                       module: TestApp.Themes.Light.BuenavistaComponentsHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
                        overridable?: false,

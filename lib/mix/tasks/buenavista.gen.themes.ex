@@ -6,9 +6,10 @@ defmodule Mix.Tasks.Buenavista.Gen.Themes do
 
   @shortdoc "(Re)Generates Nomenclator and Hydrator modules"
   def run(opts) do
-    {parsed_opts, _, _} = OptionParser.parse(opts, strict: [core: :boolean])
+    {parsed_opts, _, _} = OptionParser.parse(opts, strict: [core: :boolean, theme: :keep])
 
     themes = get_themes(parsed_opts)
+    
 
     BuenaVista.Generator.generate_theme_files(themes)
   end

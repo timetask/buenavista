@@ -1,13 +1,32 @@
 defmodule BuenaVista.Component do
   use Phoenix.Component
-
+  use TypedStruct
+  
   alias __MODULE__
-  defstruct [:name, :variants, :classes, :module, :attrs, :slots]
 
+  # ----------------------------------------
+  # Data Structures
+  # ----------------------------------------
   defmodule Variant do
-    defstruct [:name, :options, :default]
+    typedstruct do
+      field :name, String.t()
+      field :options, list(atom())
+      field :default, atom()
+    end
   end
 
+  typedstruct do
+    field :name, String.t()
+    field :variants, list(Variant.t())
+    field :classes, list(atom())
+    field :module, atom()
+    field :attrs, list(map())
+    field :slots, list(map())
+  end
+
+  # ----------------------------------------
+  # Macros
+  # ----------------------------------------
   defmacro variant(name, options, default)
            when is_atom(name) and is_list(options) and is_atom(default) do
     quote bind_quoted: [name: name, options: options, default: default] do
@@ -104,6 +123,9 @@ defmodule BuenaVista.Component do
     :ok
   end
 
+  # ----------------------------------------
+  # Persist Module Attribute
+  # ----------------------------------------
   def __before_compile__(env) do
     components = Module.get_attribute(env.module, :__bv_components__)
     Module.put_attribute(env.module, :buenavista, components)
@@ -130,6 +152,9 @@ defmodule BuenaVista.Component do
     end
   end
 
+  # ----------------------------------------
+  # Code Injection
+  # ----------------------------------------
   defmacro __using__(_opts \\ []) do
     quote do
       use Phoenix.Component
@@ -203,6 +228,9 @@ defmodule BuenaVista.Component do
     end
   end
 
+  # ----------------------------------------
+  # Helpers
+  # ----------------------------------------
   def join_classes(class_list) when is_binary(class_list), do: class_list
 
   def join_classes(class_list) when is_list(class_list) do

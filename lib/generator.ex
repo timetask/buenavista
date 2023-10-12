@@ -52,7 +52,7 @@ defmodule BuenaVista.Generator do
                     {modules_cache, modules}
                 end
 
-              raw_css = generate_module_raw_css(theme, app, modules)
+              raw_css = generate_module_raw_css(app, modules)
 
               {modules_cache, [{app, raw_css} | all_raw_css]}
           end
@@ -228,16 +228,13 @@ defmodule BuenaVista.Generator do
     end
   end
 
-  defp generate_module_raw_css(%Theme{} = theme, %Theme.App{} = app, modules) do
+  defp generate_module_raw_css(%Theme.App{} = app, modules) do
     variables =
       for {_, variable} <- app.hydrator.module.get_variables(), into: %{} do
         {variable.key, variable.css_value}
       end
 
-    for {module, components} <- modules do
-      module_name = Helpers.last_module_alias(module)
-      module_filename = "#{module_name}.css"
-      module_path = Path.join([theme.css_dir, theme.name, Atom.to_string(app.name), module_filename])
+    for {_module, components} <- modules do
 
       assigns = [
         app: app,
@@ -306,7 +303,7 @@ defmodule BuenaVista.Generator do
 
     assigns = [
       theme: theme,
-      all_raw_css: all_raw_css 
+      all_raw_css: all_raw_css
     ]
 
     create_file(root_path, root_template(assigns), force: true)
