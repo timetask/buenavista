@@ -3,8 +3,8 @@ defmodule BuenaVista.Themes.DefaultHydrator do
     nomenclator: BuenaVista.Themes.DefaultNomenclator,
     parent: BuenaVista.Themes.EmptyHydrator
 
-  import BuenaVista.Constants.DefaultColors
-  import BuenaVista.Constants.DefaultSizes
+  import BuenaVista.Constants.TailwindColors
+  import BuenaVista.Constants.TailwindSizes
 
   # ---------------------------------------------------------------------
   # Variables

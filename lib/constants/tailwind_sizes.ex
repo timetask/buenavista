@@ -1,4 +1,4 @@
-defmodule BuenaVista.Constants.DefaultSizes do
+defmodule BuenaVista.Constants.TailwindSizes do
   def size(0), do: "0px"
   def size(0.25), do: "0.125rem"
   def size(0.5), do: "0.125rem"

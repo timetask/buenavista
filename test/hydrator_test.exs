@@ -87,7 +87,7 @@ defmodule BuenaVista.HydratorTest do
     test "Can use imported functions" do
       defmodule ImportedFuncVar do
         use BuenaVista.Hydrator
-        import BuenaVista.Constants.DefaultSizes
+        import BuenaVista.Constants.TailwindSizes
 
         var :padding, ~VAR[size(2)]
       end
@@ -101,7 +101,7 @@ defmodule BuenaVista.HydratorTest do
     test "Can use multiple functions" do
       defmodule MultipleFuncVar do
         use BuenaVista.Hydrator
-        import BuenaVista.Constants.DefaultSizes
+        import BuenaVista.Constants.TailwindSizes
 
         var :padding, ~VAR[size(2) size(4)]
       end

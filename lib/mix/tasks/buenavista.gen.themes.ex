@@ -37,8 +37,8 @@ defmodule Mix.Tasks.Buenavista.Gen.Themes do
         extend: :hydrator,
         themes_dir: "lib/themes",
         hydrator_imports: [
-          BuenaVista.Constants.DefaultColors,
-          BuenaVista.Constants.DefaultSizes
+          BuenaVista.Constants.TailwindColors,
+          BuenaVista.Constants.TailwindSizes
         ]
       ],
       themes: [

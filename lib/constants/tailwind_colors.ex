@@ -1,4 +1,4 @@
-defmodule BuenaVista.Constants.DefaultColors do
+defmodule BuenaVista.Constants.TailwindColors do
   @colors %{
     black: "#000",
     white: "#fff",
