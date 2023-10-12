@@ -37,29 +37,28 @@ defmodule BuenaVista.Generator do
   end
 
   def generate_css_files(themes) do
-    %{css_dirs: css_dirs} =
-      for %Theme{gen_css?: true, css_dir: css_dir} = theme when is_binary(css_dir) <- themes,
-          %Theme.App{} = app <- theme.apps,
-          reduce: %{cache: %{}, css_dirs: %{}} do
-        %{cache: cache, css_dirs: css_dirs} ->
-          {modules, cache} =
-            case Map.get(cache, app.name) do
-              nil ->
-                modules = BuenaVista.Helpers.find_component_modules([app.name])
-                {modules, Map.put(cache, app.name, modules)}
+    for %Theme{gen_css?: true} = theme <- themes, reduce: %{} do
+      modules_cache ->
+        {modules_cache, all_raw_css} =
+          for %Theme.App{} = app <- theme.apps, reduce: {modules_cache, []} do
+            {modules_cache, all_raw_css} ->
+              {modules_cache, modules} =
+                case Map.get(modules_cache, app.name) do
+                  nil ->
+                    modules = BuenaVista.Helpers.find_component_modules([app.name])
+                    {Map.put(modules_cache, app.name, modules), modules}
 
-              modules ->
-                {modules, cache}
-            end
+                  modules ->
+                    {modules_cache, modules}
+                end
 
-          module_paths = generate_modules_css_files(theme, app, modules)
-          generate_root_css_file(theme, module_paths)
+              raw_css = generate_module_raw_css(theme, app, modules)
 
-          %{cache: cache, css_dirs: Map.put(css_dirs, css_dir, true)}
-      end
+              {modules_cache, [{app, raw_css} | all_raw_css]}
+          end
 
-    for {css_dir, true} <- css_dirs do
-      System.cmd("prettier", [css_dir, "--write"])
+        generate_theme_css_file(theme, all_raw_css)
+        modules_cache
     end
   end
 
@@ -229,31 +228,25 @@ defmodule BuenaVista.Generator do
     end
   end
 
-  defp generate_modules_css_files(%Theme{} = theme, %Theme.App{} = app, modules) do
-    hydrator = app.hydrator.module
-    nomenclator = app.nomenclator.module
-
+  defp generate_module_raw_css(%Theme{} = theme, %Theme.App{} = app, modules) do
     variables =
-      for {_, variable} <- hydrator.get_variables(), into: %{} do
-        {variable.key, "var(--#{variable.css_key})"}
+      for {_, variable} <- app.hydrator.module.get_variables(), into: %{} do
+        {variable.key, variable.css_value}
       end
 
     for {module, components} <- modules do
       module_name = Helpers.last_module_alias(module)
       module_filename = "#{module_name}.css"
-      module_path = Path.join([theme.css_dir, theme.name, app.name, module_filename])
+      module_path = Path.join([theme.css_dir, theme.name, Atom.to_string(app.name), module_filename])
 
       assigns = [
-        nomenclator: nomenclator,
-        hydrator: hydrator,
+        app: app,
         variables: variables,
         components: components,
         prefix: nil
       ]
 
-      create_file(module_path, component_template(assigns), force: true)
-
-      "#{theme.name}/#{module_filename}"
+      component_template(assigns)
     end
   end
 
@@ -281,12 +274,12 @@ defmodule BuenaVista.Generator do
   <%= for {_, component} <- @components do %>
 
   /* Component: <%= component.name  %> */
-  <%= @prefix %> .<%= apply(@nomenclator, :class_name, [component.name, :classes, :base_class]) %> {
-    <%= apply(@hydrator, :css, [component.name, :classes, :base_class, @variables]) %>
+  <%= @prefix %> .<%= apply(@app.nomenclator.module, :class_name, [component.name, :classes, :base_class]) %> {
+    <%= apply(@app.hydrator.module, :css, [component.name, :classes, :base_class, @variables]) %>
 
     <%= for {class_key, _} <- component.classes, class_key != :base_class do %>
-      <%= if class_name = apply(@nomenclator, :class_name, [component.name, :classes, class_key]) do %>
-      <%= if css = apply(@hydrator, :css, [component.name, :classes, class_key, @variables]) do %>
+      <%= if class_name = apply(@app.nomenclator.module, :class_name, [component.name, :classes, class_key]) do %>
+      <%= if css = apply(@app.hydrator.module, :css, [component.name, :classes, class_key, @variables]) do %>
       .<%= class_name %>{
         <%= css %>
       }<% end %><% end %>
@@ -296,8 +289,8 @@ defmodule BuenaVista.Generator do
       /* Variant: <%= variant.name %> */
 
       <%= for {option, _class} <- variant.options do %>
-        <%= if class_name = apply(@nomenclator, :class_name, [component.name, variant.name, option]) do %>
-        <%= if css = apply(@hydrator, :css, [component.name, variant.name, option, @variables]) do %>
+        <%= if class_name = apply(@app.nomenclator.module, :class_name, [component.name, variant.name, option]) do %>
+        <%= if css = apply(@app.hydrator.module, :css, [component.name, variant.name, option, @variables]) do %>
           &.<%= class_name %> {
             <%= css  %>
           }<% end %>
@@ -308,12 +301,12 @@ defmodule BuenaVista.Generator do
   <% end %>
   """)
 
-  defp generate_root_css_file(%Theme{} = theme, module_paths) when is_list(module_paths) do
+  defp generate_theme_css_file(%Theme{} = theme, all_raw_css) when is_list(all_raw_css) do
     root_path = Path.join(theme.css_dir, "#{theme.name}.css")
 
     assigns = [
-      module_paths: module_paths,
-      variables: []
+      theme: theme,
+      all_raw_css: all_raw_css 
     ]
 
     create_file(root_path, root_template(assigns), force: true)
@@ -325,17 +318,20 @@ defmodule BuenaVista.Generator do
                    BuenaVista Component Library
 
       > Source Code: https://github.com/timetask/buenavista
-      > Nomenclator: <%= Helpers.pretty_module(@nomenclator) %>
-      > Hydrator: <%= Helpers.pretty_module(@hydrator) %>
+      > Theme: <%= @theme.name %>
+      > Apps: <%= @theme.apps |> Enum.map(& &1.name) |>  Enum.join(", ") %>
 
   *********************************************************** */
-  <%= for path <- @module_paths do %>@import "<%= path %>";
-  <% end %>
-
-  :root {
-    <%= for {_, variable} <- @variables do %>--<%= variable.css_key %>: <%= variable.css_value %>;
+  <%= for {app, raw_css} <- @all_raw_css do %>
+    /* 
+      Application: :<%= app.name %>
+      Nomenclator: <%= Helpers.pretty_module(app.nomenclator.module) %>
+      Hydrator:    <%= Helpers.pretty_module(app.hydrator.module) %> 
+    */
+    <%= for css <- raw_css do %>
+    <%= css %>
     <% end %>
-  }
+  <% end %>
   """)
 
   # ----------------------------------------

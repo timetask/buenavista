@@ -42,7 +42,7 @@ defmodule BuenaVista.Helpers do
   def write_and_format_module(file_path, content) do
     :ok = file_path |> Path.dirname() |> File.mkdir_p()
     {formatter, _} = Mix.Tasks.Format.formatter_for_file("source.ex")
-    File.write(formatter.(content), file_path)
+    :ok = File.write(file_path, formatter.(content))
     IO.puts(IO.ANSI.green() <> "* creating " <> IO.ANSI.reset() <> file_path)
   end
 end
