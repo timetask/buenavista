@@ -65,8 +65,21 @@ defmodule BuenaVista.ConfigReader do
       apps =
         for app_config <- Keyword.get(validated_config, :apps) do
           app_name = Keyword.get(app_config, :name)
-          app_nomenclator = Keyword.get(app_config, :nomenclator)
-          app_hydrator = Keyword.get(app_config, :hydrator)
+
+          app_nomenclator = %BuenaVista.Theme.Nomenclator{
+            parent: BuenaVista.Themes.EmptyNomenclator,
+            module_name: Keyword.get(app_config, :nomenclator),
+            overridable?: false,
+            file: nil
+          }
+
+          app_hydrator = %BuenaVista.Theme.Hydrator{
+            parent: BuenaVista.Themes.EmptyHydrator,
+            module_name: Keyword.get(app_config, :hydrator),
+            imports: [],
+            overridable?: false,
+            file: nil
+          }
 
           {nomenclator, hydrator} =
             case {extend, parent_theme_name} do
@@ -80,7 +93,8 @@ defmodule BuenaVista.ConfigReader do
                 leaf_nomenclator = %BuenaVista.Theme.Nomenclator{
                   parent: nil,
                   module_name: module_name,
-                  file: file
+                  file: file,
+                  overridable?: true
                 }
 
                 {leaf_nomenclator, app_hydrator}
@@ -93,7 +107,8 @@ defmodule BuenaVista.ConfigReader do
                   parent: nil,
                   module_name: module_name,
                   file: file,
-                  imports: hydrator_imports
+                  imports: hydrator_imports,
+                  overridable?: true
                 }
 
                 {app_nomenclator, leaf_hydrator}
@@ -131,7 +146,7 @@ defmodule BuenaVista.ConfigReader do
   MyApp.Config.Themes.AdminDarkHydrator
   """
   def module_name(app_name, theme_name, base_module_name, module_type) when module_type in [:nomenclator, :hydrator] do
-    Module.concat([base_module_name, camelize("#{theme_name}_#{app_name}_#{module_type}")])
+    Module.concat([base_module_name, camelize(theme_name), camelize("#{app_name}_#{module_type}")])
   end
 
   @doc """
@@ -144,8 +159,8 @@ defmodule BuenaVista.ConfigReader do
   "lib/components/config/admin_my_app_dark_hydrator.ex"
   """
   def config_file_path(app_name, theme_name, out_dir, module_type) when module_type in [:nomenclator, :hydrator] do
-    filename = "#{underscore(theme_name)}_#{underscore(Atom.to_string(app_name))}_#{module_type}.ex"
+    filename = "#{underscore(Atom.to_string(app_name))}_#{module_type}.ex"
 
-    Path.join(out_dir, filename)
+    Path.join([out_dir, underscore(theme_name), filename])
   end
 end

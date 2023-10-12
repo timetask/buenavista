@@ -2,15 +2,15 @@ defmodule BuenaVista.CurrentThemePlug do
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    theme =
+    {:ok, theme} =
       if theme_name = conn.query_params["theme"] do
         case BuenaVista.Themes.find_theme(theme_name) do
-          {:ok, theme} -> theme
+          {:ok, theme} -> {:ok, theme}
           {:error, :not_found} -> BuenaVista.Themes.get_default_theme()
         end
       else
         case Plug.Conn.get_session(conn, :theme) do
-          %BuenaVista.Theme{} = theme -> theme
+          %BuenaVista.Theme{} = theme -> {:ok, theme}
           _ -> BuenaVista.Themes.get_default_theme()
         end
       end

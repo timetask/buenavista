@@ -41,6 +41,7 @@ defmodule BuenaVista.Helpers do
   end
 
   def write_and_format_module(file_path, content) do
+    :ok = file_path |> Path.dirname() |> File.mkdir_p()
     filename = for _ <- 1..5, into: "", do: <<Enum.random(~c"0123456789abcdef")>>
     tmp_file = "/tmp/tmp_#{filename}.ex"
     :ok = File.write(tmp_file, content)

@@ -20,6 +20,7 @@ defmodule BuenaVista.Hydrator do
         |> Atom.to_string()
         |> String.replace("_", "-")
 
+      # Move this code to sigil
       {css_value, property} =
         case value do
           {raw_body, formatted_code} ->
