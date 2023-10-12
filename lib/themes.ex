@@ -3,7 +3,10 @@ defmodule BuenaVista.Themes do
             apps = Application.compile_env(:buenavista, :apps)
             config = Application.compile_env(:buenavista, :config)
             themes = Application.compile_env(:buenavista, :themes)
-            BuenaVista.ConfigReader.build_themes(apps: apps, config: config, themes: themes)
+
+            if is_nil(apps) or is_nil(config) or is_nil(themes),
+              do: [],
+              else: BuenaVista.ConfigReader.build_themes(apps: apps, config: config, themes: themes)
           )
 
   def get_themes(), do: @themes

@@ -3,8 +3,8 @@ defmodule BuenaVista.Theme do
 
   defmodule Nomenclator do
     typedstruct enforce: true do
-      field :parent, atom()
-      field :module_name, atom()
+      field :module, atom()
+      field :parent_module, atom()
       field :file, String.t()
       field :overridable?, boolean()
     end
@@ -12,8 +12,8 @@ defmodule BuenaVista.Theme do
 
   defmodule Hydrator do
     typedstruct enforce: true do
-      field :parent, atom()
-      field :module_name, atom()
+      field :module, atom()
+      field :parent_module, atom()
       field :file, String.t()
       field :imports, list(String.t())
       field :overridable?, boolean()

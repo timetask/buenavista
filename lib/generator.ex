@@ -27,10 +27,10 @@ defmodule BuenaVista.Generator do
         sync_nomenclator(theme, app, modules)
         hydrator_path = sync_hydrator(theme, app, modules)
 
-        # unless is_nil(hydrator_path) do
-        #   Code.put_compiler_option(:ignore_module_conflict, true)
-        #   Code.compile_file(hydrator_path)
-        # end
+        unless is_nil(hydrator_path) do
+          Code.put_compiler_option(:ignore_module_conflict, true)
+          Code.compile_file(hydrator_path)
+        end
 
         cache
     end
@@ -71,7 +71,6 @@ defmodule BuenaVista.Generator do
       assigns = [
         app: app,
         existing_class_names: app.nomenclator.get_class_names(),
-        parent: app.nomenclator.parent,
         modules: modules
       ]
 
@@ -80,22 +79,22 @@ defmodule BuenaVista.Generator do
   end
 
   embed_template(:nomenclator, ~S/
-  defmodule <%= Helpers.pretty_module(@app.nomenclator.module_name) %> do
-    use BuenaVista.Nomenclator,<%= unless is_nil(@parent) do %>parent: <%= Helpers.pretty_module(@parent) %><% end %>
+  defmodule <%= Helpers.pretty_module(@app.nomenclator.module) %> do
+    use BuenaVista.Nomenclator,<%= unless is_nil(@app.nomenclator.parent_module) do %>parent: <%= Helpers.pretty_module(@app.nomenclator.parent_module) %><% end %>
 
     <%= for {module, components} <- @modules do %>
       <%= for {_, component} <- components do %>
         <%= comment_title_template(title: justify_between(Atom.to_string(component.name), Helpers.pretty_module(module), 68)) %>
 
         <%= for {class_key, _} <- component.classes do %>
-          <%= class_name_def(component.name, :classes, class_key, @existing_class_names, @parent) %><% end %>
+          <%= class_name_def(component.name, :classes, class_key, @existing_class_names, @app.nomenclator.parent_module) %><% end %>
         <%= for variant <- component.variants do %>
           <%= for {option, _} <- variant.options do %>
-            <%= class_name_def(component.name, variant.name, option, @existing_class_names, @parent) %><% end %>
+            <%= class_name_def(component.name, variant.name, option, @existing_class_names, @app.nomenclator.parent_module) %><% end %>
       <% end %>
     <% end %>
   <% end %>
-  <%= unless is_nil(@parent) do %>defdelegate class_name(component, variant, option), to: @parent<% end %>
+  <%= unless is_nil(@app.nomenclator.parent_module) do %>defdelegate class_name(component, variant, option), to: @app.nomenclator.parent_module<% end %>
   end
   /)
 
@@ -113,14 +112,14 @@ defmodule BuenaVista.Generator do
   defp sync_hydrator(%Theme{} = theme, %Theme.App{} = app, modules) do
     if theme.extend == :hydrator and app.hydrator.overridable? do
       {variables, styles} =
-        if function_exported?(app.hydrator.module_name, :__info__, 1) do
-          {app.hydrator.module_name.get_variables(), app.hydrator.module_name.get_styles_map()}
+        if function_exported?(app.hydrator.module, :__info__, 1) do
+          {app.hydrator.module.get_variables(), app.hydrator.module.get_styles_map()}
         else
-          if is_nil(app.hydrator.parent) do
+          if is_nil(app.hydrator.parent_module) do
             {[], %{}}
           else
-            {app.hydrator.parent.get_variables() |> set_parent_true(),
-             app.hydrator.parent.get_styles_map() |> set_parent_true()}
+            {app.hydrator.parent_module.get_variables() |> set_parent_true(),
+             app.hydrator.parent_module.get_styles_map() |> set_parent_true()}
           end
         end
 
@@ -171,12 +170,10 @@ defmodule BuenaVista.Generator do
   end
 
   embed_template(:hydrator, ~S/
-  defmodule <%= Helpers.pretty_module(@app.hydrator.module_name) %> do
+  defmodule <%= Helpers.pretty_module(@app.hydrator.module) %> do
     use BuenaVista.Hydrator, 
-      nomenclator: <%= Helpers.pretty_module(@app.nomenclator.module_name) %>
-      <%= unless is_nil(@app.hydrator.parent) do %>, 
-        parent: <%= Helpers.pretty_module(@app.hydrator.parent) %>
-      <% end %>
+      nomenclator: <%= Helpers.pretty_module(@app.nomenclator.module) %>,
+      parent: <%= Helpers.pretty_module(@app.hydrator.parent_module) %>
    
     <%= for import <- @app.hydrator.imports do %>
       import <%= Helpers.pretty_module(import) %><% end %>
@@ -193,10 +190,10 @@ defmodule BuenaVista.Generator do
     <%= comment_title_template(title: justify_between(Helpers.pretty_module(module), Atom.to_string(component.name), 68)) %>
 
     <%= for {class_key, _} <- component.classes do %>
-    <%= if apply(@app.nomenclator.module_name, :class_name, [component.name, :classes, class_key]) do %><%= style_def(@styles, component.name, class_key) %><% end %><% end %>
+    <%= if apply(@app.nomenclator.module, :class_name, [component.name, :classes, class_key]) do %><%= style_def(@styles, component.name, class_key) %><% end %><% end %>
     <%= for variant <- component.variants do %>
     <%= for {option, _} <- variant.options do %>
-    <%= if apply(@app.nomenclator.module_name, :class_name, [component.name, variant.name, option]) do %><%= style_def(@styles, component.name, variant.name, option) %><% end %><% end %>
+    <%= if apply(@app.nomenclator.module, :class_name, [component.name, variant.name, option]) do %><%= style_def(@styles, component.name, variant.name, option) %><% end %><% end %>
     <% end %>
     <% end %>
     <% end %>
@@ -233,8 +230,8 @@ defmodule BuenaVista.Generator do
   end
 
   defp generate_modules_css_files(%Theme{} = theme, %Theme.App{} = app, modules) do
-    hydrator = app.hydrator.module_name
-    nomenclator = app.nomenclator.module_name
+    hydrator = app.hydrator.module
+    nomenclator = app.nomenclator.module
 
     variables =
       for {_, variable} <- hydrator.get_variables(), into: %{} do

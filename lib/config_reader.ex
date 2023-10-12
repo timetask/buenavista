@@ -52,84 +52,103 @@ defmodule BuenaVista.ConfigReader do
 
   defp do_build_themes(validated_config) do
     config = Keyword.get(validated_config, :config)
+
+    {themes, _cache} =
+      for theme_config <- Keyword.get(validated_config, :themes), reduce: {[], %{}} do
+        {themes, cache} ->
+          {apps, cache} =
+            for app_config <- Keyword.get(validated_config, :apps), reduce: {[], cache} do
+              {apps, cache} ->
+                cache_key = cache_key(Keyword.get(theme_config, :name), Keyword.get(app_config, :name))
+
+                {nomenclator, hydrator} = get_app_nomenclator_and_hydrator(config, theme_config, app_config, cache)
+
+                app = %BuenaVista.Theme.App{
+                  name: Keyword.get(app_config, :name),
+                  nomenclator: nomenclator,
+                  hydrator: hydrator
+                }
+
+                cache_entry = %{nomenclator: nomenclator.module, hydrator: hydrator.module}
+                cache = Map.put(cache, cache_key, cache_entry)
+
+                {[app | apps], cache}
+            end
+
+          theme = %BuenaVista.Theme{
+            apps: apps,
+            name: Keyword.get(theme_config, :name),
+            extend: Keyword.get(config, :extend),
+            default?: Keyword.get(theme_config, :default?),
+            gen_css?: Keyword.get(theme_config, :gen_css?),
+            themes_dir: Keyword.get(config, :themes_dir),
+            css_dir: Keyword.get(config, :css_dir)
+          }
+
+          {[theme | themes], cache}
+      end
+
+    Enum.reverse(themes)
+  end
+
+  defp cache_key(theme_name, app_name) do
+    "#{theme_name}-#{app_name}"
+  end
+
+  defp get_app_nomenclator_and_hydrator(config, theme_config, app_config, cache) do
     base_module = Keyword.get(config, :base_module)
     extend = Keyword.get(config, :extend)
     themes_dir = Keyword.get(config, :themes_dir)
-    css_dir = Keyword.get(config, :css_dir)
     hydrator_imports = Keyword.get(config, :hydrator_imports)
+    theme_name = Keyword.get(theme_config, :name)
+    parent_theme_name = Keyword.get(theme_config, :parent)
+    app_name = Keyword.get(app_config, :name)
+    cache_key = cache_key(parent_theme_name, app_name)
 
-    for theme_config <- Keyword.get(validated_config, :themes) do
-      theme_name = Keyword.get(theme_config, :name)
-      parent_theme_name = Keyword.get(theme_config, :parent)
+    app_nomenclator = %BuenaVista.Theme.Nomenclator{
+      module: Keyword.get(app_config, :nomenclator, BuenaVista.Themes.EmptyNomenclator),
+      parent_module: BuenaVista.Themes.EmptyNomenclator,
+      overridable?: false,
+      file: nil
+    }
 
-      apps =
-        for app_config <- Keyword.get(validated_config, :apps) do
-          app_name = Keyword.get(app_config, :name)
+    app_hydrator = %BuenaVista.Theme.Hydrator{
+      module: Keyword.get(app_config, :hydrator, BuenaVista.Themes.EmptyHydrator),
+      parent_module: BuenaVista.Themes.EmptyHydrator,
+      imports: [],
+      overridable?: false,
+      file: nil
+    }
 
-          app_nomenclator = %BuenaVista.Theme.Nomenclator{
-            parent: BuenaVista.Themes.EmptyNomenclator,
-            module_name: Keyword.get(app_config, :nomenclator),
-            overridable?: false,
-            file: nil
-          }
+    case extend do
+      :nomenclator ->
+        module = module_name(app_name, theme_name, base_module, :nomenclator)
+        parent_module = get_in(cache, [cache_key, :hydrator]) || app_nomenclator.module
+        file = config_file_path(app_name, theme_name, themes_dir, :nomenclator)
 
-          app_hydrator = %BuenaVista.Theme.Hydrator{
-            parent: BuenaVista.Themes.EmptyHydrator,
-            module_name: Keyword.get(app_config, :hydrator),
-            imports: [],
-            overridable?: false,
-            file: nil
-          }
+        nomenclator = %BuenaVista.Theme.Nomenclator{
+          module: module,
+          parent_module: parent_module,
+          file: file,
+          overridable?: true
+        }
 
-          {nomenclator, hydrator} =
-            case {extend, parent_theme_name} do
-              {_any, nil} ->
-                {app_nomenclator, app_hydrator}
+        {nomenclator, app_hydrator}
 
-              {:nomenclator, parent} when is_binary(parent) ->
-                module_name = module_name(app_name, theme_name, base_module, :nomenclator)
-                file = config_file_path(app_name, theme_name, themes_dir, :nomenclator)
+      :hydrator ->
+        module = module_name(app_name, theme_name, base_module, :hydrator)
+        parent_module = get_in(cache, [cache_key, :hydrator]) || app_hydrator.module
+        file = config_file_path(app_name, theme_name, themes_dir, :hydrator)
 
-                leaf_nomenclator = %BuenaVista.Theme.Nomenclator{
-                  parent: nil,
-                  module_name: module_name,
-                  file: file,
-                  overridable?: true
-                }
+        hydrator = %BuenaVista.Theme.Hydrator{
+          module: module,
+          parent_module: parent_module,
+          file: file,
+          imports: hydrator_imports,
+          overridable?: true
+        }
 
-                {leaf_nomenclator, app_hydrator}
-
-              {:hydrator, parent} when is_binary(parent) ->
-                module_name = module_name(app_name, theme_name, base_module, :hydrator)
-                file = config_file_path(app_name, theme_name, themes_dir, :hydrator)
-
-                leaf_hydrator = %BuenaVista.Theme.Hydrator{
-                  parent: nil,
-                  module_name: module_name,
-                  file: file,
-                  imports: hydrator_imports,
-                  overridable?: true
-                }
-
-                {app_nomenclator, leaf_hydrator}
-            end
-
-          %BuenaVista.Theme.App{
-            name: app_name,
-            nomenclator: nomenclator,
-            hydrator: hydrator
-          }
-        end
-
-      %BuenaVista.Theme{
-        apps: apps,
-        name: theme_name,
-        extend: extend,
-        default?: Keyword.get(theme_config, :default?),
-        gen_css?: Keyword.get(theme_config, :gen_css?),
-        themes_dir: themes_dir,
-        css_dir: css_dir
-      }
+        {app_nomenclator, hydrator}
     end
   end
 
@@ -145,8 +164,8 @@ defmodule BuenaVista.ConfigReader do
   iex> module_name(:buenavista, "admin_dark", MyApp.Config.Themes, :hydrator)
   MyApp.Config.Themes.AdminDark.BuenavistaHydrator
   """
-  def module_name(app_name, theme_name, base_module_name, module_type) when module_type in [:nomenclator, :hydrator] do
-    Module.concat([base_module_name, camelize(theme_name), camelize("#{app_name}_#{module_type}")])
+  def module_name(app_name, theme_name, base_module, module_type) when module_type in [:nomenclator, :hydrator] do
+    Module.concat([base_module, camelize(theme_name), camelize("#{app_name}_#{module_type}")])
   end
 
   @doc """
