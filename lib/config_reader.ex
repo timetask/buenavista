@@ -12,8 +12,8 @@ defmodule BuenaVista.ConfigReader do
          {:non_empty_keyword_list,
           [
             name: [required: true, type: :atom],
-            nomenclator: [required: false, type: :atom, default: BuenaVista.Themes.DefaultNomenclator],
-            hydrator: [required: false, type: :atom, default: BuenaVista.Themes.DefaultHydrator]
+            nomenclator: [required: false, type: :atom, default: BuenaVista.Themes.EmptyNomenclator],
+            hydrator: [required: false, type: :atom, default: BuenaVista.Themes.EmptyHydrator]
           ]}}
     ],
     config: [
