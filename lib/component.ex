@@ -1,8 +1,9 @@
 defmodule BuenaVista.Component do
   use Phoenix.Component
   use TypedStruct
-  
+
   alias __MODULE__
+  @reserved_class_names [:classes, :variant, :variants, :variant_classes, :base_class]
 
   # ----------------------------------------
   # Data Structures
@@ -16,6 +17,7 @@ defmodule BuenaVista.Component do
   end
 
   typedstruct do
+    field :app, atom()
     field :name, String.t()
     field :variants, list(Variant.t())
     field :classes, list(atom())
@@ -83,10 +85,10 @@ defmodule BuenaVista.Component do
               {option, class_name}
             end
 
-          Map.put(variant, :options, options)
+          %{variant | options: options}
         end
 
-      for class_name <- [:classes, :variants, :base_class], class_name in classes do
+      for class_name <- classes, class_name in @reserved_class_names do
         raise "#{class_name} is a reserved word. Please use another class name"
       end
 
@@ -108,7 +110,10 @@ defmodule BuenaVista.Component do
           attr.name in excluded_names or attr.type == :global
         end)
 
+      app = Application.get_application(env.module)
+
       component = %Component{
+        app: app,
         name: component_name,
         variants: variants,
         classes: classes,
