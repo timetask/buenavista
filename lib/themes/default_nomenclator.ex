@@ -5,7 +5,7 @@ defmodule BuenaVista.Themes.DefaultNomenclator do
 
   def class_name(_, :state, :default), do: nil
 
-  def class_name(:button, :border, option), do: "button-border-#{option}"
+  def class_name(component, :border, option), do: "#{component}-border-#{option}"
 
   def class_name(:sidebar_layout, :position, :left), do: nil
 
