@@ -5,7 +5,7 @@ defmodule BuenaVista.ConfigReaderTest do
   doctest BuenaVista.ConfigReader
 
   describe "build_themes/1" do
-    test "" do
+    test "happy path setup" do
       config = [
         apps: [
           [name: :buenavista_components, hydrator: BuenaVista.Themes.DefaultHydrator],
@@ -29,8 +29,11 @@ defmodule BuenaVista.ConfigReaderTest do
       ]
 
       themes = BuenaVista.ConfigReader.build_themes(config)
+      base_theme = Enum.find(themes, fn theme -> theme.name == "base" end)
+      light_theme = Enum.find(themes, fn theme -> theme.name == "light" end)
+      dark_theme = Enum.find(themes, fn theme -> theme.name == "dark" end)
 
-      assert themes == [
+      assert base_theme ==
                %BuenaVista.Theme{
                  themes_dir: "lib/themes",
                  css_dir: "lib/assets/themes",
@@ -44,7 +47,7 @@ defmodule BuenaVista.ConfigReaderTest do
                        overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
                        file: "lib/themes/base/timetask_hydrator.ex",
-                       parent_module: BuenaVista.Themes.DefaultHydrator,
+                       parent_module: BuenaVista.Themes.EmptyHydrator,
                        module: TestApp.Themes.Base.TimetaskHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
@@ -72,7 +75,9 @@ defmodule BuenaVista.ConfigReaderTest do
                      name: :buenavista_components
                    }
                  ]
-               },
+               }
+
+      assert dark_theme ==
                %BuenaVista.Theme{
                  themes_dir: "lib/themes",
                  css_dir: "lib/assets/themes",
@@ -114,7 +119,9 @@ defmodule BuenaVista.ConfigReaderTest do
                      name: :buenavista_components
                    }
                  ]
-               },
+               }
+
+      assert light_theme ==
                %BuenaVista.Theme{
                  themes_dir: "lib/themes",
                  css_dir: "lib/assets/themes",
@@ -157,7 +164,48 @@ defmodule BuenaVista.ConfigReaderTest do
                    }
                  ]
                }
-             ]
+    end
+
+    test "fails when no default themes" do
+      config = [
+        apps: [[name: :app]],
+        config: [
+          base_module: TestApp.Themes,
+          extend: :hydrator,
+          themes_dir: "lib/themes",
+          css_dir: "lib/assets/themes"
+        ],
+        themes: [
+          [name: "base", gen_css?: false],
+          [name: "dark", parent: "base"],
+          [name: "light", parent: "base"]
+        ]
+      ]
+
+      assert_raise ArgumentError, ~r/.*provide exactly one default theme.*/, fn ->
+        BuenaVista.ConfigReader.build_themes(config)
+      end
+    end
+
+    test "fails when more than one default" do
+      config = [
+        apps: [[name: :app]],
+        config: [
+          base_module: TestApp.Themes,
+          extend: :hydrator,
+          themes_dir: "lib/themes",
+          css_dir: "lib/assets/themes"
+        ],
+        themes: [
+          [name: "base", gen_css?: false],
+          [name: "dark", parent: "base", default?: true],
+          [name: "light", parent: "base", default?: true]
+        ]
+      ]
+
+      assert_raise ArgumentError, ~r/.*provide exactly one default theme.*/, fn ->
+        BuenaVista.ConfigReader.build_themes(config)
+      end
     end
   end
 end

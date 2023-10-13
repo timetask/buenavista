@@ -12,7 +12,7 @@ defmodule BuenaVista.ConfigReader do
          {:non_empty_keyword_list,
           [
             name: [required: true, type: :atom],
-            nomenclator: [required: false, type: :atom, default: BuenaVista.Themes.EmptyNomenclator],
+            nomenclator: [required: false, type: :atom, default: BuenaVista.Themes.DefaultNomenclator],
             hydrator: [required: false, type: :atom, default: BuenaVista.Themes.EmptyHydrator]
           ]}}
     ],
@@ -87,6 +87,22 @@ defmodule BuenaVista.ConfigReader do
 
           {[theme | themes], cache}
       end
+
+    if Enum.count(themes, fn theme -> theme.default? end) != 1 do
+      raise ArgumentError,
+        message: """
+          You need to provide exactly one default theme in your :buenavista 
+          configuration, typically found in config.exs.
+
+          Example:
+          
+            config :buenavista,
+              (...)
+              themes: [
+                [name: "dark-ages", default?: true]
+              ]
+        """
+    end
 
     Enum.reverse(themes)
   end
