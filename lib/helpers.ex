@@ -6,8 +6,8 @@ defmodule BuenaVista.Helpers do
   """
   def find_component_modules(apps) when is_list(apps) do
     modules =
-      for app <- apps,
-          spec = Application.spec(app),
+      for %BuenaVista.Theme.App{} = app <- apps,
+          spec = Application.spec(app.name),
           module <- Keyword.get(spec, :modules),
           {:module, module} = Code.ensure_loaded(module),
           reduce: [] do

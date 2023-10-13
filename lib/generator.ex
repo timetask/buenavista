@@ -15,9 +15,9 @@ defmodule BuenaVista.Generator do
         reduce: %{} do
       cache ->
         {modules, cache} =
-          case Map.get(cache, app) do
+          case Map.get(cache, app.name) do
             nil ->
-              modules = BuenaVista.Helpers.find_component_modules([app.name])
+              modules = BuenaVista.Helpers.find_component_modules([app])
               {modules, Map.put(cache, app.name, modules)}
 
             modules ->
@@ -45,7 +45,7 @@ defmodule BuenaVista.Generator do
               {modules_cache, modules} =
                 case Map.get(modules_cache, app.name) do
                   nil ->
-                    modules = BuenaVista.Helpers.find_component_modules([app.name])
+                    modules = BuenaVista.Helpers.find_component_modules([app])
                     {Map.put(modules_cache, app.name, modules), modules}
 
                   modules ->
@@ -235,7 +235,6 @@ defmodule BuenaVista.Generator do
       end
 
     for {_module, components} <- modules do
-
       assigns = [
         app: app,
         variables: variables,
