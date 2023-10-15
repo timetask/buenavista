@@ -1,17 +1,26 @@
 defmodule BuenaVista.CssFormatter do
   @behaviour Mix.Tasks.Format
+  use TypedStruct
   import BuenaVista.CssProperties, only: [property_index: 1, scope_first?: 2]
 
   defmodule Property do
-    defstruct [:attr, :value]
+    typedstruct enforce: true do
+      field :attr, String.t()
+      field :value, String.t()
+    end
   end
 
   defmodule Apply do
-    defstruct [:value]
+    typedstruct enforce: true do
+      field :value, String.t()
+    end
   end
 
   defmodule Scope do
-    defstruct [:selector, :rules]
+    typedstruct enforce: true do
+      field :selector, String.t()
+      field :rules, list()
+    end
   end
 
   @impl true
@@ -86,24 +95,28 @@ defmodule BuenaVista.CssFormatter do
   defp compare(%Property{} = a, %Property{} = b), do: property_index(a.attr) >= property_index(b.attr)
   defp compare(%Scope{} = a, %Scope{} = b), do: scope_first?(a.selector, b.selector)
 
-  def write_rules(rules) do
+  def write_rules(rules) when is_list(rules) do
     rules
-    |> Enum.reduce([], fn rule, acc -> expand_rule(rule, 0, acc) end)
+    |> Enum.reduce([], fn rule, acc -> write_rule(rule, 0, acc) end)
     |> Enum.reverse()
     |> :erlang.iolist_to_binary()
   end
 
-  defp expand_rule(%Scope{} = scope, level, acc) do
-    acc = ["\n#{String.duplicate("  ", level + 1)}#{scope.selector} {\n" | acc]
-    acc = Enum.reduce(scope.rules, acc, fn child_rules, child_acc -> expand_rule(child_rules, level + 1, child_acc) end)
-    ["#{String.duplicate("  ", level + 1)}}\n" | acc]
+  defp write_rule(%Scope{} = scope, level, acc) do
+    acc = ["\n#{indent(level + 1)}#{scope.selector} {\n" | acc]
+    acc = Enum.reduce(scope.rules, acc, fn child_rules, child_acc -> write_rule(child_rules, level + 1, child_acc) end)
+    ["#{indent(level + 1)}}\n" | acc]
   end
 
-  defp expand_rule(%Property{} = prop, level, acc) do
-    ["#{String.duplicate("  ", level + 1)}#{prop.attr}: #{prop.value};\n" | acc]
+  defp write_rule(%Property{} = prop, level, acc) do
+    ["#{indent(level + 1)}#{prop.attr}: #{prop.value};\n" | acc]
   end
 
-  defp expand_rule(%Apply{} = apply, level, acc) do
-    ["#{String.duplicate("  ", level + 1)}@apply #{apply.value};\n" | acc]
+  defp write_rule(%Apply{} = apply, level, acc) do
+    ["#{indent(level + 1)}@apply #{apply.value};\n" | acc]
+  end
+
+  defp indent(level) do
+    String.duplicate("  ", level)
   end
 end

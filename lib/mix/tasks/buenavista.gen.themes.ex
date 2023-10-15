@@ -8,10 +8,9 @@ defmodule Mix.Tasks.Buenavista.Gen.Themes do
   def run(opts) do
     {parsed_opts, _, _} = OptionParser.parse(opts, strict: [core: :boolean, theme: :keep])
 
-    themes = get_themes(parsed_opts)
-    
-
-    BuenaVista.Generator.generate_theme_files(themes)
+    parsed_opts
+    |> get_themes()
+    |> BuenaVista.Generator.generate_theme_files()
   end
 
   defp get_themes(parsed_opts) do

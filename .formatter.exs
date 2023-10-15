@@ -8,6 +8,7 @@ locals_without_parens = [
   classes: 1,
   field: 1,
   field: 2,
+  field: 3,
   galeria_routes: 2,
   galeria_routes: 1
 ]
