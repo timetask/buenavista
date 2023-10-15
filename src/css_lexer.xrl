@@ -1,15 +1,15 @@
 Definitions.
 
 APPLY       = \@apply[a-z0-9-\s"'()\[\],#]+;
-PROPERTY    = [a-z-]+\s*:[a-z0-9\s/"'(),$#<>%=@_\-:\.!]+;
-BEGIN_SCOPE = [a-z.&*\[]+[a-z\s,.:$&-_\"<>%=()\[\]\n]+{
+PROPERTY    = [a-z-]+:[a-z0-9\s/"'(),$#<>%=@\_\-:\.!]+;
+BEGIN_SCOPE = [a-z]+[a-z\s]*{|[.&*\[]+[a-z\s,.:$&-_\"<>%=()\[\]\n]*{
 END_SCOPE   = }
 WHITESPACE  = [\s\t\n\r]
 
 Rules.
 
-{PROPERTY}    : {token, {property, TokenLine, extract_property(TokenChars)}}.
 {APPLY}       : {token, {apply, TokenLine, extract_apply(TokenChars)}}.
+{PROPERTY}    : {token, {property, TokenLine, extract_property(TokenChars)}}.
 {BEGIN_SCOPE} : {token, {start_scope, TokenLine, extract_begin_selector(TokenChars)}}.
 {END_SCOPE}   : {token, {end_scope, TokenLine}}.
 {WHITESPACE}  : skip_token.

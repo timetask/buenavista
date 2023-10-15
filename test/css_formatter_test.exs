@@ -40,6 +40,60 @@ defmodule BuenaVista.CssFormatterTest do
                """
     end
 
+    test "properties form a straight line" do
+      css = """
+                      background: green;
+        border: 1px solid red;
+      display: block;
+              padding: 1px;
+        margin: $margin_big;
+                      * {
+        display: none;
+            height: 45px;
+                    color: black;
+        background: blue;
+      }
+      """
+
+      result = format(css, [])
+
+      assert result ==
+               """
+                 background: green;
+                 border: 1px solid red;
+                 padding: 1px;
+                 margin: $margin_big;
+                 display: block;
+
+                 * {
+                   background: blue;
+                   color: black;
+                   height: 45px;
+                   display: none;
+                 }
+               """
+    end
+
+    test "allow elements and selector" do
+      css = """
+        color: blue;
+
+        code {
+          color: green;
+        }
+      """
+
+      result = format(css, [])
+
+      assert result == """
+               color: blue;
+
+               code {
+                 color: green;
+               }
+             """
+    end
+
     test "reading @apply" do
       css = """
                  @apply text-blue-400;
