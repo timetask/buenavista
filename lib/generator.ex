@@ -246,35 +246,33 @@ defmodule BuenaVista.Generator do
     component_template(assigns)
   end
 
-
   embed_template(:component, """
   <%= for {_, component} <- @components do %>
 
   /* Component: <%= component.name  %> */
-  <%= @prefix %> .<%= apply(@app.nomenclator.module, :class_name, [component.name, :classes, :base_class]) %> {
+    <% component_class =  apply(@app.nomenclator.module, :class_name, [component.name, :classes, :base_class]) %>
+  <%= @prefix %> .<%= component_class %> {
     <%= apply(@app.hydrator.module, :css, [component.name, :classes, :base_class, @variables]) %>
-
+  }
     <%= for {class_key, _} <- component.classes, class_key != :base_class do %>
       <%= if class_name = apply(@app.nomenclator.module, :class_name, [component.name, :classes, class_key]) do %>
       <%= if css = apply(@app.hydrator.module, :css, [component.name, :classes, class_key, @variables]) do %>
-      .<%= class_name %>{
+      <%= @prefix %> <%= component_class  %> .<%= class_name %>{
         <%= css %>
       }<% end %><% end %>
     <% end %>
 
     <%= for variant <- component.variants do %>
       /* Variant: <%= variant.name %> */
-
       <%= for {option, _class} <- variant.options do %>
-        <%= if class_name = apply(@app.nomenclator.module, :class_name, [component.name, variant.name, option]) do %>
+        <%= if option_class_name = apply(@app.nomenclator.module, :class_name, [component.name, variant.name, option]) do %>
         <%= if css = apply(@app.hydrator.module, :css, [component.name, variant.name, option, @variables]) do %>
-          &.<%= class_name %> {
+          <%= @prefix %> .<%= component_class %>.<%= option_class_name %> {
             <%= css  %>
           }<% end %>
         <% end %>
       <% end %>
     <% end %>
-  }
   <% end %>
   """)
 
