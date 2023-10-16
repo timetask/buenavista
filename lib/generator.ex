@@ -13,16 +13,8 @@ defmodule BuenaVista.Generator do
     for %Theme{} = theme <- themes,
         %Theme.App{} = app <- theme.apps,
         reduce: %{} do
-      cache ->
-        {modules, cache} =
-          case Map.get(cache, app.name) do
-            nil ->
-              modules = BuenaVista.Helpers.find_component_modules([app])
-              {modules, Map.put(cache, app.name, modules)}
-
-            modules ->
-              {modules, cache}
-          end
+      modules_cache ->
+        {modules_cache, modules} = get_component_modules_from_cache(modules_cache, app)
 
         sync_nomenclator(theme, app, modules)
         hydrator_path = sync_hydrator(theme, app, modules)
@@ -32,7 +24,7 @@ defmodule BuenaVista.Generator do
           Code.compile_file(hydrator_path)
         end
 
-        cache
+        modules_cache
     end
   end
 
@@ -41,24 +33,30 @@ defmodule BuenaVista.Generator do
       modules_cache ->
         {modules_cache, all_raw_css} =
           for %Theme.App{} = app <- theme.apps, reduce: {modules_cache, []} do
-            {modules_cache, all_raw_css} ->
-              {modules_cache, modules} =
-                case Map.get(modules_cache, app.name) do
-                  nil ->
-                    modules = BuenaVista.Helpers.find_component_modules([app])
-                    {Map.put(modules_cache, app.name, modules), modules}
+            {all_raw_css, modules_cache} ->
+              {modules_cache, modules} = get_component_modules_from_cache(modules_cache, app)
 
-                  modules ->
-                    {modules_cache, modules}
+              raw_css =
+                for {_module, components} <- modules, into: "" do
+                  generate_app_components_raw_css(app, components)
                 end
-
-              raw_css = generate_module_raw_css(app, modules)
 
               {modules_cache, [{app, raw_css} | all_raw_css]}
           end
 
         generate_theme_css_file(theme, all_raw_css)
         modules_cache
+    end
+  end
+
+  defp get_component_modules_from_cache(modules_cache, app) do
+    case Map.get(modules_cache, app.name) do
+      nil ->
+        modules = BuenaVista.Helpers.find_component_modules([app])
+        {Map.put(modules_cache, app.name, modules), modules}
+
+      modules ->
+        {modules_cache, modules}
     end
   end
 
@@ -110,27 +108,12 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   defp sync_hydrator(%Theme{} = theme, %Theme.App{} = app, modules) do
     if theme.extend == :hydrator and app.hydrator.overridable? do
-      {variables, styles} =
-        if function_exported?(app.hydrator.module, :__info__, 1) do
-          {app.hydrator.module.get_variables(), app.hydrator.module.get_styles_map()}
-        else
-          if is_nil(app.hydrator.parent_module) do
-            {[], %{}}
-          else
-            {app.hydrator.parent_module.get_variables() |> set_parent_true(),
-             app.hydrator.parent_module.get_styles_map() |> set_parent_true()}
-          end
-        end
-
-      grouped_variables =
-        ordered_group_by(variables, fn {key, _var} ->
-          [key | _rest] = key |> Atom.to_string() |> String.split("_")
-          key
-        end)
+      {variables, styles} = get_variables_and_styles(app)
+      variables = group_variables_by_name(variables)
 
       assigns = [
         app: app,
-        variables: grouped_variables,
+        variables: variables,
         styles: styles,
         modules: modules
       ]
@@ -140,6 +123,25 @@ defmodule BuenaVista.Generator do
     else
       nil
     end
+  end
+
+  defp get_variables_and_styles(%Theme.App{} = app) do
+    if function_exported?(app.hydrator.module, :__info__, 1) do
+      {app.hydrator.module.get_variables(), app.hydrator.module.get_styles_map()}
+    else
+      if is_nil(app.hydrator.parent_module) do
+        {[], %{}}
+      else
+        {app.hydrator.parent_module.get_variables() |> set_parent_true(),
+         app.hydrator.parent_module.get_styles_map() |> set_parent_true()}
+      end
+    end
+  end
+
+  defp group_variables_by_name(variables) do
+    ordered_group_by(variables, fn {key, _var} ->
+      key |> Atom.to_string() |> String.split("_") |> List.first()
+    end)
   end
 
   defp set_parent_true(items) when is_list(items) do
@@ -228,43 +230,22 @@ defmodule BuenaVista.Generator do
     end
   end
 
-  defp generate_module_raw_css(%Theme.App{} = app, modules) do
+  def generate_app_components_raw_css(%Theme.App{} = app, components, prefix \\ nil) do
     variables =
       for {_, variable} <- app.hydrator.module.get_variables(), into: %{} do
         {variable.key, variable.css_value}
       end
 
-    for {_module, components} <- modules do
-      assigns = [
-        app: app,
-        variables: variables,
-        components: components,
-        prefix: nil
-      ]
+    assigns = [
+      app: app,
+      variables: variables,
+      components: components,
+      prefix: prefix
+    ]
 
-      component_template(assigns)
-    end
+    component_template(assigns)
   end
 
-  # def generate_preview_css(%Theme{} = theme, %Component{} = component) do
-  #   nomenclator = Helpers.get_nomenclator(theme)
-  #   hydrator = Helpers.get_hydrator(theme)
-
-  #   variables =
-  #     for {_, variable} <- hydrator.get_variables(), into: %{} do
-  #       {variable.key, "var(--#{variable.css_key})"}
-  #     end
-
-  #   assigns = [
-  #     nomenclator: nomenclator,
-  #     hydrator: hydrator,
-  #     variables: variables,
-  #     components: [{nil, component}],
-  #     prefix: "#galeria-preview"
-  #   ]
-
-  #   component_template(assigns)
-  # end
 
   embed_template(:component, """
   <%= for {_, component} <- @components do %>
