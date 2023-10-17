@@ -33,7 +33,7 @@ defmodule BuenaVista.Generator do
       modules_cache ->
         {modules_cache, all_raw_css} =
           for %Theme.App{} = app <- theme.apps, reduce: {modules_cache, []} do
-            {all_raw_css, modules_cache} ->
+            {modules_cache, all_raw_css} ->
               {modules_cache, modules} = get_component_modules_from_cache(modules_cache, app)
 
               raw_css =
@@ -45,6 +45,7 @@ defmodule BuenaVista.Generator do
           end
 
         generate_theme_css_file(theme, all_raw_css)
+
         modules_cache
     end
   end
@@ -257,7 +258,7 @@ defmodule BuenaVista.Generator do
     <%= for {class_key, _} <- component.classes, class_key != :base_class do %>
       <%= if class_name = apply(@app.nomenclator.module, :class_name, [component.name, :classes, class_key]) do %>
       <%= if css = apply(@app.hydrator.module, :css, [component.name, :classes, class_key, @variables]) do %>
-      <%= @prefix %> <%= component_class  %> .<%= class_name %>{
+      <%= @prefix %> .<%= component_class  %> .<%= class_name %>{
         <%= css %>
       }<% end %><% end %>
     <% end %>
@@ -303,9 +304,7 @@ defmodule BuenaVista.Generator do
       Nomenclator: <%= Helpers.pretty_module(app.nomenclator.module) %>
       Hydrator:    <%= Helpers.pretty_module(app.hydrator.module) %> 
     */
-    <%= for css <- raw_css do %>
-    <%= css %>
-    <% end %>
+    <%= raw_css %>
   <% end %>
   """)
 
