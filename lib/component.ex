@@ -19,11 +19,11 @@ defmodule BuenaVista.Component do
   typedstruct do
     field :app, atom()
     field :name, String.t()
-    field :variants, list(Variant.t())
-    field :classes, list(atom())
     field :module, atom()
+    field :variants, list(Variant.t())
     field :attrs, list(map())
     field :slots, list(map())
+    field :classes, list(atom())
   end
 
   # ----------------------------------------
@@ -216,7 +216,7 @@ defmodule BuenaVista.Component do
             end
           end
 
-        assign_new(assigns, :variant_classes, fn -> join_classes(classes) end)
+        assign(assigns, :variant_classes, join_classes(classes))
       end
 
       def __assign_classes(assigns, %Component{} = component, nomenclator) do
@@ -227,7 +227,7 @@ defmodule BuenaVista.Component do
                 do: class_name,
                 else: nomenclator.class_name(component.name, :classes, class_key)
 
-            assign_new(assigns, class_key, fn -> class_name end)
+            assign(assigns, class_key, class_name)
         end
       end
     end
