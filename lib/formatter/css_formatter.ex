@@ -14,7 +14,6 @@ defmodule BuenaVista.CssFormatter do
     |> write_rules()
   end
 
-
   def write_rules(rules) when is_list(rules) do
     rules
     |> Enum.reduce([], fn rule, acc -> write_rule(rule, 0, acc) end)

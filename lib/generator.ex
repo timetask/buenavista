@@ -237,45 +237,90 @@ defmodule BuenaVista.Generator do
         {variable.key, variable.css_value}
       end
 
-    assigns = [
-      app: app,
-      variables: variables,
-      components: components,
-      prefix: prefix
-    ]
+    rules =
+      for {_, component} <- components, reduce: [] do
+        rules ->
+          component_class = app.nomenclator.module.class_name(component.name, :classes, :base_class)
 
-    component_template(assigns)
+          css = app.hydrator.module.css(component.name, :classes, :base_class, variables)
+          css_tokens = css |> BuenaVista.CssTokenizer.build_tokens() |> BuenaVista.CssTokenizer.sort_tokens()
+          scope = [{:scope, component_class}, {:scope, prefix}]
+          rules = build_rules(scope, css_tokens, [], rules)
+
+          rules =
+            for {class_key, _} <- component.classes, class_key != :base_class, reduce: rules do
+              rules ->
+                css = app.hydrator.module.css(component.name, :classes, class_key, variables)
+                class_name = app.nomenclator.module.class_name(component.name, :classes, class_key)
+                css_tokens = css |> BuenaVista.CssTokenizer.build_tokens() |> BuenaVista.CssTokenizer.sort_tokens()
+                scope = [{:scope, class_name}, {:scope, component_class}, {:scope, prefix}]
+                build_rules(scope, css_tokens, [], rules)
+            end
+
+          for variant <- component.variants, {option, option_class} <- variant.options, reduce: rules do
+            rules ->
+              css = app.hydrator.module.css(component.name, variant, option, variables)
+              css_tokens = css |> BuenaVista.CssTokenizer.build_tokens() |> BuenaVista.CssTokenizer.sort_tokens()
+              scope = [{:modifier, option_class}, {:scope, component_class}, {:scope, prefix}]
+              build_rules(scope, css_tokens, [], rules)
+          end
+          |> dbg()
+      end
+
+    rules
+    |> write_rules()
+    |> IO.iodata_to_binary()
   end
 
-  embed_template(:component, """
-  <%= for {_, component} <- @components do %>
+  defp build_rules(scope, [%BuenaVista.CssTokenizer.Property{} = prop | rest], properties, rules) do
+    build_rules(scope, rest, [prop | properties], rules)
+  end
 
-  /* Component: <%= component.name  %> */
-    <% component_class =  apply(@app.nomenclator.module, :class_name, [component.name, :classes, :base_class]) %>
-  <%= @prefix %> .<%= component_class %> {
-    <%= apply(@app.hydrator.module, :css, [component.name, :classes, :base_class, @variables]) %>
-  }
-    <%= for {class_key, _} <- component.classes, class_key != :base_class do %>
-      <%= if class_name = apply(@app.nomenclator.module, :class_name, [component.name, :classes, class_key]) do %>
-      <%= if css = apply(@app.hydrator.module, :css, [component.name, :classes, class_key, @variables]) do %>
-      <%= @prefix %> .<%= component_class  %> .<%= class_name %>{
-        <%= css %>
-      }<% end %><% end %>
-    <% end %>
+  defp build_rules(scope, [%BuenaVista.CssTokenizer.Scope{} = nested_scope | rest], properties, rules) do
+    new_rule = [{:properties, properties} | scope]
+    rules = build_rules([{:scope, nested_scope.selector} | scope], nested_scope.rules, [], [new_rule | rules])
+    build_rules(scope, rest, [], rules)
+  end
 
-    <%= for variant <- component.variants do %>
-      /* Variant: <%= variant.name %> */
-      <%= for {option, _class} <- variant.options do %>
-        <%= if option_class_name = apply(@app.nomenclator.module, :class_name, [component.name, variant.name, option]) do %>
-        <%= if css = apply(@app.hydrator.module, :css, [component.name, variant.name, option, @variables]) do %>
-          <%= @prefix %> .<%= component_class %>.<%= option_class_name %> {
-            <%= css  %>
-          }<% end %>
-        <% end %>
-      <% end %>
-    <% end %>
-  <% end %>
-  """)
+  defp build_rules(scope, [], properties, rules) do
+    new_rule = [{:properties, properties} | scope]
+    [new_rule | rules]
+  end
+
+  defp write_rules(rules) do
+    for rule <- rules, segment <- rule, reduce: [] do
+      segments ->
+        write_segment(segment, segments)
+    end
+  end
+
+  defp write_segment({:modifier, nil}, acc), do: acc
+
+  defp write_segment({:modifier, selector}, acc) do
+    [".#{selector}" | acc]
+  end
+
+  defp write_segment({:scope, nil}, acc), do: acc
+
+  defp write_segment({:scope, "&" <> selector}, acc) do
+    [selector | acc]
+  end
+
+  defp write_segment({:scope, selector}, acc) do
+    [" .#{selector}" | acc]
+  end
+
+  defp write_segment({:properties, properties}, acc) do
+    acc = ["}\n" | acc]
+
+    acc =
+      for prop <- properties, reduce: acc do
+        acc ->
+          ["#{prop.attr}: #{prop.value};\n" | acc]
+      end
+
+    acc = ["{\n" | acc]
+  end
 
   defp generate_theme_css_file(%Theme{} = theme, all_raw_css) when is_list(all_raw_css) do
     root_path = Path.join(theme.css_dir, "#{theme.name}.css")
