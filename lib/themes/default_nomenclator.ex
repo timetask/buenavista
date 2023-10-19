@@ -3,9 +3,10 @@ defmodule BuenaVista.Themes.DefaultNomenclator do
 
   def class_name(_, _, :none), do: nil
 
-  def class_name(_, :state, :default), do: nil
+  def class_name(_, _, :default), do: nil
 
-  def class_name(component, :border, option), do: "#{component}-border-#{option}"
+  def class_name(component, property, option) when property in [:border, :padding, :rounded],
+    do: "#{component}-#{property}-#{option}"
 
   def class_name(:sidebar_layout, :position, :left), do: nil
 
