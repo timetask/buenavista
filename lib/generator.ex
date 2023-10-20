@@ -36,6 +36,7 @@ defmodule BuenaVista.Generator do
             {modules_cache, all_raw_css} ->
               {modules_cache, modules} = get_component_modules_from_cache(modules_cache, app)
 
+              # TODO: Use IO.iodata_to_binary
               raw_css =
                 for {_module, components} <- modules, into: "" do
                   generate_app_components_raw_css(app, components)
@@ -47,17 +48,6 @@ defmodule BuenaVista.Generator do
         generate_theme_css_file(theme, all_raw_css)
 
         modules_cache
-    end
-  end
-
-  defp get_component_modules_from_cache(modules_cache, app) do
-    case Map.get(modules_cache, app.name) do
-      nil ->
-        modules = BuenaVista.Helpers.find_component_modules([app])
-        {Map.put(modules_cache, app.name, modules), modules}
-
-      modules ->
-        {modules_cache, modules}
     end
   end
 
@@ -87,8 +77,8 @@ defmodule BuenaVista.Generator do
         <%= for {class_key, _} <- component.classes do %>
           <%= class_name_def(component.name, :classes, class_key, @existing_class_names, @app.nomenclator.parent_module) %><% end %>
         <%= for variant <- component.variants do %>
-          <%= for {option, _} <- variant.options do %>
-            <%= class_name_def(component.name, variant.name, option, @existing_class_names, @app.nomenclator.parent_module) %><% end %>
+          <%= for {_, option} <- variant.options do %>
+            <%= class_name_def(component.name, variant.name, option.name, @existing_class_names, @app.nomenclator.parent_module) %><% end %>
       <% end %>
     <% end %>
   <% end %>
@@ -145,14 +135,6 @@ defmodule BuenaVista.Generator do
     end)
   end
 
-  defp set_parent_true(items) when is_list(items) do
-    for {key, val} <- items, do: {key, %{val | parent: true}}
-  end
-
-  defp set_parent_true(items) when is_map(items) do
-    for {key, val} <- items, into: %{}, do: {key, %{val | parent: true}}
-  end
-
   defp ordered_group_by(items, group_fn) when is_list(items) and is_function(group_fn) do
     for item <- items, reduce: [] do
       acc ->
@@ -169,6 +151,14 @@ defmodule BuenaVista.Generator do
           Keyword.put(acc, key, [item])
         end
     end
+  end
+
+  defp set_parent_true(items) when is_list(items) do
+    for {key, val} <- items, do: {key, %{val | parent: true}}
+  end
+
+  defp set_parent_true(items) when is_map(items) do
+    for {key, val} <- items, into: %{}, do: {key, %{val | parent: true}}
   end
 
   embed_template(:hydrator, ~S/
@@ -194,8 +184,8 @@ defmodule BuenaVista.Generator do
     <%= for {class_key, _} <- component.classes do %>
     <%= if apply(@app.nomenclator.module, :class_name, [component.name, :classes, class_key]) do %><%= style_def(@styles, component.name, class_key) %><% end %><% end %>
     <%= for variant <- component.variants do %>
-    <%= for {option, _} <- variant.options do %>
-    <%= if apply(@app.nomenclator.module, :class_name, [component.name, variant.name, option]) do %><%= style_def(@styles, component.name, variant.name, option) %><% end %><% end %>
+    <%= for {_, option} <- variant.options do %>
+    <%= if apply(@app.nomenclator.module, :class_name, [component.name, variant.name, option.name]) do %><%= style_def(@styles, component.name, variant.name, option) %><% end %><% end %>
     <% end %>
     <% end %>
     <% end %>
@@ -231,6 +221,9 @@ defmodule BuenaVista.Generator do
     end
   end
 
+  # ----------------------------------------
+  # CSS
+  # ----------------------------------------
   def generate_app_components_raw_css(%Theme.App{} = app, components, prefix \\ nil) do
     variables =
       for {_, variable} <- app.hydrator.module.get_variables(), into: %{} do
@@ -238,7 +231,7 @@ defmodule BuenaVista.Generator do
       end
 
     rules =
-      for {_, component} <- components, reduce: [] do
+      for {_, component} <- Enum.reverse(components), reduce: [] do
         rules ->
           component_class = app.nomenclator.module.class_name(component.name, :classes, :base_class)
 
@@ -257,14 +250,13 @@ defmodule BuenaVista.Generator do
                 build_rules(scope, css_tokens, [], rules)
             end
 
-          for variant <- component.variants, {option, option_class} <- variant.options, reduce: rules do
+          for variant <- component.variants, {_, option} <- variant.options, reduce: rules do
             rules ->
-              css = app.hydrator.module.css(component.name, variant, option, variables)
+              css = app.hydrator.module.css(component.name, variant.name, option.name, variables)
               css_tokens = css |> BuenaVista.CssTokenizer.build_tokens() |> BuenaVista.CssTokenizer.sort_tokens()
-              scope = [{:modifier, option_class}, {:scope, component_class}, {:scope, prefix}]
+              scope = [{:modifier, option.class_name}, {:scope, component_class}, {:scope, prefix}]
               build_rules(scope, css_tokens, [], rules)
           end
-          |> dbg()
       end
 
     rules
@@ -278,8 +270,14 @@ defmodule BuenaVista.Generator do
 
   defp build_rules(scope, [%BuenaVista.CssTokenizer.Scope{} = nested_scope | rest], properties, rules) do
     new_rule = [{:properties, properties} | scope]
-    rules = build_rules([{:scope, nested_scope.selector} | scope], nested_scope.rules, [], [new_rule | rules])
-    build_rules(scope, rest, [], rules)
+    child_rules = build_rules([{:internal_scope, nested_scope.selector} | scope], nested_scope.tokens, [], [new_rule])
+
+    sibling_rules =
+      if Enum.empty?(rest),
+        do: [],
+        else: build_rules(scope, rest, [], [])
+
+    sibling_rules ++ child_rules ++ rules
   end
 
   defp build_rules(scope, [], properties, rules) do
@@ -288,38 +286,69 @@ defmodule BuenaVista.Generator do
   end
 
   defp write_rules(rules) do
-    for rule <- rules, segment <- rule, reduce: [] do
+    for rule <- rules, reduce: [] do
       segments ->
-        write_segment(segment, segments)
+        rule =
+          rule
+          |> Enum.reverse()
+          |> Enum.reduce_while([], fn segment, acc ->
+            case segment do
+              {:internal_scope, selector} ->
+                cond do
+                  String.starts_with?(selector, "&") ->
+                    {:cont, [{:internal_modifier, String.replace(selector, "&", "")} | acc]}
+
+                  String.ends_with?(selector, "&") ->
+                    replace_string = [acc] |> write_rules() |> IO.iodata_to_binary()
+                    selector = String.replace(selector, "&", replace_string)
+                    {:cont, [{:internal_modifier, selector}]}
+
+                  true ->
+                    {:cont, [{:internal_scope, selector} | acc]}
+                end
+
+              _ ->
+                {:cont, [segment | acc]}
+            end
+          end)
+
+        for segment <- rule, reduce: segments do
+          segments ->
+            write_segment(segment, segments, rule)
+        end
     end
   end
 
-  defp write_segment({:modifier, nil}, acc), do: acc
+  defp write_segment({:modifier, nil}, acc, _rule), do: acc
 
-  defp write_segment({:modifier, selector}, acc) do
+  defp write_segment({:modifier, selector}, acc, _rule) do
     [".#{selector}" | acc]
   end
 
-  defp write_segment({:scope, nil}, acc), do: acc
-
-  defp write_segment({:scope, "&" <> selector}, acc) do
+  defp write_segment({:internal_modifier, selector}, acc, _rule) do
     [selector | acc]
   end
 
-  defp write_segment({:scope, selector}, acc) do
+  defp write_segment({:internal_scope, selector}, acc, rule) do
+    [" #{selector}" | acc]
+  end
+
+  defp write_segment({:scope, nil}, acc, _rule), do: acc
+
+  defp write_segment({:scope, selector}, acc, rule) do
     [" .#{selector}" | acc]
   end
 
-  defp write_segment({:properties, properties}, acc) do
+  defp write_segment({:properties, properties}, acc, _rule) do
     acc = ["}\n" | acc]
 
     acc =
       for prop <- properties, reduce: acc do
         acc ->
-          ["#{prop.attr}: #{prop.value};\n" | acc]
+          ["  #{prop.attr}: #{prop.value};\n" | acc]
       end
 
-    acc = ["{\n" | acc]
+    [" {\n" | acc]
   end
 
   defp generate_theme_css_file(%Theme{} = theme, all_raw_css) when is_list(all_raw_css) do
@@ -356,6 +385,17 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   # Helpers
   # ----------------------------------------
+  defp get_component_modules_from_cache(modules_cache, app) do
+    case Map.get(modules_cache, app.name) do
+      nil ->
+        modules = BuenaVista.Helpers.find_component_modules([app])
+        {Map.put(modules_cache, app.name, modules), modules}
+
+      modules ->
+        {modules_cache, modules}
+    end
+  end
+
   defp comment_lines(content) do
     String.replace(content, "\n", "\n# ")
   end

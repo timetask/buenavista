@@ -12,13 +12,13 @@ defmodule BuenaVista.Helpers do
           {:module, module} = Code.ensure_loaded(module),
           reduce: [] do
         acc ->
-          if function_exported?(module, :__are_you_buenavista?, 0),
+          if function_exported?(module, :are_you_buenavista?, 0),
             do: [module | acc],
             else: acc
       end
 
     for module <- modules do
-      case module.__buenavista_components() do
+      case module.buenavista_components() do
         [] -> nil
         components -> {module, Enum.reverse(components)}
       end
