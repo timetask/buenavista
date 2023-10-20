@@ -169,7 +169,7 @@ defmodule BuenaVista.Hydrator do
       Module.register_attribute(__MODULE__, :nomenclator, persist: true)
       Module.put_attribute(__MODULE__, :nomenclator, Keyword.get(opts, :nomenclator, nil))
 
-      def css(component, variant, option, variables) do
+      def css(component, variant, option, variables) when is_atom(component) and is_atom(variant) and is_atom(option) do
         case Map.get(get_styles_map(), {component, variant, option}) do
           %Style{} = style ->
             css_template = "<% import #{inspect(__MODULE__)}, only: [class_name: 3]%>" <> style.eex_css

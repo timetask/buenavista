@@ -1,6 +1,4 @@
 defmodule BuenaVista do
-  defdelegate current_nomenclator(), to: BuenaVista.Themes
-
   # Button
   defdelegate button(assigns), to: BuenaVista.Components.Button
 
