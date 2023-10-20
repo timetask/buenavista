@@ -23,7 +23,7 @@ defmodule BuenaVista.CssFormatter do
 
   defp write_rule(%BuenaVista.CssTokenizer.Scope{} = scope, level, acc) do
     acc = ["\n#{indent(level + 1)}#{scope.selector} {\n" | acc]
-    acc = Enum.reduce(scope.rules, acc, fn child_rules, child_acc -> write_rule(child_rules, level + 1, child_acc) end)
+    acc = Enum.reduce(scope.tokens, acc, fn child_rules, child_acc -> write_rule(child_rules, level + 1, child_acc) end)
     ["#{indent(level + 1)}}\n" | acc]
   end
 

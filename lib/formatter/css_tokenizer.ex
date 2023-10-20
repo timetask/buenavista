@@ -17,7 +17,7 @@ defmodule BuenaVista.CssTokenizer do
   defmodule Scope do
     typedstruct enforce: true do
       field :selector, String.t()
-      field :rules, list()
+      field :tokens, list()
     end
   end
 
@@ -25,46 +25,46 @@ defmodule BuenaVista.CssTokenizer do
     contents
     |> to_charlist()
     |> :css_lexer.string()
-    |> then(fn {:ok, rules, _} -> rules end)
-    |> Enum.reduce(%{level: 0, rules: []}, fn
-      {:property, _, {key, val}}, %{level: level, rules: rules} ->
+    |> then(fn {:ok, tokens, _} -> tokens end)
+    |> Enum.reduce(%{level: 0, tokens: []}, fn
+      {:property, _, {key, val}}, %{level: level, tokens: tokens} ->
         prop = %Property{attr: key, value: val}
-        rules = insert_element(rules, prop, level)
-        %{level: level, rules: rules}
+        tokens = insert_element(tokens, prop, level)
+        %{level: level, tokens: tokens}
 
-      {:apply, _, value}, %{level: level, rules: rules} ->
+      {:apply, _, value}, %{level: level, tokens: tokens} ->
         apply = %Apply{value: value}
-        rules = insert_element(rules, apply, level)
-        %{level: level, rules: rules}
+        tokens = insert_element(tokens, apply, level)
+        %{level: level, tokens: tokens}
 
-      {:start_scope, _, selectors}, %{level: level, rules: rules} ->
-        scope = %Scope{selector: selectors, rules: []}
-        rules = insert_element(rules, scope, level)
-        %{level: level + 1, rules: rules}
+      {:start_scope, _, selectors}, %{level: level, tokens: tokens} ->
+        scope = %Scope{selector: selectors, tokens: []}
+        tokens = insert_element(tokens, scope, level)
+        %{level: level + 1, tokens: tokens}
 
-      {:end_scope, _}, %{level: level, rules: rules} ->
-        %{level: level - 1, rules: rules}
+      {:end_scope, _}, %{level: level, tokens: tokens} ->
+        %{level: level - 1, tokens: tokens}
     end)
-    |> then(fn %{rules: ast} -> ast end)
+    |> then(fn %{tokens: ast} -> ast end)
   end
 
-  defp insert_element(rules, ele, 0) do
-    [ele | rules]
+  defp insert_element(tokens, ele, 0) do
+    [ele | tokens]
   end
 
-  defp insert_element(rules, prop, level) do
-    {scope, rules_rest} = List.pop_at(rules, 0)
-    rules = insert_element(scope.rules, prop, level - 1)
-    [%{scope | rules: rules} | rules_rest]
+  defp insert_element(tokens, prop, level) do
+    {scope, tokens_rest} = List.pop_at(tokens, 0)
+    tokens = insert_element(scope.tokens, prop, level - 1)
+    [%{scope | tokens: tokens} | tokens_rest]
   end
 
-  def sort_tokens(rules) do
-    rules
+  def sort_tokens(tokens) do
+    tokens
     |> Enum.sort(&compare/2)
     |> Enum.map(fn
       %Scope{} = scope ->
-        rules = sort_tokens(scope.rules)
-        %Scope{scope | rules: rules}
+        tokens = sort_tokens(scope.tokens)
+        %Scope{scope | tokens: tokens}
 
       property ->
         property
