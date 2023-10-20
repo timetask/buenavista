@@ -314,32 +314,32 @@ defmodule BuenaVista.Generator do
 
         for segment <- rule, reduce: segments do
           segments ->
-            write_segment(segment, segments, rule)
+            write_segment(segment, segments)
         end
     end
   end
 
-  defp write_segment({:modifier, nil}, acc, _rule), do: acc
+  defp write_segment({:modifier, nil}, acc), do: acc
 
-  defp write_segment({:modifier, selector}, acc, _rule) do
+  defp write_segment({:modifier, selector}, acc) do
     [".#{selector}" | acc]
   end
 
-  defp write_segment({:internal_modifier, selector}, acc, _rule) do
+  defp write_segment({:internal_modifier, selector}, acc) do
     [selector | acc]
   end
 
-  defp write_segment({:internal_scope, selector}, acc, rule) do
+  defp write_segment({:internal_scope, selector}, acc) do
     [" #{selector}" | acc]
   end
 
-  defp write_segment({:scope, nil}, acc, _rule), do: acc
+  defp write_segment({:scope, nil}, acc), do: acc
 
-  defp write_segment({:scope, selector}, acc, rule) do
+  defp write_segment({:scope, selector}, acc) do
     [" .#{selector}" | acc]
   end
 
-  defp write_segment({:properties, properties}, acc, _rule) do
+  defp write_segment({:properties, properties}, acc) do
     acc = ["}\n" | acc]
 
     acc =
