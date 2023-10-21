@@ -18,7 +18,7 @@ defmodule BuenaVista.Helpers do
       end
 
     for module <- modules do
-      case module.buenavista_components() do
+      case module.get_buenavista_components() do
         [] -> nil
         components -> {module, Enum.reverse(components)}
       end

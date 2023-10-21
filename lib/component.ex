@@ -11,7 +11,7 @@ defmodule BuenaVista.Component do
   defmodule Variant do
     typedstruct enforce: true do
       field :name, String.t()
-      field :options, list(atom())
+      field :options, list(Option.t())
       field :default, atom()
     end
   end
@@ -35,9 +35,9 @@ defmodule BuenaVista.Component do
     field :name, String.t()
     field :module, atom()
     field :variants, list(Variant.t())
+    field :classes, list(Class.t())
     field :attrs, list(map())
     field :slots, list(map())
-    field :classes, list(atom())
   end
 
   # ----------------------------------------
@@ -52,7 +52,7 @@ defmodule BuenaVista.Component do
         )
       end
 
-      variant_def = %Variant{name: name, options: options_list, default: default}
+      variant_def = %{name: name, options_list: options_list, default: default}
 
       Module.put_attribute(__MODULE__, :__variant_defs__, variant_def)
 
@@ -82,7 +82,10 @@ defmodule BuenaVista.Component do
       def unquote(fn_name)(var!(assigns)) do
         nomenclator = Map.get(var!(assigns), :nomenclator)
 
-        %Component{} = component = __get_buenavista_component__(unquote(fn_name))
+        %Component{} =
+          component =
+          __MODULE__.get_buenavista_components()
+          |> Keyword.get(unquote(fn_name))
 
         var!(assigns) =
           var!(assigns)
@@ -126,14 +129,14 @@ defmodule BuenaVista.Component do
       classes = classes_defs |> Enum.reverse() |> List.flatten()
 
       variants =
-        for %Variant{} = variant <- variant_defs do
+        for %{name: variant_name, options_list: options_list, default: default} <- variant_defs do
           options =
-            for option_name <- variant.options do
-              class_name = nomenclator_module.class_name(component_name, variant.name, option_name)
+            for option_name <- options_list do
+              class_name = nomenclator_module.class_name(component_name, variant_name, option_name)
               %Option{name: option_name, class_name: class_name}
             end
 
-          %{variant | options: options}
+          %Variant{name: variant_name, options: options, default: default}
         end
 
       for class_name <- classes, class_name in @reserved_class_names do
@@ -204,11 +207,6 @@ defmodule BuenaVista.Component do
         :attributes
         |> __MODULE__.__info__()
         |> Keyword.get(:buenavista)
-      end
-
-      def __get_buenavista_component__(component) do
-        components = __MODULE__.get_buenavista_components()
-        Keyword.get(components, component)
       end
 
       def __assign_variant_classes__(assigns, %Component{} = component, nomenclator \\ nil) do
