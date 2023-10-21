@@ -19,7 +19,14 @@ defmodule BuenaVista.Component do
   defmodule Option do
     typedstruct enforce: true do
       field :name, atom()
-      field :class_name, String.t(), enforce: false
+      field :class_name, String.t()
+    end
+  end
+
+  defmodule Class do
+    typedstruct enforce: true do
+      field :name, atom()
+      field :class_name, String.t()
     end
   end
 
@@ -36,17 +43,16 @@ defmodule BuenaVista.Component do
   # ----------------------------------------
   # Macros
   # ----------------------------------------
-  defmacro variant(name, raw_options, default)
-           when is_atom(name) and is_list(raw_options) and is_atom(default) do
-    quote bind_quoted: [name: name, raw_options: raw_options, default: default] do
-      if default not in raw_options do
+  defmacro variant(name, options_list, default)
+           when is_atom(name) and is_list(options_list) and is_atom(default) do
+    quote bind_quoted: [name: name, options_list: options_list, default: default] do
+      if default not in options_list do
         raise(ArgumentError,
-          message: "default option :#{default} must be one of the provided options #{inspect(raw_options)}"
+          message: "default option :#{default} must be one of the provided options #{inspect(options_list)}"
         )
       end
 
-      options = for option_name <- raw_options, do: %Option{name: option_name}
-      variant_def = %Variant{name: name, options: options, default: default}
+      variant_def = %Variant{name: name, options: options_list, default: default}
 
       Module.put_attribute(__MODULE__, :__variant_defs__, variant_def)
 
@@ -54,7 +60,7 @@ defmodule BuenaVista.Component do
         __MODULE__,
         name,
         :atom,
-        [values: raw_options, default: default],
+        [values: options_list, default: default],
         __ENV__.line,
         __ENV__.file
       )
@@ -80,8 +86,8 @@ defmodule BuenaVista.Component do
 
         var!(assigns) =
           var!(assigns)
-          |> __assign_variant_classes(component, nomenclator)
-          |> __assign_classes(component, nomenclator)
+          |> __assign_variant_classes__(component, nomenclator)
+          |> __assign_classes__(component, nomenclator)
 
         unquote(body)
       end
@@ -91,7 +97,7 @@ defmodule BuenaVista.Component do
   # ----------------------------------------
   # Record data
   # ----------------------------------------
-  def __is_component?(component_name, args) do
+  def __is_component__(component_name, args) do
     if component_name |> Atom.to_string() |> String.starts_with?("__") do
       false
     else
@@ -100,13 +106,13 @@ defmodule BuenaVista.Component do
   end
 
   def __on_definition__(env, _kind, component_name, args, _guards, _body) do
-    if __is_component?(component_name, args) do
+    if __is_component__(component_name, args) do
       app_name = Application.get_application(env.module)
 
       nomenclator_module =
         with apps_config when is_list(apps_config) <- Application.get_env(:buenavista, :apps),
              app when is_list(app) <- Enum.find(apps_config, &(Keyword.get(&1, :name) == app_name)),
-             nomenclator when is_atom(nomenclator) <- Keyword.get(app, :nomenclator) do
+             nomenclator when is_atom(nomenclator) and not is_nil(nomenclator) <- Keyword.get(app, :nomenclator) do
           nomenclator
         else
           _ ->
@@ -122,9 +128,9 @@ defmodule BuenaVista.Component do
       variants =
         for %Variant{} = variant <- variant_defs do
           options =
-            for %Option{} = option <- variant.options do
-              class_name = nomenclator_module.class_name(component_name, variant.name, option.name)
-              {option.name, %{option | class_name: class_name}}
+            for option_name <- variant.options do
+              class_name = nomenclator_module.class_name(component_name, variant.name, option_name)
+              %Option{name: option_name, class_name: class_name}
             end
 
           %{variant | options: options}
@@ -137,7 +143,7 @@ defmodule BuenaVista.Component do
       classes =
         for class_key <- [:base_class | classes] do
           class_name = nomenclator_module.class_name(component_name, :classes, class_key)
-          {class_key, class_name}
+          %Class{name: class_key, class_name: class_name}
         end
 
       phoenix_components = Map.get(Module.get_attribute(env.module, :__components__), component_name)
@@ -205,52 +211,39 @@ defmodule BuenaVista.Component do
         Keyword.get(components, component)
       end
 
-      def __assign_variant_classes(assigns, %Component{} = component, nomenclator) do
+      def __assign_variant_classes__(assigns, %Component{} = component, nomenclator \\ nil) do
         classes =
           for %Variant{} = variant <- component.variants do
-            selected_option = Map.get(assigns, variant.name)
+            selected_option = Map.get(assigns, variant.name, variant.default)
 
-            unless is_nil(selected_option) do
-              available_options = Keyword.keys(variant.options)
+            case Enum.find(variant.options, &(&1.name == selected_option)) do
+              %Option{} = option ->
+                if is_nil(nomenclator),
+                  do: option.class_name,
+                  else: nomenclator.class_name(component.name, variant.name, option.name)
 
-              if selected_option not in available_options do
+              _ ->
                 raise "Invalid BuenaVista component variant selected option:\n" <>
-                        "\t\t> Module: #{inspect(__MODULE__)}\n" <>
-                        "\t\t> Component: #{component.name}\n" <>
-                        "\t\t> Variant: #{variant.name}\n" <>
-                        "\t\t> Available options: #{inspect(available_options)}\n" <>
-                        "\t\t> Selected option: #{inspect(selected_option)}"
-              end
-            end
-
-            case {nomenclator, selected_option} do
-              {nil, nil} ->
-                Keyword.get(variant.options, variant.default)
-
-              {nil, selected_option} ->
-                Keyword.get(variant.options, selected_option)
-
-              {nomenclator, nil} ->
-                nomenclator.class_name(component.name, variant.name, variant.default)
-
-              {nomenclator, selected_option} ->
-                nomenclator.class_name(component.name, variant.name, selected_option)
+                        "\t\t> Module:            #{inspect(__MODULE__)}\n" <>
+                        "\t\t> Component:         #{component.name}\n" <>
+                        "\t\t> Variant:           #{variant.name}\n" <>
+                        "\t\t> Available options: #{inspect(variant.options)}\n" <>
+                        "\t\t> Selected option:   #{inspect(selected_option)}"
             end
           end
 
-        # TODO: use io list
         assign(assigns, :variant_classes, join_classes(classes))
       end
 
-      def __assign_classes(assigns, %Component{} = component, nomenclator) do
-        for {class_key, class_name} <- component.classes, reduce: assigns do
+      def __assign_classes__(assigns, %Component{} = component, nomenclator \\ nil) do
+        for %Class{} = class <- component.classes, reduce: assigns do
           assigns ->
             class_name =
               if is_nil(nomenclator),
-                do: class_name,
-                else: nomenclator.class_name(component.name, :classes, class_key)
+                do: class.class_name,
+                else: nomenclator.class_name(component.name, :classes, class.name)
 
-            assign(assigns, class_key, class_name)
+            assign(assigns, class.name, class_name)
         end
       end
     end

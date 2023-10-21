@@ -2,6 +2,7 @@ defmodule BuenaVista.Generator do
   require Logger
   import Mix.Generator
 
+  alias BuenaVista.Component
   alias BuenaVista.Helpers
   alias BuenaVista.Hydrator.Variable
   alias BuenaVista.Theme
@@ -233,34 +234,35 @@ defmodule BuenaVista.Generator do
     rules =
       for {_, component} <- Enum.reverse(components), reduce: [] do
         rules ->
-          component_class = app.nomenclator.module.class_name(component.name, :classes, :base_class)
+          %Component.Class{} = base_class = Enum.find(component.classes, &(&1.name == :base_class))
 
           css = app.hydrator.module.css(component.name, :classes, :base_class, variables)
           css_tokens = css |> BuenaVista.CssTokenizer.build_tokens() |> BuenaVista.CssTokenizer.sort_tokens()
-          scope = [{:scope, component_class}, {:scope, prefix}]
+          scope = [{:scope, base_class.class_name}, {:scope, prefix}]
           rules = build_rules(scope, css_tokens, [], rules)
 
           rules =
-            for {class_key, _} <- component.classes, class_key != :base_class, reduce: rules do
+            for %Component.Class{} = class <- component.classes, class.name != :base_class, reduce: rules do
               rules ->
-                css = app.hydrator.module.css(component.name, :classes, class_key, variables)
-                class_name = app.nomenclator.module.class_name(component.name, :classes, class_key)
+                css = app.hydrator.module.css(component.name, :classes, class.name, variables)
                 css_tokens = css |> BuenaVista.CssTokenizer.build_tokens() |> BuenaVista.CssTokenizer.sort_tokens()
-                scope = [{:scope, class_name}, {:scope, component_class}, {:scope, prefix}]
+                scope = [{:scope, class.class_name}, {:scope, base_class.class_name}, {:scope, prefix}]
                 build_rules(scope, css_tokens, [], rules)
             end
 
-          for variant <- component.variants, {_, option} <- variant.options, reduce: rules do
+          for %Component.Variant{} = variant <- component.variants,
+              %Component.Option{} = option <- variant.options,
+              reduce: rules do
             rules ->
               css = app.hydrator.module.css(component.name, variant.name, option.name, variables)
               css_tokens = css |> BuenaVista.CssTokenizer.build_tokens() |> BuenaVista.CssTokenizer.sort_tokens()
-              scope = [{:modifier, option.class_name}, {:scope, component_class}, {:scope, prefix}]
+              scope = [{:modifier, option.class_name}, {:scope, base_class.class_name}, {:scope, prefix}]
               build_rules(scope, css_tokens, [], rules)
           end
       end
 
     rules
-    |> write_rules()
+    |> rules_to_iodata()
     |> IO.iodata_to_binary()
   end
 
@@ -285,7 +287,7 @@ defmodule BuenaVista.Generator do
     [new_rule | rules]
   end
 
-  defp write_rules(rules) do
+  defp rules_to_iodata(rules) when is_list(rules) do
     for rule <- rules, reduce: [] do
       segments ->
         rule =
@@ -299,7 +301,7 @@ defmodule BuenaVista.Generator do
                     {:cont, [{:internal_modifier, String.replace(selector, "&", "")} | acc]}
 
                   String.ends_with?(selector, "&") ->
-                    replace_string = [acc] |> write_rules() |> IO.iodata_to_binary()
+                    replace_string = [acc] |> rules_to_iodata() |> IO.iodata_to_binary()
                     selector = String.replace(selector, "&", replace_string)
                     {:cont, [{:internal_modifier, selector}]}
 
@@ -314,32 +316,32 @@ defmodule BuenaVista.Generator do
 
         for segment <- rule, reduce: segments do
           segments ->
-            write_segment(segment, segments)
+            rule_segment_to_iodata(segment, segments)
         end
     end
   end
 
-  defp write_segment({:modifier, nil}, acc), do: acc
+  defp rule_segment_to_iodata({:modifier, nil}, acc), do: acc
 
-  defp write_segment({:modifier, selector}, acc) do
+  defp rule_segment_to_iodata({:modifier, selector}, acc) do
     [".#{selector}" | acc]
   end
 
-  defp write_segment({:internal_modifier, selector}, acc) do
+  defp rule_segment_to_iodata({:internal_modifier, selector}, acc) do
     [selector | acc]
   end
 
-  defp write_segment({:internal_scope, selector}, acc) do
+  defp rule_segment_to_iodata({:internal_scope, selector}, acc) do
     [" #{selector}" | acc]
   end
 
-  defp write_segment({:scope, nil}, acc), do: acc
+  defp rule_segment_to_iodata({:scope, nil}, acc), do: acc
 
-  defp write_segment({:scope, selector}, acc) do
+  defp rule_segment_to_iodata({:scope, selector}, acc) do
     [" .#{selector}" | acc]
   end
 
-  defp write_segment({:properties, properties}, acc) do
+  defp rule_segment_to_iodata({:properties, properties}, acc) do
     acc = ["}\n" | acc]
 
     acc =
