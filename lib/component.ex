@@ -110,7 +110,7 @@ defmodule BuenaVista.Component do
 
   def __on_definition__(env, _kind, component_name, args, _guards, _body) do
     if __is_component__(component_name, args) do
-      app_name = BuenaVista.Helpers.find_app_name(env.file)
+      app_name = Mix.Project.config() |> Keyword.get(:app)
 
       nomenclator_module =
         with apps_config when is_list(apps_config) <- Application.get_env(:buenavista, :apps),

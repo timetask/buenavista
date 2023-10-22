@@ -38,28 +38,6 @@ defmodule BuenaVista.Helpers do
     |> Enum.reverse()
   end
 
-  def find_app_name(module_file) when is_binary(module_file) do
-    module_file
-    |> Path.dirname()
-    |> find_app_name_in_dir()
-  end
-
-  defp find_app_name_in_dir(dir) do
-    {:ok, files} = File.ls(dir)
-
-    if "mix.exs" in files do
-      mix_file = Path.join(dir, "mix.exs")
-      {:ok, content} = File.read(mix_file)
-
-      case Regex.named_captures(~r/app: :(?<app_name>[a-z_]+),*\n/, content) do
-        %{"app_name" => app_name} -> String.to_existing_atom(app_name)
-        _ -> raise("Failed to read an app name from #{mix_file}")
-      end
-    else
-      dir |> Path.dirname() |> find_app_name_in_dir()
-    end
-  end
-
   def pretty_module(module) when is_atom(module) do
     module |> Atom.to_string() |> String.replace("Elixir.", "")
   end
