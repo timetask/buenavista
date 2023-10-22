@@ -15,7 +15,7 @@ defmodule BuenaVista.Generator do
         %Theme.App{} = app <- theme.apps,
         reduce: %{} do
       modules_cache ->
-        {modules_cache, modules} = get_component_modules_from_cache(modules_cache, app)
+        {modules, modules_cache} = Helpers.get_component_modules_from_cache(app, modules_cache)
 
         sync_nomenclator(theme, app, modules)
         hydrator_path = sync_hydrator(theme, app, modules)
@@ -35,9 +35,8 @@ defmodule BuenaVista.Generator do
         {modules_cache, all_raw_css} =
           for %Theme.App{} = app <- theme.apps, reduce: {modules_cache, []} do
             {modules_cache, all_raw_css} ->
-              {modules_cache, modules} = get_component_modules_from_cache(modules_cache, app)
+              {modules, modules_cache} = Helpers.get_component_modules_from_cache(app, modules_cache)
 
-              # TODO: Use IO.iodata_to_binary
               raw_css =
                 for {_module, components} <- modules, into: "" do
                   generate_app_components_raw_css(app, components)
@@ -182,11 +181,11 @@ defmodule BuenaVista.Generator do
     <%= for {_, component} <- components do %>
     <%= comment_title_template(title: justify_between(Helpers.pretty_module(module), Atom.to_string(component.name), 68)) %>
 
-    <%= for {class_key, _} <- component.classes do %>
-    <%= if apply(@app.nomenclator.module, :class_name, [component.name, :classes, class_key]) do %><%= style_def(@styles, component.name, class_key) %><% end %><% end %>
+    <%= for class <- component.classes do %>
+    <%= if apply(@app.nomenclator.module, :class_name, [component.name, :classes, class.name]) do %><%= style_def(@styles, component.name, class.name) %><% end %><% end %>
     <%= for variant <- component.variants do %>
-    <%= for {_, option} <- variant.options do %>
-    <%= if apply(@app.nomenclator.module, :class_name, [component.name, variant.name, option.name]) do %><%= style_def(@styles, component.name, variant.name, option) %><% end %><% end %>
+    <%= for option <- variant.options do %>
+    <%= if apply(@app.nomenclator.module, :class_name, [component.name, variant.name, option.name]) do %><%= style_def(@styles, component.name, variant.name, option.name) %><% end %><% end %>
     <% end %>
     <% end %>
     <% end %>
@@ -387,17 +386,6 @@ defmodule BuenaVista.Generator do
   # ----------------------------------------
   # Helpers
   # ----------------------------------------
-  defp get_component_modules_from_cache(modules_cache, app) do
-    case Map.get(modules_cache, app.name) do
-      nil ->
-        modules = BuenaVista.Helpers.find_component_modules([app])
-        {Map.put(modules_cache, app.name, modules), modules}
-
-      modules ->
-        {modules_cache, modules}
-    end
-  end
-
   defp comment_lines(content) do
     String.replace(content, "\n", "\n# ")
   end

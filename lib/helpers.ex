@@ -1,6 +1,17 @@
 defmodule BuenaVista.Helpers do
   import Macro, only: [underscore: 1]
 
+  def get_component_modules_from_cache(%BuenaVista.Theme.App{} = app, modules_cache) do
+    case Map.get(modules_cache, app.name) do
+      nil ->
+        modules = BuenaVista.Helpers.find_component_modules([app])
+        {modules, Map.put(modules_cache, app.name, modules)}
+
+      modules ->
+        {modules, modules_cache}
+    end
+  end
+
   @doc """
   Returns all BuenaVista modules and components.
   """
@@ -63,7 +74,7 @@ defmodule BuenaVista.Helpers do
 
   def write_and_format_module(file_path, content) do
     :ok = file_path |> Path.dirname() |> File.mkdir_p()
-    {formatter, _} = Mix.Tasks.Format.formatter_for_file("source.ex")
+    {formatter, opts} = Mix.Tasks.Format.formatter_for_file("helpers.ex")
     :ok = File.write(file_path, formatter.(content))
     IO.puts(IO.ANSI.green() <> "* creating " <> IO.ANSI.reset() <> file_path)
   end
