@@ -212,7 +212,7 @@ defmodule BuenaVista.Component do
       def __assign_variant_classes__(assigns, %Component{} = component, nomenclator \\ nil) do
         classes =
           for %Variant{} = variant <- component.variants do
-            selected_option = Map.get(assigns, variant.name, variant.default)
+            selected_option = Map.get(assigns, variant.name) || variant.default
 
             case Enum.find(variant.options, &(&1.name == selected_option)) do
               %Option{} = option ->
