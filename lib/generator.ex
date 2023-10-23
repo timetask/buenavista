@@ -98,7 +98,7 @@ defmodule BuenaVista.Generator do
   # Hydrator
   # ----------------------------------------
   defp sync_hydrator(%Theme{} = theme, %Theme.App{} = app, modules) do
-    if theme.extend == :hydrator and app.hydrator.overridable? do
+    if theme.extend == :hydrator do
       {variables, styles} = get_variables_and_styles(app)
       variables = group_variables_by_name(variables)
 

@@ -61,15 +61,13 @@ defmodule BuenaVista.GeneratorTest do
         nomenclator: %BuenaVista.Theme.Nomenclator{
           module: BuenaVista.Themes.DefaultNomenclator,
           parent_module: BuenaVista.Themes.EmptyNomenclator,
-          file: nil,
-          overridable?: true
+          file: nil
         },
         hydrator: %BuenaVista.Theme.Hydrator{
           module: TestComponentsHydrator,
           parent_module: BuenaVista.Themes.EmptyHydrator,
           file: nil,
-          imports: [],
-          overridable?: false
+          imports: []
         }
       }
 

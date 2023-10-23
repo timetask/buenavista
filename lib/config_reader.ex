@@ -124,7 +124,6 @@ defmodule BuenaVista.ConfigReader do
     app_nomenclator = %BuenaVista.Theme.Nomenclator{
       module: Keyword.get(app_config, :nomenclator, BuenaVista.Themes.EmptyNomenclator),
       parent_module: BuenaVista.Themes.EmptyNomenclator,
-      overridable?: false,
       file: nil
     }
 
@@ -132,7 +131,6 @@ defmodule BuenaVista.ConfigReader do
       module: Keyword.get(app_config, :hydrator, BuenaVista.Themes.EmptyHydrator),
       parent_module: BuenaVista.Themes.EmptyHydrator,
       imports: [],
-      overridable?: false,
       file: nil
     }
 
@@ -145,8 +143,7 @@ defmodule BuenaVista.ConfigReader do
         nomenclator = %BuenaVista.Theme.Nomenclator{
           module: module,
           parent_module: parent_module,
-          file: file,
-          overridable?: true
+          file: file
         }
 
         {nomenclator, app_hydrator}
@@ -160,8 +157,7 @@ defmodule BuenaVista.ConfigReader do
           module: module,
           parent_module: parent_module,
           file: file,
-          imports: hydrator_imports,
-          overridable?: true
+          imports: hydrator_imports
         }
 
         {app_nomenclator, hydrator}

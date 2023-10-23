@@ -44,14 +44,12 @@ defmodule BuenaVista.ConfigReaderTest do
                  apps: [
                    %BuenaVista.Theme.App{
                      hydrator: %BuenaVista.Theme.Hydrator{
-                       overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
                        file: "lib/themes/base/timetask_hydrator.ex",
                        parent_module: BuenaVista.Themes.EmptyHydrator,
                        module: TestApp.Themes.Base.TimetaskHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
-                       overridable?: false,
                        file: nil,
                        parent_module: BuenaVista.Themes.EmptyNomenclator,
                        module: BuenaVista.Themes.DefaultNomenclator
@@ -60,14 +58,12 @@ defmodule BuenaVista.ConfigReaderTest do
                    },
                    %BuenaVista.Theme.App{
                      hydrator: %BuenaVista.Theme.Hydrator{
-                       overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
                        file: "lib/themes/base/buenavista_hydrator.ex",
                        parent_module: BuenaVista.Themes.DefaultHydrator,
                        module: TestApp.Themes.Base.BuenavistaHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
-                       overridable?: false,
                        file: nil,
                        parent_module: BuenaVista.Themes.EmptyNomenclator,
                        module: BuenaVista.Themes.DefaultNomenclator
@@ -88,14 +84,12 @@ defmodule BuenaVista.ConfigReaderTest do
                  apps: [
                    %BuenaVista.Theme.App{
                      hydrator: %BuenaVista.Theme.Hydrator{
-                       overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
                        file: "lib/themes/dark/timetask_hydrator.ex",
                        parent_module: TestApp.Themes.Base.TimetaskHydrator,
                        module: TestApp.Themes.Dark.TimetaskHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
-                       overridable?: false,
                        file: nil,
                        parent_module: BuenaVista.Themes.EmptyNomenclator,
                        module: BuenaVista.Themes.DefaultNomenclator
@@ -104,14 +98,12 @@ defmodule BuenaVista.ConfigReaderTest do
                    },
                    %BuenaVista.Theme.App{
                      hydrator: %BuenaVista.Theme.Hydrator{
-                       overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
                        file: "lib/themes/dark/buenavista_hydrator.ex",
                        parent_module: TestApp.Themes.Base.BuenavistaHydrator,
                        module: TestApp.Themes.Dark.BuenavistaHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
-                       overridable?: false,
                        file: nil,
                        parent_module: BuenaVista.Themes.EmptyNomenclator,
                        module: BuenaVista.Themes.DefaultNomenclator
@@ -132,14 +124,12 @@ defmodule BuenaVista.ConfigReaderTest do
                  apps: [
                    %BuenaVista.Theme.App{
                      hydrator: %BuenaVista.Theme.Hydrator{
-                       overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
                        file: "lib/themes/light/timetask_hydrator.ex",
                        parent_module: TestApp.Themes.Base.TimetaskHydrator,
                        module: TestApp.Themes.Light.TimetaskHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
-                       overridable?: false,
                        file: nil,
                        parent_module: BuenaVista.Themes.EmptyNomenclator,
                        module: BuenaVista.Themes.DefaultNomenclator
@@ -148,14 +138,12 @@ defmodule BuenaVista.ConfigReaderTest do
                    },
                    %BuenaVista.Theme.App{
                      hydrator: %BuenaVista.Theme.Hydrator{
-                       overridable?: true,
                        imports: [BuenaVista.Constants.TailwindColors, BuenaVista.Constants.TailwindSizes],
                        file: "lib/themes/light/buenavista_hydrator.ex",
                        parent_module: TestApp.Themes.Base.BuenavistaHydrator,
                        module: TestApp.Themes.Light.BuenavistaHydrator
                      },
                      nomenclator: %BuenaVista.Theme.Nomenclator{
-                       overridable?: false,
                        file: nil,
                        parent_module: BuenaVista.Themes.EmptyNomenclator,
                        module: BuenaVista.Themes.DefaultNomenclator

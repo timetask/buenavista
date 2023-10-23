@@ -6,7 +6,6 @@ defmodule BuenaVista.Theme do
       field :module, atom()
       field :parent_module, atom()
       field :file, String.t()
-      field :overridable?, boolean()
     end
   end
 
@@ -16,7 +15,6 @@ defmodule BuenaVista.Theme do
       field :parent_module, atom()
       field :file, String.t()
       field :imports, list(String.t())
-      field :overridable?, boolean()
     end
   end
 
